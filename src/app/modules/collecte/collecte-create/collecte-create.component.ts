@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CollecteService } from '../../../services/collecte.service';
 import { catchError, finalize } from 'rxjs/operators';
@@ -7,6 +7,7 @@ import { of } from 'rxjs';
 import {
   CollecteRequest,
   CollecteStatus,
+  CollecteItem,
 } from '../../../models/collecte.model';
 
 @Component({
@@ -28,20 +29,58 @@ export class CollecteCreateComponent implements OnInit {
       title: ['', [Validators.required]],
       description: ['', [Validators.required]],
       location: ['', [Validators.required]],
+      scheduledDate: ['', [Validators.required]],
+      notes: [''],
+      items: this.fb.array([], [Validators.required]),
       status: [CollecteStatus.PENDING],
     });
   }
 
   ngOnInit(): void {
-    // Initialize component
+    // Add an initial item
+    this.addItem();
   }
 
   get f() {
     return this.collecteForm.controls;
   }
 
+  get itemsControls() {
+    return this.collecteForm.get('items') as FormArray;
+  }
+
+  createItem(): FormGroup {
+    return this.fb.group({
+      name: ['', Validators.required],
+      quantity: [1, [Validators.required, Validators.min(1)]],
+      unit: ['', Validators.required],
+    });
+  }
+
+  addItem(): void {
+    this.itemsControls.push(this.createItem());
+  }
+
+  removeItem(index: number): void {
+    this.itemsControls.removeAt(index);
+  }
+
   onSubmit(): void {
     if (this.collecteForm.invalid) {
+      // Mark all fields as touched to trigger validation
+      Object.keys(this.collecteForm.controls).forEach((key) => {
+        const control = this.collecteForm.get(key);
+        control?.markAsTouched();
+      });
+
+      // Mark all items form fields as touched
+      for (let i = 0; i < this.itemsControls.length; i++) {
+        const itemGroup = this.itemsControls.at(i) as FormGroup;
+        Object.keys(itemGroup.controls).forEach((key) => {
+          itemGroup.get(key)?.markAsTouched();
+        });
+      }
+
       return;
     }
 
@@ -52,6 +91,7 @@ export class CollecteCreateComponent implements OnInit {
       title: this.f['title'].value,
       description: this.f['description'].value,
       location: this.f['location'].value,
+      items: this.f['items'].value,
       status: this.f['status'].value,
     };
 

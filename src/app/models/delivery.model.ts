@@ -1,5 +1,4 @@
 import { User } from './user.model';
-import { Donation } from './donation.model';
 
 export enum DeliveryStatus {
   PENDING = 'pending',
@@ -16,23 +15,23 @@ export interface DeliveryItem {
 
 export interface Delivery {
   _id: string;
-  donation: string | Donation; // Reference to donation ID or populated donation
   deliveryPersonId: string; // Reference to the user assigned for delivery
   deliveryPersonName?: string; // Name of the delivery person
   status: DeliveryStatus;
   scheduledDate: Date;
   address: string;
   notes?: string;
+  items: DeliveryItem[]; // Adding items directly to delivery
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface DeliveryRequest {
-  donation: string;
   deliveryPersonId?: string;
   scheduledDate: Date;
   address: string;
   notes?: string;
+  items: DeliveryItem[]; // Adding items directly to request
 }
 
 export interface DeliveryResponse extends Delivery {

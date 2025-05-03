@@ -77,10 +77,7 @@ export class CollecteDetailComponent implements OnInit {
       )
       .subscribe((result) => {
         if (result) {
-          this.collecte = {
-            ...result,
-            donation: result || null,
-          };
+          this.collecte = result;
         }
       });
   }
@@ -96,15 +93,6 @@ export class CollecteDetailComponent implements OnInit {
 
   isString(value: any): boolean {
     return typeof value === 'string';
-  }
-
-  getDonationId(donation: any): string {
-    if (typeof donation === 'string') {
-      return donation;
-    } else if (donation && donation._id) {
-      return donation._id;
-    }
-    return 'Unknown';
   }
 
   getTransporterId(transporter: any): string {

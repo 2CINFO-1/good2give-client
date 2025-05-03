@@ -4,7 +4,6 @@ import { Collecte, CollecteStatus } from '../../../models/collecte.model';
 import { CollecteService } from '../../../services/collecte.service';
 import { catchError, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
-import { Donation } from '../../../core/models/donation.model';
 
 @Component({
   selector: 'app-collecte-list',
@@ -74,15 +73,6 @@ export class CollecteListComponent implements OnInit {
 
   isString(value: any): boolean {
     return typeof value === 'string';
-  }
-
-  getDonationId(donation: string | Donation): string {
-    if (typeof donation === 'string') {
-      return donation;
-    } else if (donation && typeof donation === 'object' && '_id' in donation) {
-      return donation._id;
-    }
-    return 'N/A';
   }
 
   formatDate(date: string | Date): string {

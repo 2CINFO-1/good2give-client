@@ -7,18 +7,20 @@ import { FormBuilder, FormGroup } from '@angular/forms';
   styleUrls: ['./notifications.component.css'],
 })
 export class NotificationsComponent implements OnInit {
-  notificationsForm: FormGroup;
+  notificationForm: FormGroup;
+  loading = false;
+  success = false;
   isSubmitting = false;
-  successMessage = '';
-  errorMessage = '';
+  successMessage: string | null = null;
+  errorMessage: string | null = null;
 
   constructor(private fb: FormBuilder) {
-    this.notificationsForm = this.fb.group({
+    this.notificationForm = this.fb.group({
       emailNotifications: [true],
-      donationUpdates: [true],
-      newRequests: [true],
+      smsNotifications: [false],
+      pushNotifications: [true],
       deliveryUpdates: [true],
-      systemAnnouncements: [true],
+      newRequestNotifications: [true],
       marketingEmails: [false],
     });
   }
@@ -34,16 +36,19 @@ export class NotificationsComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.notificationsForm.valid) {
-      this.isSubmitting = true;
-      this.successMessage = '';
-      this.errorMessage = '';
+    this.isSubmitting = true;
+    this.errorMessage = null;
+    this.successMessage = null;
 
-      // Simulate API call
+    // Simulate API call
+    setTimeout(() => {
+      this.isSubmitting = false;
+      this.successMessage = 'Notification preferences saved successfully!';
+
+      // Reset success message after 3 seconds
       setTimeout(() => {
-        this.isSubmitting = false;
-        this.successMessage = 'Notification preferences updated successfully!';
-      }, 1000);
-    }
+        this.successMessage = null;
+      }, 3000);
+    }, 1000);
   }
 }

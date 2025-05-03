@@ -64,12 +64,6 @@
                         <dt class="text-sm font-medium text-gray-500">Status</dt>
                         <dd class="mt-1 text-sm text-gray-900 sm:col-span-2">{{ delivery?.status }}</dd>
                     </div>
-                    <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                        <dt class="text-sm font-medium text-gray-500">Donation ID</dt>
-                        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2">
-                            {{ getDonationId() }}
-                        </dd>
-                    </div>
                 </dl>
             </div>
         </div>
@@ -124,10 +118,10 @@
             </div>
         </div>
 
-        <!-- Donation Items -->
+        <!-- Delivery Items -->
         <div class="bg-white shadow overflow-hidden sm:rounded-lg lg:col-span-3">
             <div class="px-4 py-5 sm:px-6 bg-gray-50">
-                <h3 class="text-lg leading-6 font-medium text-gray-900">Donation Items</h3>
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Delivery Items</h3>
             </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
@@ -143,22 +137,22 @@
                             </th>
                             <th scope="col"
                                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Type
+                                Unit
                             </th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        <tr *ngFor="let item of donationItems">
+                        <tr *ngFor="let item of delivery?.items">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-medium text-gray-900">
-                                    {{ getProductName(item.productId) || 'Unknown Product' }}
+                                    {{ item.name || 'Unknown Product' }}
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm text-gray-900">{{ item.quantity }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ getProductType(item.productId) || 'Unknown Type' }}
+                                {{ item.unit || 'N/A' }}
                             </td>
                         </tr>
                     </tbody>

@@ -7,6 +7,12 @@ export enum CollecteStatus {
   CANCELLED = 'cancelled',
 }
 
+export interface CollecteItem {
+  name: string;
+  quantity: number;
+  unit: string;
+}
+
 export interface Collecte {
   _id: string;
   title: string;
@@ -15,7 +21,7 @@ export interface Collecte {
   status: CollecteStatus;
   createdAt: string;
   updatedAt: string;
-  donation: string | any; // Reference to donation ID or populated donation
+  items: CollecteItem[];
   scheduledDate?: string;
   completedDate?: string;
   notes?: string;
@@ -26,6 +32,7 @@ export interface CollecteRequest {
   title: string;
   description: string;
   location: string;
+  items: CollecteItem[];
   status?: CollecteStatus;
 }
 
@@ -35,6 +42,7 @@ export interface CollecteResponse {
   description: string;
   location: string;
   status: CollecteStatus;
+  items: CollecteItem[];
   createdAt: string;
   updatedAt: string;
 }

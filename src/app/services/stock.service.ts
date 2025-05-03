@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { Stock, StockRequest, StockResponse } from '../models/stock.model';
+import { Stock, StockRequest, StockResponse } from '../core/models/stock.model';
 
 @Injectable({
   providedIn: 'root',
@@ -36,8 +36,8 @@ export class StockService {
   }
 
   // Additional methods for specific stock operations
-  getStockByDonator(donatorId: string): Observable<Stock[]> {
-    return this.http.get<Stock[]>(`${this.apiUrl}/donator/${donatorId}`);
+  getStockBySource(source: string): Observable<Stock[]> {
+    return this.http.get<Stock[]>(`${this.apiUrl}/source/${source}`);
   }
 
   getStockByProduct(productId: string): Observable<Stock[]> {

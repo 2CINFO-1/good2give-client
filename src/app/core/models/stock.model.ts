@@ -31,10 +31,8 @@ export interface StockAdjustment {
 }
 
 export interface StockRequest {
-  product: string;
+  productId: string;
   quantity: number;
-  expiryDate?: Date;
-  batchNumber?: string;
-  donationSource?: string;
-  location: string;
+  source?: string;
+  notes?: string;
 }

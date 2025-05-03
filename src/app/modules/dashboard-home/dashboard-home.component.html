@@ -13,10 +13,22 @@
 
         <!-- Actual stats -->
         <ng-container *ngIf="!isLoading">
-            <!-- Donations Card -->
-            <div class="bg-white rounded-lg shadow p-6 border-t-4 border-blue-500">
-                <h2 class="text-gray-600 text-sm font-medium uppercase">Total Donations</h2>
-                <p class="text-3xl font-bold text-gray-800">{{ stats.donations }}</p>
+            <!-- Deliveries Card -->
+            <div class="bg-white p-6 rounded-lg shadow-md flex flex-col h-full">
+                <h2 class="text-gray-600 text-sm font-medium uppercase">Total Deliveries</h2>
+                <p class="text-3xl font-bold text-gray-800">{{ stats.deliveries }}</p>
+
+                <div class="mt-auto pt-4">
+                    <a routerLink="/dashboard/deliveries"
+                        class="inline-flex items-center text-blue-600 hover:text-blue-800">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                        <span class="text-gray-700">Manage Deliveries</span>
+                    </a>
+                </div>
             </div>
 
             <!-- Collections Card -->
@@ -26,15 +38,65 @@
             </div>
 
             <!-- Products Card -->
-            <div class="bg-white rounded-lg shadow p-6 border-t-4 border-purple-500">
-                <h2 class="text-gray-600 text-sm font-medium uppercase">Products</h2>
-                <p class="text-3xl font-bold text-gray-800">{{ stats.products }}</p>
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="p-5">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 bg-blue-100 rounded-md p-3">
+                            <span class="material-icons text-blue-600">inventory_2</span>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Total Products</dt>
+                                <dd>
+                                    <div class="text-lg font-medium text-gray-900">{{ stats.products }}</div>
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-5 py-3">
+                    <div class="text-sm">
+                        <a routerLink="/dashboard/products"
+                            class="font-medium text-blue-600 hover:text-blue-500 flex items-center justify-center">
+                            <span class="material-icons text-sm mr-1">open_in_new</span>
+                            <span class="text-gray-700">Manage Products</span>
+                        </a>
+                    </div>
+                </div>
             </div>
 
             <!-- Events Card -->
             <div class="bg-white rounded-lg shadow p-6 border-t-4 border-yellow-500">
                 <h2 class="text-gray-600 text-sm font-medium uppercase">Events</h2>
                 <p class="text-3xl font-bold text-gray-800">{{ stats.events }}</p>
+            </div>
+
+            <!-- Analytics Card -->
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="p-5">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 bg-indigo-100 rounded-md p-3">
+                            <span class="material-icons text-indigo-600">bar_chart</span>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Analytics</dt>
+                                <dd>
+                                    <div class="text-lg font-medium text-gray-900">View Reports</div>
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-5 py-3">
+                    <div class="text-sm">
+                        <a routerLink="/dashboard/reports"
+                            class="font-medium text-indigo-600 hover:text-indigo-500 flex items-center justify-center">
+                            <span class="material-icons text-sm mr-1">open_in_new</span>
+                            <span class="text-gray-700">View Analytics</span>
+                        </a>
+                    </div>
+                </div>
             </div>
         </ng-container>
     </div>
@@ -43,13 +105,6 @@
     <div class="bg-white rounded-lg shadow p-6 mb-8">
         <h2 class="text-xl font-semibold text-gray-800 mb-4">Quick Access</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            <a routerLink="/dashboard/donations"
-                class="flex items-center p-3 rounded-lg hover:bg-blue-50 transition-colors">
-                <span class="bg-blue-100 p-2 rounded-full text-blue-500 mr-3">
-                    <i class="fas fa-gift"></i>
-                </span>
-                <span class="text-gray-700">Manage Donations</span>
-            </a>
             <a routerLink="/dashboard/collectes"
                 class="flex items-center p-3 rounded-lg hover:bg-green-50 transition-colors">
                 <span class="bg-green-100 p-2 rounded-full text-green-500 mr-3">

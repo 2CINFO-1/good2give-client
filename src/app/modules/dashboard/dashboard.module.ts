@@ -27,14 +27,6 @@ const routes: Routes = [
         canActivate: [AuthGuard],
       },
       {
-        path: 'donations',
-        loadChildren: () =>
-          import('../donations/donations.module').then(
-            (m) => m.DonationsModule
-          ),
-        canActivate: [AuthGuard],
-      },
-      {
         path: 'collecte',
         loadChildren: () =>
           import('../collecte/collecte.module').then((m) => m.CollecteModule),

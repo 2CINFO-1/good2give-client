@@ -14,7 +14,13 @@ export enum DisposalMethod {
   COMPOST = 'compost',
   LANDFILL = 'landfill',
   HAZARDOUS_WASTE = 'hazardous_waste',
-  DONATION = 'donation',
+  OTHER = 'other',
+}
+
+export enum ScrapSource {
+  INVENTORY = 'inventory',
+  DELIVERY = 'delivery',
+  COLLECTION = 'collection',
   OTHER = 'other',
 }
 

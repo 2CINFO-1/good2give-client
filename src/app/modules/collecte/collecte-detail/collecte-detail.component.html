@@ -25,7 +25,7 @@
             <div class="flex justify-between items-start">
                 <div>
                     <h1 class="text-2xl font-bold text-gray-800 mb-2">Collection #{{ collecte._id }}</h1>
-                    <p class="text-gray-600">For donation: {{ getDonationId(collecte.donation) }}</p>
+                    <p class="text-gray-600">Items: {{ collecte.items?.length || 0 }} items to collect</p>
                 </div>
                 <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full" [ngClass]="{
                     'bg-yellow-100 text-yellow-800': collecte.status === CollecteStatus.PENDING,
@@ -74,6 +74,40 @@
                         No transporter assigned yet.
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div class="p-6 border-b border-gray-200">
+            <h2 class="text-lg font-medium text-gray-800 mb-3">Collection Items</h2>
+            <div *ngIf="collecte.items && collecte.items.length > 0" class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Item Name
+                            </th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Quantity
+                            </th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Unit
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr *ngFor="let item of collecte.items">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.name }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.quantity }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.unit }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div *ngIf="!collecte.items || collecte.items.length === 0" class="p-4 bg-gray-50 rounded text-gray-600">
+                No items added to this collection.
             </div>
         </div>
 

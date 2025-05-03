@@ -57,11 +57,6 @@ export class DeliveryService {
     );
   }
 
-  // Get deliveries by donation
-  getDeliveriesByDonation(donationId: string): Observable<Delivery[]> {
-    return this.http.get<Delivery[]>(`${this.apiUrl}?donation=${donationId}`);
-  }
-
   // Update delivery status
   updateDeliveryStatus(
     id: string,

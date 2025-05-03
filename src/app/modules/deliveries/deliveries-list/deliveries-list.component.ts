@@ -36,23 +36,29 @@ export class DeliveriesListComponent implements OnInit {
       const mockDeliveries = [
         {
           _id: '1234abcd',
-          donationId: 'don123',
           deliveryPersonId: 'del456',
           status: 'pending',
           scheduledDate: new Date(),
           address: '123 Main St, Anytown, CA',
           notes: 'Deliver to back door',
+          items: [
+            { name: 'Food Package', quantity: 2, unit: 'boxes' },
+            { name: 'Hygiene Kit', quantity: 1, unit: 'pack' },
+          ],
           createdAt: new Date(),
           updatedAt: new Date(),
         },
         {
           _id: '5678efgh',
-          donationId: 'don456',
           deliveryPersonId: 'del789',
           status: 'completed',
           scheduledDate: new Date(),
           address: '456 Oak St, Othertown, NY',
           notes: '',
+          items: [
+            { name: 'Winter Clothing', quantity: 3, unit: 'bags' },
+            { name: 'Canned Goods', quantity: 10, unit: 'items' },
+          ],
           createdAt: new Date(),
           updatedAt: new Date(),
         },
