@@ -1,0 +1,80 @@
+<header class="bg-white shadow-sm">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+        <div class="flex items-center">
+            <!-- Mobile menu button could go here -->
+            <h2 class="text-xl font-semibold text-gray-800">Good2Give</h2>
+        </div>
+
+        <div class="flex items-center space-x-4">
+            <!-- Notifications dropdown -->
+            <div class="relative">
+                <button (click)="toggleNotifications()" class="p-2 rounded-full hover:bg-gray-100 relative">
+                    <i class="fas fa-bell text-gray-600"></i>
+                    <span *ngIf="hasUnreadNotifications"
+                        class="absolute top-0 right-0 h-3 w-3 rounded-full bg-red-500"></span>
+                </button>
+
+                <!-- Notifications panel -->
+                <div *ngIf="notificationsOpen"
+                    class="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg z-20 py-1">
+                    <div class="p-3 border-b border-gray-200">
+                        <h3 class="font-semibold text-gray-700">Notifications</h3>
+                    </div>
+
+                    <div *ngIf="notifications.length === 0" class="p-4 text-center text-gray-500">
+                        No notifications
+                    </div>
+
+                    <div *ngFor="let notification of notifications"
+                        class="p-3 hover:bg-gray-50 flex items-start border-b border-gray-100"
+                        [ngClass]="{'bg-blue-50': !notification.read}">
+                        <div class="flex-1">
+                            <p class="text-sm text-gray-800">{{ notification.message }}</p>
+                            <p class="text-xs text-gray-500 mt-1">{{ notification.time }}</p>
+                        </div>
+                        <button class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+
+                    <div class="p-2 text-center">
+                        <button class="text-sm text-blue-600 hover:text-blue-800">
+                            Mark all as read
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User dropdown -->
+            <div class="relative">
+                <button (click)="toggleUserMenu()" class="flex items-center space-x-2">
+                    <img [src]="user.avatar" alt="User avatar" class="h-8 w-8 rounded-full object-cover">
+                    <span class="text-gray-700 font-medium hidden md:inline">{{ user.name }}</span>
+                    <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
+                </button>
+
+                <!-- User menu panel -->
+                <div *ngIf="userMenuOpen" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-20 py-1">
+                    <div class="px-4 py-3 border-b border-gray-100">
+                        <p class="text-sm font-semibold text-gray-700">{{ user.name }}</p>
+                        <p class="text-xs text-gray-500 mt-1">{{ user.email }}</p>
+                    </div>
+
+                    <a routerLink="/dashboard/settings/profile"
+                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fas fa-user-circle mr-2"></i> Profile
+                    </a>
+
+                    <a routerLink="/dashboard/settings" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fas fa-cog mr-2"></i> Settings
+                    </a>
+
+                    <button (click)="logout()"
+                        class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <i class="fas fa-sign-out-alt mr-2"></i> Sign out
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>

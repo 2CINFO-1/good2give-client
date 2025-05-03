@@ -1,0 +1,132 @@
+<div class="container mx-auto px-4 py-6">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">Edit Event</h1>
+        <button (click)="cancel()" class="flex items-center text-blue-600 hover:text-blue-800 transition-colors">
+            <svg class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Cancel
+        </button>
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="error" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
+        <p>{{ error }}</p>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div *ngIf="loading" class="flex justify-center my-8">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+    </div>
+
+    <!-- Form -->
+    <div *ngIf="!loading && eventData" class="bg-white rounded-lg shadow-lg p-6">
+        <form [formGroup]="eventForm" (ngSubmit)="onSubmit()">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Title -->
+                <div class="col-span-2">
+                    <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Event Title *</label>
+                    <input type="text" id="title" formControlName="title"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Enter event title">
+                    <div *ngIf="f['title'].touched && f['title'].invalid" class="mt-1 text-sm text-red-600">
+                        <div *ngIf="f['title'].errors?.['required']">Title is required.</div>
+                        <div *ngIf="f['title'].errors?.['minlength']">Title must be at least 3 characters.</div>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="col-span-2">
+                    <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description *</label>
+                    <textarea id="description" formControlName="description" rows="4"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Enter event description"></textarea>
+                    <div *ngIf="f['description'].touched && f['description'].invalid" class="mt-1 text-sm text-red-600">
+                        <div *ngIf="f['description'].errors?.['required']">Description is required.</div>
+                        <div *ngIf="f['description'].errors?.['minlength']">Description must be at least 10 characters.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Date and Time -->
+                <div>
+                    <label for="date" class="block text-sm font-medium text-gray-700 mb-1">Date *</label>
+                    <input type="date" id="date" formControlName="date"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <div *ngIf="f['date'].touched && f['date'].invalid" class="mt-1 text-sm text-red-600">
+                        <div *ngIf="f['date'].errors?.['required']">Date is required.</div>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="time" class="block text-sm font-medium text-gray-700 mb-1">Time *</label>
+                    <input type="text" id="time" formControlName="time"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="e.g., 10:00-16:00">
+                    <div *ngIf="f['time'].touched && f['time'].invalid" class="mt-1 text-sm text-red-600">
+                        <div *ngIf="f['time'].errors?.['required']">Time is required.</div>
+                    </div>
+                </div>
+
+                <!-- Location and Organizer -->
+                <div>
+                    <label for="location" class="block text-sm font-medium text-gray-700 mb-1">Location *</label>
+                    <input type="text" id="location" formControlName="location"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Enter event location">
+                    <div *ngIf="f['location'].touched && f['location'].invalid" class="mt-1 text-sm text-red-600">
+                        <div *ngIf="f['location'].errors?.['required']">Location is required.</div>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="organizer" class="block text-sm font-medium text-gray-700 mb-1">Organizer *</label>
+                    <input type="text" id="organizer" formControlName="organizer"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Enter organizer name">
+                    <div *ngIf="f['organizer'].touched && f['organizer'].invalid" class="mt-1 text-sm text-red-600">
+                        <div *ngIf="f['organizer'].errors?.['required']">Organizer is required.</div>
+                    </div>
+                </div>
+
+                <!-- Capacity and Status -->
+                <div>
+                    <label for="capacity" class="block text-sm font-medium text-gray-700 mb-1">Capacity *</label>
+                    <input type="number" id="capacity" formControlName="capacity" min="1"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Enter maximum capacity">
+                    <div *ngIf="f['capacity'].touched && f['capacity'].invalid" class="mt-1 text-sm text-red-600">
+                        <div *ngIf="f['capacity'].errors?.['required']">Capacity is required.</div>
+                        <div *ngIf="f['capacity'].errors?.['min']">Capacity must be at least 1.</div>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <select id="status" formControlName="status"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option [value]="0">Upcoming</option>
+                        <option [value]="1">Ongoing</option>
+                        <option [value]="2">Completed</option>
+                        <option [value]="3">Cancelled</option>
+                    </select>
+                </div>
+
+                <!-- Buttons -->
+                <div class="col-span-2 flex justify-end space-x-4 mt-6">
+                    <button type="button" (click)="cancel()"
+                        class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit" [disabled]="submitting"
+                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center">
+                        <span *ngIf="submitting" class="mr-2">
+                            <div class="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
+                        </span>
+                        {{ submitting ? 'Saving...' : 'Save Changes' }}
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

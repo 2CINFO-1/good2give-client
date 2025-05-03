@@ -1,0 +1,30 @@
+<div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <div class="px-4 py-6 sm:px-0">
+        <div class="border-4 border-dashed border-gray-200 rounded-lg p-4">
+            <!-- Header -->
+            <div class="md:flex md:items-center md:justify-between mb-6">
+                <div class="flex-1 min-w-0">
+                    <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+                        Edit Product
+                    </h2>
+                    <p class="mt-1 text-sm text-gray-500">
+                        Redirecting to product form...
+                    </p>
+                </div>
+            </div>
+
+            <!-- Loading State -->
+            <div class="flex justify-center my-8">
+                <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+
+            <!-- Navigation Button -->
+            <div class="flex justify-end mt-6">
+                <button type="button" (click)="onBack()"
+                    class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    Back to Products
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,105 @@
+<div class="space-y-6">
+    <h2 class="text-xl font-semibold text-gray-800">Notification Settings</h2>
+
+    <div *ngIf="successMessage" class="bg-green-50 border border-green-400 text-green-700 px-4 py-3 rounded">
+        {{ successMessage }}
+    </div>
+
+    <div *ngIf="errorMessage" class="bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded">
+        {{ errorMessage }}
+    </div>
+
+    <form [formGroup]="notificationsForm" (ngSubmit)="onSubmit()" class="space-y-6">
+        <div class="space-y-4">
+            <h3 class="text-lg font-medium text-gray-700">Email Notifications</h3>
+
+            <div class="flex items-start">
+                <div class="flex items-center h-5">
+                    <input id="emailNotifications" type="checkbox" formControlName="emailNotifications"
+                        class="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500">
+                </div>
+                <div class="ml-3 text-sm">
+                    <label for="emailNotifications" class="font-medium text-gray-700">Enable Email Notifications</label>
+                    <p class="text-gray-500">Receive all notifications via email.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-4" *ngIf="notificationsForm.get('emailNotifications')?.value">
+            <h3 class="text-lg font-medium text-gray-700">Notification Types</h3>
+
+            <div class="flex items-start">
+                <div class="flex items-center h-5">
+                    <input id="donationUpdates" type="checkbox" formControlName="donationUpdates"
+                        class="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500">
+                </div>
+                <div class="ml-3 text-sm">
+                    <label for="donationUpdates" class="font-medium text-gray-700">Donation Updates</label>
+                    <p class="text-gray-500">Receive notifications about your donation status changes.</p>
+                </div>
+            </div>
+
+            <div class="flex items-start">
+                <div class="flex items-center h-5">
+                    <input id="newRequests" type="checkbox" formControlName="newRequests"
+                        class="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500">
+                </div>
+                <div class="ml-3 text-sm">
+                    <label for="newRequests" class="font-medium text-gray-700">New Request Notifications</label>
+                    <p class="text-gray-500">Receive notifications when new donation requests are posted.</p>
+                </div>
+            </div>
+
+            <div class="flex items-start">
+                <div class="flex items-center h-5">
+                    <input id="deliveryUpdates" type="checkbox" formControlName="deliveryUpdates"
+                        class="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500">
+                </div>
+                <div class="ml-3 text-sm">
+                    <label for="deliveryUpdates" class="font-medium text-gray-700">Delivery Updates</label>
+                    <p class="text-gray-500">Receive notifications about delivery status changes.</p>
+                </div>
+            </div>
+
+            <div class="flex items-start">
+                <div class="flex items-center h-5">
+                    <input id="systemAnnouncements" type="checkbox" formControlName="systemAnnouncements"
+                        class="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500">
+                </div>
+                <div class="ml-3 text-sm">
+                    <label for="systemAnnouncements" class="font-medium text-gray-700">System Announcements</label>
+                    <p class="text-gray-500">Receive important system announcements and updates.</p>
+                </div>
+            </div>
+
+            <div class="flex items-start">
+                <div class="flex items-center h-5">
+                    <input id="marketingEmails" type="checkbox" formControlName="marketingEmails"
+                        class="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500">
+                </div>
+                <div class="ml-3 text-sm">
+                    <label for="marketingEmails" class="font-medium text-gray-700">Marketing Emails</label>
+                    <p class="text-gray-500">Receive marketing emails, newsletters, and promotional content.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex justify-end pt-4">
+            <button type="submit" [disabled]="isSubmitting"
+                class="px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700 transition-colors disabled:opacity-50">
+                <span *ngIf="isSubmitting" class="flex items-center">
+                    <svg class="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none"
+                        viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                        </circle>
+                        <path class="opacity-75" fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                        </path>
+                    </svg>
+                    Saving...
+                </span>
+                <span *ngIf="!isSubmitting">Save Preferences</span>
+            </button>
+        </div>
+    </form>
+</div>

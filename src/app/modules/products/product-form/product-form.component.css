@@ -1,0 +1,12 @@
+/* All styling is handled by Tailwind CSS */
+
+/* Product form specific styles */
+.ng-invalid.ng-touched {
+  border-color: #ef4444;
+}
+
+.form-error {
+  color: #ef4444;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}

@@ -1,0 +1,168 @@
+<div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <div class="px-4 py-6 sm:px-0">
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg p-6">
+            <!-- Header -->
+            <div class="md:flex md:items-center md:justify-between mb-6">
+                <div class="flex-1 min-w-0">
+                    <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+                        Create New Inspection
+                    </h2>
+                    <p class="mt-1 text-sm text-gray-500">
+                        Fill out the form to create a new inspection report for Stock ID: {{ stockId }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Error Message -->
+            <div *ngIf="error" class="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                            fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-red-700">{{ error }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inspection Form -->
+            <form [formGroup]="inspectionForm" (ngSubmit)="onSubmit()">
+                <!-- Inspector -->
+                <div class="mb-4">
+                    <label for="inspector" class="block text-sm font-medium text-gray-700">Inspector Name *</label>
+                    <input type="text" id="inspector" formControlName="inspector"
+                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        [ngClass]="{'border-red-500': inspectionForm.get('inspector')?.invalid && inspectionForm.get('inspector')?.touched}">
+                    <div *ngIf="inspectionForm.get('inspector')?.invalid && inspectionForm.get('inspector')?.touched"
+                        class="text-red-500 text-sm mt-1">
+                        <span *ngIf="inspectionForm.get('inspector')?.errors?.['required']">Inspector name is
+                            required</span>
+                        <span *ngIf="inspectionForm.get('inspector')?.errors?.['minlength']">Inspector name must be at
+                            least 3
+                            characters</span>
+                    </div>
+                </div>
+
+                <!-- Notes -->
+                <div class="mb-6">
+                    <label for="notes" class="block text-sm font-medium text-gray-700">Notes</label>
+                    <textarea id="notes" formControlName="notes" rows="3"
+                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"></textarea>
+                </div>
+
+                <!-- Findings Section -->
+                <div class="mb-6">
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="block text-sm font-medium text-gray-700">Findings</label>
+                        <button type="button" (click)="addFinding()"
+                            class="inline-flex items-center px-3 py-1 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            Add Finding
+                        </button>
+                    </div>
+
+                    <div *ngIf="findings.length === 0"
+                        class="text-center py-4 bg-gray-50 border border-gray-200 rounded-md">
+                        <p class="text-sm text-gray-500">No findings added yet. Click "Add Finding" to report issues.
+                        </p>
+                    </div>
+
+                    <div formArrayName="findings" *ngIf="findings.length > 0" class="space-y-4">
+                        <div *ngFor="let finding of findings.controls; let i = index" [formGroupName]="i"
+                            class="p-4 border border-gray-200 rounded-md bg-gray-50">
+
+                            <div class="flex justify-between mb-3">
+                                <h4 class="text-sm font-medium text-gray-700">Finding #{{ i + 1 }}</h4>
+                                <button type="button" (click)="removeFinding(i)"
+                                    class="text-red-600 hover:text-red-900 text-sm font-medium">
+                                    Remove
+                                </button>
+                            </div>
+
+                            <!-- Finding Type -->
+                            <div class="mb-3">
+                                <label [for]="'type-' + i" class="block text-sm font-medium text-gray-700">Type
+                                    *</label>
+                                <select [id]="'type-' + i" formControlName="type"
+                                    class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                    <option *ngFor="let type of findingTypes" [value]="type">{{ type }}</option>
+                                </select>
+                            </div>
+
+                            <!-- Finding Description -->
+                            <div class="mb-3">
+                                <label [for]="'description-' + i"
+                                    class="block text-sm font-medium text-gray-700">Description *</label>
+                                <textarea [id]="'description-' + i" formControlName="description" rows="2"
+                                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                    [ngClass]="{'border-red-500': finding.get('description')?.invalid && finding.get('description')?.touched}"></textarea>
+                                <div *ngIf="finding.get('description')?.invalid && finding.get('description')?.touched"
+                                    class="text-red-500 text-sm mt-1">
+                                    <span *ngIf="finding.get('description')?.errors?.['required']">Description is
+                                        required</span>
+                                    <span *ngIf="finding.get('description')?.errors?.['minlength']">Description must be
+                                        at least 10
+                                        characters</span>
+                                </div>
+                            </div>
+
+                            <!-- Finding Severity -->
+                            <div class="mb-3">
+                                <label [for]="'severity-' + i" class="block text-sm font-medium text-gray-700">Severity
+                                    *</label>
+                                <select [id]="'severity-' + i" formControlName="severity"
+                                    class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                    <option *ngFor="let severity of findingSeverities" [value]="severity">{{ severity }}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <!-- Action Required -->
+                            <div class="mb-2">
+                                <label [for]="'action-' + i" class="block text-sm font-medium text-gray-700">Action
+                                    Required</label>
+                                <textarea [id]="'action-' + i" formControlName="actionRequired" rows="2"
+                                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Buttons -->
+                <div class="pt-5 flex justify-end space-x-3">
+                    <button type="button" (click)="onCancel()"
+                        class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Cancel
+                    </button>
+                    <button type="submit" [disabled]="submitting || inspectionForm.invalid"
+                        class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50">
+                        <span *ngIf="submitting">
+                            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline-block"
+                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                    stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                </path>
+                            </svg>
+                            Creating...
+                        </span>
+                        <span *ngIf="!submitting">
+                            Create Inspection
+                        </span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,93 @@
+<div class="container mx-auto px-4 py-6">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">Schedule Collection</h1>
+        <button (click)="cancel()" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-md">
+            Cancel
+        </button>
+    </div>
+
+    <div *ngIf="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        {{ error }}
+    </div>
+
+    <div class="bg-white shadow-md rounded-lg p-6">
+        <form [formGroup]="collecteForm" (ngSubmit)="onSubmit()">
+            <!-- Donation Selection -->
+            <div class="mb-6">
+                <label for="donationId" class="block text-gray-700 text-sm font-medium mb-2">Donation*</label>
+                <div *ngIf="isLoadingDonations" class="flex items-center">
+                    <div class="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-2">
+                    </div>
+                    <span>Loading donations...</span>
+                </div>
+                <select *ngIf="!isLoadingDonations" id="donationId" formControlName="donationId"
+                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <option value="">Select a donation</option>
+                    <option *ngFor="let donation of donations" [value]="donation._id">
+                        {{ donation.title || 'Donation #' + donation._id.substring(0, 8) }} - {{ donation.location }}
+                    </option>
+                </select>
+                <div *ngIf="formControls['donationId'].touched && formControls['donationId'].errors?.['required']"
+                    class="text-red-500 text-sm mt-1">
+                    Please select a donation
+                </div>
+                <div *ngIf="!isLoadingDonations && donations.length === 0" class="text-gray-500 text-sm mt-1">
+                    No approved donations available for collection
+                </div>
+            </div>
+
+            <!-- Transporter Selection (Optional) -->
+            <div class="mb-6">
+                <label for="transporterId" class="block text-gray-700 text-sm font-medium mb-2">Assign Transporter
+                    (Optional)</label>
+                <div *ngIf="isLoadingTransporters" class="flex items-center">
+                    <div class="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-2">
+                    </div>
+                    <span>Loading transporters...</span>
+                </div>
+                <select *ngIf="!isLoadingTransporters" id="transporterId" formControlName="transporterId"
+                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <option value="">Select a transporter (optional)</option>
+                    <option *ngFor="let transporter of transporters" [value]="transporter._id">
+                        {{ transporter.firstName }} {{ transporter.lastName }} ({{ transporter.email }})
+                    </option>
+                </select>
+                <div *ngIf="!isLoadingTransporters && transporters.length === 0" class="text-gray-500 text-sm mt-1">
+                    No transporters available
+                </div>
+            </div>
+
+            <!-- Scheduled Date -->
+            <div class="mb-6">
+                <label for="scheduledDate" class="block text-gray-700 text-sm font-medium mb-2">Scheduled Date*</label>
+                <input type="datetime-local" id="scheduledDate" formControlName="scheduledDate"
+                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                <div *ngIf="formControls['scheduledDate'].touched && formControls['scheduledDate'].errors?.['required']"
+                    class="text-red-500 text-sm mt-1">
+                    Scheduled date is required
+                </div>
+            </div>
+
+            <!-- Notes -->
+            <div class="mb-6">
+                <label for="notes" class="block text-gray-700 text-sm font-medium mb-2">Notes (Optional)</label>
+                <textarea id="notes" formControlName="notes" rows="4"
+                    placeholder="Any special instructions or notes for the collection"
+                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="flex justify-end">
+                <button type="submit" [disabled]="collecteForm.invalid || isLoading"
+                    class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50">
+                    <span *ngIf="isLoading" class="flex items-center">
+                        <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2">
+                        </div>
+                        Scheduling...
+                    </span>
+                    <span *ngIf="!isLoading">Schedule Collection</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

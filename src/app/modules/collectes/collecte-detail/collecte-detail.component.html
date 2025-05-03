@@ -1,0 +1,117 @@
+<div class="container mx-auto px-4 py-6">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">Collecte Details</h1>
+        <button (click)="goBack()" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-md">
+            Back to List
+        </button>
+    </div>
+
+    <div *ngIf="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        {{ error }}
+    </div>
+
+    <div *ngIf="isLoading" class="flex justify-center py-8">
+        <div class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate
+-spin"></div>
+    </div>
+
+    <div *ngIf="!isLoading && !error && collecte" class="bg-white rounded-lg shadow-md overflow-hidden">
+        <!-- Header -->
+        <div class="p-6 border-b border-gray-200">
+            <div class="flex justify-between items-center mb-2">
+                <h2 class="text-xl font-semibold">{{ collecte.title }}</h2>
+                <span [class]="getStatusClass(collecte.status)" class="px-3 py-1 rounded-full text-sm font-semibold">
+                    {{ collecte.status }}
+                </span>
+            </div>
+            <p class="text-gray-600">{{ collecte.description }}</p>
+        </div>
+
+        <!-- Details -->
+        <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <h3 class="text-lg font-semibold mb-4">Collection Information</h3>
+                <div class="space-y-3">
+                    <div>
+                        <p class="text-gray-500 text-sm">Date Scheduled</p>
+                        <p>{{ formatDate(collecte.scheduledDate) }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-sm">Location</p>
+                        <p>{{ collecte.location || 'Not specified' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-sm">Items</p>
+                        <ul class="list-disc pl-5">
+                            <li *ngFor="let item of collecte.items">{{ item.name }} - {{ item.quantity }} units</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="text-lg font-semibold mb-4">Contact Information</h3>
+                <div class="space-y-3">
+                    <div>
+                        <p class="text-gray-500 text-sm">Donor</p>
+                        <p>{{ collecte.donorName || 'Anonymous' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-sm">Phone</p>
+                        <p>{{ collecte.contactPhone || 'Not provided' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-sm">Email</p>
+                        <p>{{ collecte.contactEmail || 'Not provided' }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transporter Information -->
+        <div class="p-6 border-t border-gray-200" *ngIf="collecte.transporter">
+            <h3 class="text-lg font-semibold mb-4">Assigned Transporter</h3>
+            <div class="flex items-center space-x-4">
+                <div class="rounded-full bg-gray-200 w-12 h-12 flex items-center justify-center text-xl">
+                    {{ collecte.transporter.name?.charAt(0) || 'T' }}
+                </div>
+                <div>
+                    <p class="font-medium">{{ collecte.transporter.name }}</p>
+                    <p class="text-sm text-gray-600">{{ collecte.transporter.phone || 'No phone' }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes -->
+        <div class="p-6 border-t border-gray-200" *ngIf="collecte.notes">
+            <h3 class="text-lg font-semibold mb-4">Notes</h3>
+            <p class="whitespace-pre-line">{{ collecte.notes }}</p>
+        </div>
+
+        <!-- Admin Actions -->
+        <div class="p-6 border-t border-gray-200">
+            <h3 class="text-lg font-semibold mb-4">Actions</h3>
+
+            <div class="flex flex-wrap gap-2 mb-6">
+                <button *ngFor="let status of statusOptions" (click)="updateStatus(status)"
+                    class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md disabled:opacity-50"
+                    [disabled]="collecte.status === status || isLoading">
+                    Mark as {{ status }}
+                </button>
+            </div>
+
+            <div *ngIf="!collecte.transporter">
+                <h4 class="font-medium mb-2">Assign Transporter</h4>
+                <!-- Simplified for demo - in real app, this would include a dropdown of available transporters -->
+                <div class="flex items-center">
+                    <input type="text" placeholder="Transporter ID" #transporterId
+                        class="border p-2 rounded-l-md flex-grow" />
+                    <button (click)="assignTransporter(transporterId.value)"
+                        class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-r-md">
+                        Assign
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

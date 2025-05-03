@@ -1,0 +1,132 @@
+<div class="container mx-auto p-4">
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">Adjust Stock</h1>
+            <button (click)="cancel()" class="text-blue-600 flex items-center">
+                <span class="material-icons text-sm mr-1">arrow_back</span>
+                Back to Stocks
+            </button>
+        </div>
+
+        <div *ngIf="errorMessage" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            {{ errorMessage }}
+        </div>
+
+        <div *ngIf="isLoading" class="flex justify-center py-8">
+            <svg class="animate-spin h-8 w-8 text-emerald-500" xmlns="http://www.w3.org/2000/svg" fill="none"
+                viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                </path>
+            </svg>
+        </div>
+
+        <form [formGroup]="adjustmentForm" (ngSubmit)="onSubmit()" *ngIf="!isLoading" class="space-y-6">
+            <div>
+                <label for="productId" class="block text-sm font-medium text-gray-700 mb-1">
+                    Product *
+                </label>
+                <select id="productId" formControlName="productId"
+                    (change)="onProductSelect(adjustmentForm.get('productId')?.value)"
+                    class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
+                    <option value="">Select a product</option>
+                    <option *ngFor="let product of products" [value]="product.id">
+                        {{ product.name }} ({{ product.category }})
+                    </option>
+                </select>
+                <div *ngIf="adjustmentForm.get('productId')?.invalid && adjustmentForm.get('productId')?.touched"
+                    class="text-red-500 text-sm mt-1">
+                    Product is required
+                </div>
+            </div>
+
+            <div *ngIf="stocks.length > 0" class="bg-gray-50 p-4 rounded-lg">
+                <h3 class="text-md font-semibold mb-2">Current Stock Information</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm text-gray-500">Total Available Quantity</p>
+                        <p class="font-medium">{{ getTotalQuantity() }} {{ getProductUnit() }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Locations</p>
+                        <p class="font-medium">{{ getStockLocations() }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div *ngIf="adjustmentForm.get('productId')?.valid && stocks.length === 0"
+                class="bg-yellow-50 p-4 rounded-lg">
+                <p class="text-yellow-800">No stock available for this product.</p>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">
+                    Adjustment Type *
+                </label>
+                <div class="flex flex-wrap gap-4">
+                    <div *ngFor="let type of adjustmentTypes" class="flex items-center">
+                        <input type="radio" [id]="type.value" [value]="type.value" formControlName="adjustmentType"
+                            class="h-4 w-4 text-emerald-600 border-gray-300 focus:ring-emerald-500">
+                        <label [for]="type.value" class="ml-2 text-sm text-gray-700">{{ type.label }}</label>
+                    </div>
+                </div>
+                <div *ngIf="adjustmentForm.get('adjustmentType')?.invalid && adjustmentForm.get('adjustmentType')?.touched"
+                    class="text-red-500 text-sm mt-1">
+                    Adjustment type is required
+                </div>
+            </div>
+
+            <div>
+                <label for="quantity" class="block text-sm font-medium text-gray-700 mb-1">
+                    Quantity *
+                </label>
+                <input type="number" id="quantity" formControlName="quantity" min="1"
+                    class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
+                <div *ngIf="adjustmentForm.get('quantity')?.invalid && adjustmentForm.get('quantity')?.touched"
+                    class="text-red-500 text-sm mt-1">
+                    <div *ngIf="adjustmentForm.get('quantity')?.errors?.['required']">Quantity is required</div>
+                    <div *ngIf="adjustmentForm.get('quantity')?.errors?.['min']">Quantity must be at least 1</div>
+                </div>
+                <div *ngIf="isDecreaseTooLarge()" class="text-red-500 text-sm mt-1">
+                    Cannot decrease quantity beyond available stock ({{ getTotalQuantity() }} {{ getProductUnit() }})
+                </div>
+            </div>
+
+            <div>
+                <label for="reason" class="block text-sm font-medium text-gray-700 mb-1">
+                    Reason for Adjustment *
+                </label>
+                <textarea id="reason" formControlName="reason" rows="3"
+                    class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                    placeholder="Please provide a reason for this stock adjustment..."></textarea>
+                <div *ngIf="adjustmentForm.get('reason')?.invalid && adjustmentForm.get('reason')?.touched"
+                    class="text-red-500 text-sm mt-1">
+                    Reason is required
+                </div>
+            </div>
+
+            <div class="flex justify-end space-x-3 pt-4">
+                <button type="button" (click)="cancel()"
+                    class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors">
+                    Cancel
+                </button>
+                <button type="submit" [disabled]="adjustmentForm.invalid || isSubmitting || isDecreaseTooLarge()"
+                    class="px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                    <span *ngIf="isSubmitting" class="flex items-center">
+                        <svg class="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none"
+                            viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                            </circle>
+                            <path class="opacity-75" fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                            </path>
+                        </svg>
+                        Saving...
+                    </span>
+                    <span *ngIf="!isSubmitting">Save Adjustment</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

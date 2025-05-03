@@ -1,0 +1,62 @@
+<div class="container mx-auto px-4 py-6">
+    <div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">Schedule Collection</h1>
+            <button (click)="cancel()" class="text-gray-600 hover:text-gray-800">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Error alert -->
+        <div *ngIf="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6">
+            <span class="block sm:inline">{{ error }}</span>
+        </div>
+
+        <!-- Loading state -->
+        <div *ngIf="loading" class="text-center my-8">
+            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto"></div>
+            <p class="mt-2 text-gray-600">Processing request...</p>
+        </div>
+
+        <form [formGroup]="collecteForm" (ngSubmit)="onSubmit()" *ngIf="!loading">
+            <div class="mb-4">
+                <label for="donationId" class="block text-gray-700 text-sm font-medium mb-2">Donation ID*</label>
+                <input id="donationId" type="text" formControlName="donationId"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                <div *ngIf="f['donationId'].touched && f['donationId'].errors" class="text-red-500 text-sm mt-1">
+                    <div *ngIf="f['donationId'].errors?.['required']">Donation ID is required</div>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label for="scheduledDate" class="block text-gray-700 text-sm font-medium mb-2">Scheduled Date*</label>
+                <input id="scheduledDate" type="date" formControlName="scheduledDate"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                <div *ngIf="f['scheduledDate'].touched && f['scheduledDate'].errors" class="text-red-500 text-sm mt-1">
+                    <div *ngIf="f['scheduledDate'].errors?.['required']">Scheduled date is required</div>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <label for="notes" class="block text-gray-700 text-sm font-medium mb-2">Notes</label>
+                <textarea id="notes" rows="3" formControlName="notes"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+            </div>
+
+            <div class="flex justify-end space-x-3">
+                <button type="button" (click)="cancel()"
+                    class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                    Cancel
+                </button>
+                <button type="submit" [disabled]="collecteForm.invalid"
+                    class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    [ngClass]="{'opacity-50 cursor-not-allowed': collecteForm.invalid}">
+                    Schedule Collection
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

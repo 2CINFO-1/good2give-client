@@ -1,0 +1,189 @@
+<div class="p-6 max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <button (click)="goBack()" class="inline-flex items-center text-gray-700 hover:text-gray-900">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Back to Donations
+            </button>
+            <h1 class="text-2xl font-bold mt-2">Donation Details</h1>
+        </div>
+        <div *ngIf="!loading && donation">
+            <div class="flex items-center space-x-2">
+                <span class="px-3 py-1 text-sm rounded-full" [ngClass]="{
+              'bg-yellow-100 text-yellow-800': donation.status === DonationStatus.PENDING,
+              'bg-green-100 text-green-800': donation.status === DonationStatus.APPROVED,
+              'bg-blue-100 text-blue-800': donation.status === DonationStatus.COLLECTED,
+              'bg-purple-100 text-purple-800': donation.status === DonationStatus.DELIVERED,
+              'bg-red-100 text-red-800': donation.status === DonationStatus.REJECTED,
+              'bg-gray-100 text-gray-800': donation.status === DonationStatus.EXPIRED
+            }">
+                    {{ donation.status }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="flex justify-center items-center h-64">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="error" class="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
+        <div class="flex items-center">
+            <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                        clip-rule="evenodd"></path>
+                </svg>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm text-red-700">{{ errorMessage }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Donation Details -->
+    <div *ngIf="!loading && !error && donation" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Donor Information -->
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+            <div class="px-4 py-5 sm:px-6 bg-gray-50">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Donor Information</h3>
+            </div>
+            <div class="border-t border-gray-200">
+                <dl>
+                    <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500">Donor Name</dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2">{{ donation.donorName }}</dd>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500">Donor ID</dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2">{{ donation.donorId }}</dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+
+        <!-- Pickup Information -->
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+            <div class="px-4 py-5 sm:px-6 bg-gray-50">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Pickup Information</h3>
+            </div>
+            <div class="border-t border-gray-200">
+                <dl>
+                    <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500">Address</dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2">{{ donation.pickupAddress }}</dd>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500">Date & Time</dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2">{{ formatDate(donation.pickupDate) }}</dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+
+        <!-- Timestamps -->
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+            <div class="px-4 py-5 sm:px-6 bg-gray-50">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Details</h3>
+            </div>
+            <div class="border-t border-gray-200">
+                <dl>
+                    <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500">Created</dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2">{{ formatDate(donation.createdAt) }}</dd>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500">Last Updated</dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2">{{ formatDate(donation.updatedAt) }}</dd>
+                    </div>
+                    <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                        <dt class="text-sm font-medium text-gray-500">Notes</dt>
+                        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2">{{ donation.notes || 'No notes provided' }}
+                        </dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+
+        <!-- Products -->
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg lg:col-span-3">
+            <div class="px-4 py-5 sm:px-6 bg-gray-50 flex justify-between items-center">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Donated Products</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Product
+                            </th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Quantity
+                            </th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Unit
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr *ngFor="let product of donation.items">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">
+                                    {{ product.name }}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">{{ product.quantity }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ product.unit }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div *ngIf="!loading && !error && donation" class="mt-8 space-y-4">
+        <div class="flex flex-wrap gap-4 justify-end">
+            <!-- Show different buttons based on status -->
+            <div *ngIf="donation.status === DonationStatus.PENDING">
+                <button (click)="updateStatus(DonationStatus.APPROVED)"
+                    class="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                    Approve Donation
+                </button>
+                <button (click)="updateStatus(DonationStatus.REJECTED)"
+                    class="ml-3 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                    Reject Donation
+                </button>
+            </div>
+
+            <div *ngIf="donation.status === DonationStatus.APPROVED">
+                <button (click)="updateStatus(DonationStatus.COLLECTED)"
+                    class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    Mark as Collected
+                </button>
+            </div>
+
+            <div *ngIf="donation.status === DonationStatus.COLLECTED">
+                <button (click)="updateStatus(DonationStatus.DELIVERED)"
+                    class="px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+                    Mark as Delivered
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,218 @@
+<div class="p-6 max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="mb-6">
+        <button (click)="goBack()" class="inline-flex items-center text-gray-700 hover:text-gray-900">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
+                </path>
+            </svg>
+            Back to Donations
+        </button>
+        <h1 class="text-2xl font-bold mt-2">Create New Donation</h1>
+        <p class="mt-1 text-gray-600">Fill out the form below to register a new donation.</p>
+    </div>
+
+    <!-- Success Message -->
+    <div *ngIf="success" class="bg-green-50 border-l-4 border-green-500 p-4 mb-6">
+        <div class="flex items-center">
+            <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                        clip-rule="evenodd"></path>
+                </svg>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm text-green-700">{{ success }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="error" class="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
+        <div class="flex items-center">
+            <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                        clip-rule="evenodd"></path>
+                </svg>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm text-red-700">{{ error }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading state for initial products loading -->
+    <div *ngIf="loading" class="flex justify-center items-center h-32">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+    </div>
+
+    <!-- Form -->
+    <form [formGroup]="donationForm" (ngSubmit)="onSubmit()" *ngIf="!loading && !success">
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
+            <div class="px-4 py-5 sm:px-6 bg-gray-50">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Donor Information</h3>
+                <p class="mt-1 max-w-2xl text-sm text-gray-500">Please provide the donor's details.</p>
+            </div>
+            <div class="border-t border-gray-200 px-4 py-5 sm:p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Donor Name -->
+                    <div>
+                        <label for="donorName" class="block text-sm font-medium text-gray-700">Donor Name</label>
+                        <input type="text" id="donorName" formControlName="donorName"
+                            class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                        <div *ngIf="donationForm.get('donorName')?.touched && donationForm.get('donorName')?.invalid"
+                            class="mt-1 text-sm text-red-600">
+                            <div *ngIf="donationForm.get('donorName')?.errors?.['required']">Donor name is required.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
+            <div class="px-4 py-5 sm:px-6 bg-gray-50">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Pickup Information</h3>
+                <p class="mt-1 max-w-2xl text-sm text-gray-500">Details about where and when to collect the donation.
+                </p>
+            </div>
+            <div class="border-t border-gray-200 px-4 py-5 sm:p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Pickup Address -->
+                    <div class="md:col-span-2">
+                        <label for="pickupAddress" class="block text-sm font-medium text-gray-700">Pickup
+                            Address</label>
+                        <input type="text" id="pickupAddress" formControlName="pickupAddress"
+                            class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                        <div *ngIf="donationForm.get('pickupAddress')?.touched && donationForm.get('pickupAddress')?.invalid"
+                            class="mt-1 text-sm text-red-600">
+                            <div *ngIf="donationForm.get('pickupAddress')?.errors?.['required']">Pickup address is
+                                required.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pickup Date -->
+                    <div>
+                        <label for="pickupDate" class="block text-sm font-medium text-gray-700">Pickup Date</label>
+                        <input type="datetime-local" id="pickupDate" formControlName="pickupDate"
+                            class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                        <div *ngIf="donationForm.get('pickupDate')?.touched && donationForm.get('pickupDate')?.invalid"
+                            class="mt-1 text-sm text-red-600">
+                            <div *ngIf="donationForm.get('pickupDate')?.errors?.['required']">Pickup date is required.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="md:col-span-2">
+                        <label for="notes" class="block text-sm font-medium text-gray-700">Additional Notes</label>
+                        <textarea id="notes" formControlName="notes" rows="3"
+                            class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
+            <div class="px-4 py-5 sm:px-6 bg-gray-50 flex justify-between items-center">
+                <div>
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">Products</h3>
+                    <p class="mt-1 max-w-2xl text-sm text-gray-500">Add the products being donated.</p>
+                </div>
+                <button type="button" (click)="addProduct()"
+                    class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Add Product
+                </button>
+            </div>
+            <div class="border-t border-gray-200">
+                <div formArrayName="products">
+                    <div *ngFor="let productForm of productsArray.controls; let i = index" [formGroupName]="i"
+                        class="px-4 py-5 sm:px-6 border-b border-gray-200 last:border-b-0">
+                        <div class="flex justify-between items-start mb-4">
+                            <h4 class="text-md font-medium text-gray-900">Product #{{ i + 1 }}</h4>
+                            <button *ngIf="productsArray.length > 1" type="button" (click)="removeProduct(i)"
+                                class="inline-flex items-center px-2 py-1 border border-transparent text-xs leading-4 font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                    </path>
+                                </svg>
+                                Remove
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Product Selection -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Product</label>
+                                <select formControlName="productId" (change)="onProductChange(i)"
+                                    class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                                    <option value="">Select a product</option>
+                                    <option *ngFor="let product of products" [value]="product._id">{{ product.name }}
+                                    </option>
+                                </select>
+                                <div *ngIf="productsArray.at(i).get('productId')?.touched && productsArray.at(i).get('productId')?.invalid"
+                                    class="mt-1 text-sm text-red-600">
+                                    <div *ngIf="productsArray.at(i).get('productId')?.errors?.['required']">Product
+                                        selection is required.</div>
+                                </div>
+                            </div>
+
+                            <!-- Quantity -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Quantity</label>
+                                <div class="mt-1 flex rounded-md shadow-sm">
+                                    <input type="number" formControlName="quantity" min="0.1" step="0.1"
+                                        class="focus:ring-blue-500 focus:border-blue-500 flex-1 block w-full rounded-none rounded-l-md sm:text-sm border-gray-300">
+                                    <span
+                                        class="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+                                        {{ productsArray.at(i).get('unit')?.value || 'units' }}
+                                    </span>
+                                </div>
+                                <div *ngIf="productsArray.at(i).get('quantity')?.touched && productsArray.at(i).get('quantity')?.invalid"
+                                    class="mt-1 text-sm text-red-600">
+                                    <div *ngIf="productsArray.at(i).get('quantity')?.errors?.['required']">Quantity is
+                                        required.</div>
+                                    <div *ngIf="productsArray.at(i).get('quantity')?.errors?.['min']">Quantity must be
+                                        greater than 0.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex justify-end space-x-3">
+            <button type="button" (click)="goBack()"
+                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                Cancel
+            </button>
+            <button type="submit" [disabled]="submitting"
+                class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                <span *ngIf="!submitting">Create Donation</span>
+                <span *ngIf="submitting" class="flex items-center">
+                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg"
+                        fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                        </circle>
+                        <path class="opacity-75" fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                        </path>
+                    </svg>
+                    Processing...
+                </span>
+            </button>
+        </div>
+    </form>
+</div>

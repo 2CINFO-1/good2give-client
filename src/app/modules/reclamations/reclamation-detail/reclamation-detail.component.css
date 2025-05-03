@@ -1,0 +1,25 @@
+/* ReclamationDetail component styles */
+
+.border-emerald-500 {
+  border-color: #10b981;
+}
+
+.text-emerald-600 {
+  color: #059669;
+}
+
+.hover\:text-emerald-700:hover {
+  color: #047857;
+}
+
+.bg-emerald-600 {
+  background-color: #059669;
+}
+
+.hover\:bg-emerald-700:hover {
+  background-color: #047857;
+}
+
+.border-emerald-700 {
+  border-color: #047857;
+}

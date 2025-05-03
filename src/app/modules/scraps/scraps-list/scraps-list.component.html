@@ -1,0 +1,60 @@
+<div class="container mx-auto p-4">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-semibold text-gray-800">Scrap Items</h1>
+        <a routerLink="create"
+            class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded inline-flex items-center">
+            <span class="material-icons mr-1 text-sm">add</span>
+            New Scrap Item
+        </a>
+    </div>
+
+    <div *ngIf="isLoading" class="flex justify-center py-8">
+        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-700"></div>
+    </div>
+
+    <div *ngIf="!isLoading && scraps.length === 0" class="bg-gray-50 p-8 text-center rounded-lg shadow-sm">
+        <p class="text-gray-600">No scrap items found. Click "New Scrap Item" to create one.</p>
+    </div>
+
+    <div *ngIf="!isLoading && scraps.length > 0" class="bg-white rounded-lg shadow-sm overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th scope="col"
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                    <th scope="col"
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                    <th scope="col"
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity
+                    </th>
+                    <th scope="col"
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                    <th scope="col"
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status
+                    </th>
+                    <th scope="col"
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                <tr *ngFor="let scrap of scraps">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ scrap.id }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ scrap.name }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ scrap.quantity }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ scrap.date | date }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span
+                            [ngClass]="scrap.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'"
+                            class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
+                            {{ scrap.status }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <a [routerLink]="[scrap.id]" class="text-emerald-600 hover:text-emerald-900 mr-3">View</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
