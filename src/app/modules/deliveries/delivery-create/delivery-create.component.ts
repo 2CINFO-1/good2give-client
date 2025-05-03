@@ -43,10 +43,10 @@ export class DeliveryCreateComponent implements OnInit {
     this.error = false;
 
     const deliveryRequest: DeliveryRequest = {
-      donationId: this.deliveryForm.value.donationId,
+      donation: this.deliveryForm.value.donationId,
       scheduledDate: new Date(this.deliveryForm.value.scheduledDate),
       address: this.deliveryForm.value.address,
-      recipientId: this.deliveryForm.value.recipientId,
+      deliveryPersonId: this.deliveryForm.value.recipientId,
       notes: this.deliveryForm.value.notes,
     };
 

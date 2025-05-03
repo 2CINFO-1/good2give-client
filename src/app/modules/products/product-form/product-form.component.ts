@@ -5,7 +5,7 @@ import { ProductsService } from '../../../services/products.service';
 import {
   Product,
   ProductCategory,
-  ProductUnit,
+  ProductType,
 } from '../../../models/product.model';
 
 @Component({
@@ -23,21 +23,7 @@ export class ProductFormComponent implements OnInit {
 
   // Use the enum values for the dropdowns
   categories = Object.values(ProductCategory);
-  units = Object.values(ProductUnit);
-
-  // For allergens handling
-  allergensList: string[] = [
-    'Milk',
-    'Eggs',
-    'Fish',
-    'Shellfish',
-    'Tree nuts',
-    'Peanuts',
-    'Wheat',
-    'Soybeans',
-    'Sesame',
-  ];
-  selectedAllergens: string[] = [];
+  productTypes = Object.values(ProductType);
 
   constructor(
     private fb: FormBuilder,
@@ -49,10 +35,8 @@ export class ProductFormComponent implements OnInit {
       name: ['', [Validators.required, Validators.minLength(3)]],
       description: ['', [Validators.required, Validators.minLength(10)]],
       category: ['', Validators.required],
-      unit: ['', Validators.required],
-      minStock: [0, [Validators.required, Validators.min(0)]],
-      trackExpiration: [true],
-      nutritionInfo: [''],
+      productType: ['', Validators.required],
+      status: [''],
     });
   }
 
@@ -87,31 +71,9 @@ export class ProductFormComponent implements OnInit {
       name: product.name,
       description: product.description || '',
       category: product.category,
-      unit: product.unit,
-      minStock: product.minStock || 0,
-      trackExpiration: product.trackExpiration || false,
-      nutritionInfo: product.nutritionInfo || '',
+      productType: product.productType,
+      status: product.status || '',
     });
-
-    // Handle allergens array
-    if (product.allergens) {
-      this.selectedAllergens = Array.isArray(product.allergens)
-        ? product.allergens
-        : product.allergens;
-    }
-  }
-
-  toggleAllergen(allergen: string): void {
-    const index = this.selectedAllergens.indexOf(allergen);
-    if (index === -1) {
-      this.selectedAllergens.push(allergen);
-    } else {
-      this.selectedAllergens.splice(index, 1);
-    }
-  }
-
-  isAllergenSelected(allergen: string): boolean {
-    return this.selectedAllergens.includes(allergen);
   }
 
   onSubmit(): void {
@@ -132,17 +94,13 @@ export class ProductFormComponent implements OnInit {
 
   prepareProductData(): Product {
     const formValue = this.productForm.value;
-
-    return {
-      ...formValue,
-      allergens: this.selectedAllergens,
-    } as Product;
+    return formValue as Product;
   }
 
   createProduct(product: Product): void {
     this.productsService.createProduct(product).subscribe({
       next: () => {
-        this.router.navigate(['/products']);
+        this.router.navigate(['/dashboard/products']);
       },
       error: (err) => {
         this.error = 'Failed to create product. Please try again.';
@@ -155,7 +113,7 @@ export class ProductFormComponent implements OnInit {
   updateProduct(id: string, product: Product): void {
     this.productsService.updateProduct(id, product).subscribe({
       next: () => {
-        this.router.navigate(['/products']);
+        this.router.navigate(['/dashboard/products']);
       },
       error: (err) => {
         this.error = 'Failed to update product. Please try again.';
@@ -166,7 +124,7 @@ export class ProductFormComponent implements OnInit {
   }
 
   onCancel(): void {
-    this.router.navigate(['/products']);
+    this.router.navigate(['/dashboard/products']);
   }
 
   // Helper method to mark all form controls as touched

@@ -59,17 +59,20 @@ export class StockAdjustmentComponent implements OnInit {
   onProductSelect(productId: string): void {
     if (productId) {
       this.isLoading = true;
+      // Load stocks for this product
       this.stockService.getStockByProduct(productId).subscribe(
-        (data) => {
-          this.stocks = data;
+        (stocks: any[]) => {
+          this.stocks = stocks;
           this.isLoading = false;
         },
-        (error) => {
-          this.errorMessage =
-            'Failed to load stock information. Please try again.';
+        (error: any) => {
+          console.error('Error loading stocks:', error);
+          this.errorMessage = 'Failed to load stock information';
           this.isLoading = false;
         }
       );
+    } else {
+      this.stocks = [];
     }
   }
 
@@ -99,14 +102,20 @@ export class StockAdjustmentComponent implements OnInit {
     return this.stocks.reduce((total, stock) => total + stock.quantity, 0);
   }
 
-  getProductUnit(): string {
+  getProductType(): string {
     const productId = this.adjustmentForm.get('productId')?.value;
-    const product = this.products.find((p) => p.id === productId);
-    return product?.unit || '';
+    const product = this.products.find((p) => p._id === productId);
+    return product?.productType || '';
   }
 
   getStockLocations(): string {
-    const locations = [...new Set(this.stocks.map((stock) => stock.location))];
+    const locations = [
+      ...new Set(
+        this.stocks
+          .map((stock) => stock.location)
+          .filter((location) => location !== undefined && location !== null)
+      ),
+    ];
     return locations.join(', ');
   }
 

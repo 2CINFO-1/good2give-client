@@ -85,34 +85,6 @@ export class EventDetailComponent implements OnInit {
     }
   }
 
-  registerAttendee(): void {
-    if (this.event) {
-      this.eventService.registerAttendee(this.event._id).subscribe({
-        next: (updatedEvent: Event) => {
-          this.event = updatedEvent;
-        },
-        error: (err: any) => {
-          this.error = 'Failed to register attendee. Please try again later.';
-          console.error('Error registering attendee:', err);
-        },
-      });
-    }
-  }
-
-  removeAttendee(): void {
-    if (this.event) {
-      this.eventService.removeAttendee(this.event._id).subscribe({
-        next: (updatedEvent: Event) => {
-          this.event = updatedEvent;
-        },
-        error: (err: any) => {
-          this.error = 'Failed to remove attendee. Please try again later.';
-          console.error('Error removing attendee:', err);
-        },
-      });
-    }
-  }
-
   getStatusColor(status: EventStatus): string {
     switch (status) {
       case EventStatus.UPCOMING:

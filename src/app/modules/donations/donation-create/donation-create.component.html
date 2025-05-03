@@ -135,7 +135,7 @@
                 </button>
             </div>
             <div class="border-t border-gray-200">
-                <div formArrayName="products">
+                <div formArrayName="items">
                     <div *ngFor="let productForm of productsArray.controls; let i = index" [formGroupName]="i"
                         class="px-4 py-5 sm:px-6 border-b border-gray-200 last:border-b-0">
                         <div class="flex justify-between items-start mb-4">
@@ -176,7 +176,7 @@
                                         class="focus:ring-blue-500 focus:border-blue-500 flex-1 block w-full rounded-none rounded-l-md sm:text-sm border-gray-300">
                                     <span
                                         class="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
-                                        {{ productsArray.at(i).get('unit')?.value || 'units' }}
+                                        {{ productsArray.at(i).get('productType')?.value || 'units' }}
                                     </span>
                                 </div>
                                 <div *ngIf="productsArray.at(i).get('quantity')?.touched && productsArray.at(i).get('quantity')?.invalid"

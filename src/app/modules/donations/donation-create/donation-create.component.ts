@@ -29,7 +29,7 @@ export class DonationCreateComponent implements OnInit {
       pickupAddress: ['', [Validators.required]],
       pickupDate: ['', [Validators.required]],
       notes: [''],
-      products: this.fb.array([this.createProductFormGroup()]),
+      items: this.fb.array([this.createProductFormGroup()]),
     });
   }
 
@@ -53,7 +53,7 @@ export class DonationCreateComponent implements OnInit {
   }
 
   get productsArray(): FormArray {
-    return this.donationForm.get('products') as FormArray;
+    return this.donationForm.get('items') as FormArray;
   }
 
   createProductFormGroup(): FormGroup {
@@ -61,7 +61,7 @@ export class DonationCreateComponent implements OnInit {
       productId: ['', Validators.required],
       name: [''],
       quantity: [1, [Validators.required, Validators.min(0.1)]],
-      unit: [''],
+      productType: [''],
     });
   }
 
@@ -86,7 +86,7 @@ export class DonationCreateComponent implements OnInit {
       if (selectedProduct) {
         productControl.patchValue({
           name: selectedProduct.name,
-          unit: selectedProduct.unit,
+          productType: selectedProduct.productType,
         });
       }
     }
@@ -108,7 +108,7 @@ export class DonationCreateComponent implements OnInit {
       pickupAddress: this.donationForm.get('pickupAddress')?.value,
       pickupDate: this.donationForm.get('pickupDate')?.value,
       notes: this.donationForm.get('notes')?.value,
-      products: this.productsArray.value,
+      items: this.productsArray.value,
     };
 
     this.donationService.createDonation(donationData).subscribe({

@@ -1,9 +1,13 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CollecteService } from '../../../services/collecte.service';
 import { catchError, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
+import {
+  CollecteRequest,
+  CollecteStatus,
+} from '../../../models/collecte.model';
 
 @Component({
   selector: 'app-collecte-create',
@@ -18,17 +22,18 @@ export class CollecteCreateComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    @Inject('CollecteService') private collecteService: CollecteService
+    private collecteService: CollecteService
   ) {
     this.collecteForm = this.fb.group({
-      donationId: ['', [Validators.required]],
-      scheduledDate: ['', [Validators.required]],
-      notes: [''],
+      title: ['', [Validators.required]],
+      description: ['', [Validators.required]],
+      location: ['', [Validators.required]],
+      status: [CollecteStatus.PENDING],
     });
   }
 
   ngOnInit(): void {
-    // For a real application, you might load available donations here
+    // Initialize component
   }
 
   get f() {
@@ -43,18 +48,15 @@ export class CollecteCreateComponent implements OnInit {
     this.loading = true;
     this.error = null;
 
-    const collecteData = {
-      donationId: this.f['donationId'].value,
-      scheduledDate: this.f['scheduledDate'].value,
-      notes: this.f['notes'].value,
+    const collecteData: CollecteRequest = {
+      title: this.f['title'].value,
+      description: this.f['description'].value,
+      location: this.f['location'].value,
+      status: this.f['status'].value,
     };
 
     this.collecteService
-      .createCollecte({
-        donation: collecteData.donationId,
-        scheduledDate: collecteData.scheduledDate,
-        notes: collecteData.notes,
-      })
+      .createCollecte(collecteData)
       .pipe(
         catchError((error) => {
           this.error = 'Failed to create collection. Please try again.';
@@ -64,7 +66,7 @@ export class CollecteCreateComponent implements OnInit {
           this.loading = false;
         })
       )
-      .subscribe((result: any) => {
+      .subscribe((result) => {
         if (result) {
           this.router.navigate(['/dashboard/collecte']);
         }

@@ -1,6 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Product } from '../../../models/product.model';
+import {
+  Product,
+  ProductCategory,
+  ProductType,
+} from '../../../models/product.model';
+import { ProductsService } from '../../../services/products.service';
+import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-products-list',
@@ -12,119 +19,89 @@ export class ProductsListComponent implements OnInit {
   filteredProducts: Product[] = [];
   loading = true;
   error = '';
-  searchTerm = '';
-  categoryFilter = '';
+  successMessage = '';
+  productToDelete: Product | null = null;
+  showDeleteModal = false;
+  Math = Math;
+
+  // Permissions
+  canEdit = false;
+  canDelete = false;
+
+  // Filters
+  filter = {
+    category: '',
+    stockStatus: '',
+    search: '',
+  };
 
   // Pagination
   currentPage = 1;
   pageSize = 10;
   totalItems = 0;
+  totalPages: number[] = [];
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private productsService: ProductsService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
     this.loadProducts();
+    this.checkPermissions();
+  }
+
+  checkPermissions(): void {
+    this.canEdit = this.authService.hasPermission('products:edit');
+    this.canDelete = this.authService.hasPermission('products:delete');
   }
 
   loadProducts(): void {
     this.loading = true;
     this.error = '';
 
-    // Simulate API call with timeout
-    setTimeout(() => {
-      // Mock data
-      this.products = [
-        {
-          _id: 'prod1',
-          name: 'Rice',
-          category: 'Grains',
-          unit: 'kg',
-          description: 'White rice',
-          minStock: 100,
-        },
-        {
-          _id: 'prod2',
-          name: 'Beans',
-          category: 'Legumes',
-          unit: 'kg',
-          description: 'Red beans',
-          minStock: 50,
-        },
-        {
-          _id: 'prod3',
-          name: 'Milk',
-          category: 'Dairy',
-          unit: 'liter',
-          description: 'Whole milk',
-          minStock: 30,
-        },
-        {
-          _id: 'prod4',
-          name: 'Flour',
-          category: 'Baking',
-          unit: 'kg',
-          description: 'All-purpose flour',
-          minStock: 40,
-        },
-        {
-          _id: 'prod5',
-          name: 'Sugar',
-          category: 'Baking',
-          unit: 'kg',
-          description: 'White sugar',
-          minStock: 25,
-        },
-        {
-          _id: 'prod6',
-          name: 'Oil',
-          category: 'Cooking',
-          unit: 'liter',
-          description: 'Vegetable oil',
-          minStock: 20,
-        },
-        {
-          _id: 'prod7',
-          name: 'Salt',
-          category: 'Seasoning',
-          unit: 'kg',
-          description: 'Table salt',
-          minStock: 10,
-        },
-        {
-          _id: 'prod8',
-          name: 'Maize',
-          category: 'Grains',
-          unit: 'kg',
-          description: 'Yellow maize',
-          minStock: 80,
-        },
-      ];
-
-      // Apply filter and pagination
-      this.applyFilters();
-      this.loading = false;
-    }, 1000);
+    this.productsService.getProducts().subscribe({
+      next: (data) => {
+        this.products = data;
+        this.applyFilters();
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = err.message || 'Failed to load products';
+        this.loading = false;
+      },
+    });
   }
 
   applyFilters(): void {
     // Filter by search term and category
     this.filteredProducts = this.products.filter((product) => {
-      const matchesSearch = this.searchTerm
-        ? product.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-          product
-            .description!.toLowerCase()
-            .includes(this.searchTerm.toLowerCase())
+      const matchesSearch = this.filter.search
+        ? product.name
+            .toLowerCase()
+            .includes(this.filter.search.toLowerCase()) ||
+          (product.description &&
+            product.description
+              .toLowerCase()
+              .includes(this.filter.search.toLowerCase()))
         : true;
 
-      const matchesCategory = this.categoryFilter
-        ? product.category === this.categoryFilter
+      const matchesCategory = this.filter.category
+        ? product.category === this.filter.category
         : true;
 
-      return matchesSearch && matchesCategory;
+      const matchesStockStatus = this.filter.stockStatus
+        ? this.getStockStatusText(product).toLowerCase() ===
+          this.filter.stockStatus.toLowerCase()
+        : true;
+
+      return matchesSearch && matchesCategory && matchesStockStatus;
     });
 
     // Update total count for pagination
     this.totalItems = this.filteredProducts.length;
+    this.calculateTotalPages();
 
     // Apply pagination
     const startIndex = (this.currentPage - 1) * this.pageSize;
@@ -134,17 +111,31 @@ export class ProductsListComponent implements OnInit {
     );
   }
 
-  onFilterChange(): void {
-    this.currentPage = 1; // Reset to first page
+  calculateTotalPages(): void {
+    const pageCount = Math.ceil(this.totalItems / this.pageSize);
+    this.totalPages = Array(pageCount)
+      .fill(0)
+      .map((_, index) => index + 1);
+  }
+
+  getPageNumbers(): number[] {
+    return this.totalPages;
+  }
+
+  clearSearch(): void {
+    this.filter.search = '';
     this.applyFilters();
   }
 
-  onPageChange(page: number): void {
-    this.currentPage = page;
-    this.applyFilters();
+  dismissSuccess(): void {
+    this.successMessage = '';
   }
 
   createProduct(): void {
+    this.router.navigate(['/dashboard/products/create']);
+  }
+
+  addProduct(): void {
     this.router.navigate(['/dashboard/products/create']);
   }
 
@@ -152,14 +143,55 @@ export class ProductsListComponent implements OnInit {
     this.router.navigate(['/dashboard/products', id]);
   }
 
-  get categories(): string[] {
-    // Extract unique categories from products
-    return [...new Set(this.products.map((product) => product.category))];
+  editProduct(id: string): void {
+    this.router.navigate(['/dashboard/products/edit', id]);
   }
 
-  get totalPages(): number[] {
-    return Array(Math.ceil(this.totalItems / this.pageSize))
-      .fill(0)
-      .map((_, index) => index + 1);
+  confirmDelete(product: Product): void {
+    this.productToDelete = product;
+    this.showDeleteModal = true;
+  }
+
+  deleteProduct(): void {
+    if (!this.productToDelete) return;
+
+    this.loading = true;
+    this.productsService.deleteProduct(this.productToDelete._id).subscribe({
+      next: () => {
+        this.successMessage = `Product "${this.productToDelete?.name}" was successfully deleted.`;
+        this.loadProducts();
+        this.cancelDelete();
+      },
+      error: (err) => {
+        this.error = err.message || 'Failed to delete product';
+        this.loading = false;
+        this.cancelDelete();
+      },
+    });
+  }
+
+  cancelDelete(): void {
+    this.showDeleteModal = false;
+    this.productToDelete = null;
+  }
+
+  goToPage(page: number): void {
+    if (page < 1 || page > this.totalPages.length) return;
+    this.currentPage = page;
+    this.applyFilters();
+  }
+
+  getStockStatusText(product: Product): string {
+    // In a real application, this would check actual stock levels
+    // For now, we'll just return a placeholder based on product status
+    if (product.status === 'inactive') return 'Out of Stock';
+    return 'In Stock';
+  }
+
+  getStockStatusClass(product: Product): string {
+    const status = this.getStockStatusText(product);
+    if (status === 'Out of Stock') return 'bg-red-100 text-red-800';
+    if (status === 'Low Stock') return 'bg-yellow-100 text-yellow-800';
+    return 'bg-green-100 text-green-800';
   }
 }

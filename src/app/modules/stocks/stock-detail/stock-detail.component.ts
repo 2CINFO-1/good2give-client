@@ -76,7 +76,7 @@ export class StockDetailComponent implements OnInit {
 
   goToEdit(): void {
     if (this.stock) {
-      this.router.navigate(['/dashboard/stocks/edit', this.stock.id]);
+      this.router.navigate(['/dashboard/stocks/edit', this.stock._id]);
     }
   }
 
@@ -89,10 +89,8 @@ export class StockDetailComponent implements OnInit {
   }
 
   isLowStock(): boolean {
-    if (!this.stock || !this.product || !this.product.minStock) {
-      return false;
-    }
-    return this.stock.quantity <= this.product.minStock;
+    // Since minStock doesn't exist in the model, always return false
+    return false;
   }
 
   isExpiringSoon(): boolean {
@@ -113,7 +111,7 @@ export class StockDetailComponent implements OnInit {
 
     if (confirm('Are you sure you want to delete this stock entry?')) {
       this.isLoading = true;
-      this.stockService.deleteStock(this.stock.id).subscribe({
+      this.stockService.deleteStock(this.stock._id).subscribe({
         next: () => {
           this.router.navigate(['/dashboard/stocks']);
         },

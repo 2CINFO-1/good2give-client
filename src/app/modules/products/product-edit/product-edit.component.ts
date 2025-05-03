@@ -17,14 +17,14 @@ export class ProductEditComponent implements OnInit {
     if (this.productId) {
       // Short timeout to show the loading spinner briefly
       setTimeout(() => {
-        this.router.navigate(['/products/form', this.productId]);
+        this.router.navigate(['/dashboard/products/form', this.productId]);
       }, 1500);
     } else {
-      this.router.navigate(['/products']);
+      this.router.navigate(['/dashboard/products']);
     }
   }
 
   onBack(): void {
-    this.router.navigate(['/products']);
+    this.router.navigate(['/dashboard/products']);
   }
 }

@@ -1,16 +1,15 @@
+import { User } from './user.model';
+
 export interface Product {
   _id: string;
   name: string;
-  description?: string;
-  category: string;
-  unit: string;
-  minStock?: number;
-  imageUrl?: string;
+  productType: ProductType;
+  category: ProductCategory;
+  description: string;
+  donatorId: User;
+  status?: string;
   createdAt?: string;
   updatedAt?: string;
-  allergens?: string[];
-  nutritionInfo?: string;
-  trackExpiration?: boolean;
 }
 
 export enum ProductCategory {
@@ -26,23 +25,32 @@ export enum ProductCategory {
   OTHER = 'Other',
 }
 
-export enum ProductUnit {
-  KG = 'kg',
-  G = 'g',
-  LITER = 'liter',
-  ML = 'ml',
-  PIECE = 'piece',
-  BOX = 'box',
-  PACK = 'pack',
+export enum ProductType {
+  PERISHABLE = 'Perishable',
+  NON_PERISHABLE = 'Non-Perishable',
+  FROZEN = 'Frozen',
+  REFRIGERATED = 'Refrigerated',
+  CANNED = 'Canned',
+  DRIED = 'Dried',
+  OTHER = 'Other',
 }
 
 export interface ProductRequest {
   name: string;
+  productType: ProductType;
   category: ProductCategory;
   description: string;
-  unit: ProductUnit;
-  minStock?: number;
-  allergens?: string[];
-  nutritionInfo?: string;
-  trackExpiration?: boolean;
+  status?: string;
+}
+
+export interface ProductResponse {
+  _id: string;
+  name: string;
+  productType: ProductType;
+  category: ProductCategory;
+  description: string;
+  donatorId: User;
+  status?: string;
+  createdAt: string;
+  updatedAt: string;
 }

@@ -7,6 +7,7 @@ import { DeliveriesListComponent } from './deliveries-list/deliveries-list.compo
 import { DeliveryDetailComponent } from './delivery-detail/delivery-detail.component';
 import { DeliveryCreateComponent } from './delivery-create/delivery-create.component';
 import { DeliveryService } from '../../services/delivery.service';
+import { DonationService } from '../../services/donation.service';
 
 const routes: Routes = [
   { path: '', component: DeliveriesListComponent },
@@ -21,6 +22,9 @@ const routes: Routes = [
     DeliveryCreateComponent,
   ],
   imports: [CommonModule, RouterModule.forChild(routes), ReactiveFormsModule],
-  providers: [DeliveryService],
+  providers: [
+    DeliveryService,
+    { provide: 'DonationService', useClass: DonationService },
+  ],
 })
 export class DeliveriesModule {}

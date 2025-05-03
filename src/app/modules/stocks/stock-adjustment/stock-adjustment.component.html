@@ -23,21 +23,26 @@
         </div>
 
         <form [formGroup]="adjustmentForm" (ngSubmit)="onSubmit()" *ngIf="!isLoading" class="space-y-6">
-            <div>
-                <label for="productId" class="block text-sm font-medium text-gray-700 mb-1">
-                    Product *
+            <div class="mb-6">
+                <label for="product" class="block text-sm font-medium text-gray-700 mb-1">
+                    Product
                 </label>
-                <select id="productId" formControlName="productId"
+                <select id="product" formControlName="productId"
                     (change)="onProductSelect(adjustmentForm.get('productId')?.value)"
-                    class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
-                    <option value="">Select a product</option>
-                    <option *ngFor="let product of products" [value]="product.id">
-                        {{ product.name }} ({{ product.category }})
+                    class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                    <option [value]="''">Select a product</option>
+                    <option *ngFor="let product of products" [value]="product._id">
+                        {{ product.name }}
                     </option>
                 </select>
-                <div *ngIf="adjustmentForm.get('productId')?.invalid && adjustmentForm.get('productId')?.touched"
-                    class="text-red-500 text-sm mt-1">
-                    Product is required
+
+                <div *ngIf="
+                        adjustmentForm.get('productId')?.invalid &&
+                        (adjustmentForm.get('productId')?.dirty || adjustmentForm.get('productId')?.touched)
+                    " class="text-red-500 text-sm mt-1">
+                    <div *ngIf="adjustmentForm.get('productId')?.errors?.['required']">
+                        Product selection is required
+                    </div>
                 </div>
             </div>
 
@@ -46,7 +51,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <p class="text-sm text-gray-500">Total Available Quantity</p>
-                        <p class="font-medium">{{ getTotalQuantity() }} {{ getProductUnit() }}</p>
+                        <p class="font-medium">{{ getTotalQuantity() }} {{ getProductType() }}</p>
                     </div>
                     <div>
                         <p class="text-sm text-gray-500">Locations</p>
@@ -89,7 +94,7 @@
                     <div *ngIf="adjustmentForm.get('quantity')?.errors?.['min']">Quantity must be at least 1</div>
                 </div>
                 <div *ngIf="isDecreaseTooLarge()" class="text-red-500 text-sm mt-1">
-                    Cannot decrease quantity beyond available stock ({{ getTotalQuantity() }} {{ getProductUnit() }})
+                    Cannot decrease quantity beyond available stock ({{ getTotalQuantity() }} {{ getProductType() }})
                 </div>
             </div>
 

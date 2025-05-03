@@ -34,7 +34,16 @@ export class AuthInterceptor implements HttpInterceptor {
       return next.handle(request);
     }
 
-    const token = localStorage.getItem('access_token');
+    // Check localStorage first, then sessionStorage
+    let token = localStorage.getItem('access_token');
+    let storageType = 'localStorage';
+
+    if (!token) {
+      token = sessionStorage.getItem('access_token');
+      storageType = 'sessionStorage';
+    }
+
+    console.log(`AuthInterceptor - Token from ${storageType}:`, !!token);
 
     if (token) {
       request = this.addToken(request, token);
@@ -78,13 +87,39 @@ export class AuthInterceptor implements HttpInterceptor {
       this.isRefreshing = true;
       this.refreshTokenSubject.next(null);
 
-      const refreshToken = localStorage.getItem('refresh_token');
+      // Check localStorage first, then sessionStorage
+      let refreshToken = localStorage.getItem('refresh_token');
+      let storageType = 'localStorage';
+
+      if (!refreshToken) {
+        refreshToken = sessionStorage.getItem('refresh_token');
+        storageType = 'sessionStorage';
+      }
+
+      console.log(
+        `AuthInterceptor handle401Error - Refresh token from ${storageType}:`,
+        !!refreshToken
+      );
 
       if (refreshToken) {
         return this.authService.refreshToken({ refreshToken }).pipe(
           switchMap(() => {
             this.isRefreshing = false;
-            const newToken = localStorage.getItem('access_token');
+
+            // Check both storage locations for the new token
+            let newToken = localStorage.getItem('access_token');
+            let tokenStorageType = 'localStorage';
+
+            if (!newToken) {
+              newToken = sessionStorage.getItem('access_token');
+              tokenStorageType = 'sessionStorage';
+            }
+
+            console.log(
+              `AuthInterceptor handle401Error - New token from ${tokenStorageType}:`,
+              !!newToken
+            );
+
             this.refreshTokenSubject.next(newToken);
             return next.handle(this.addToken(request, newToken!));
           }),

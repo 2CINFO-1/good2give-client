@@ -77,8 +77,8 @@
                         <p class="font-medium">{{ product?.description || 'No description available' }}</p>
                     </div>
                     <div>
-                        <p class="text-sm text-gray-500">Unit</p>
-                        <p class="font-medium">{{ product?.unit }}</p>
+                        <p class="text-sm text-gray-500">Type</p>
+                        <p class="font-medium">{{ product?.productType }}</p>
                     </div>
                 </div>
             </div>
@@ -89,7 +89,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <p class="text-sm text-gray-500">Quantity</p>
-                        <p class="font-medium">{{ stock?.quantity }} {{ product?.unit }}</p>
+                        <p class="font-medium">{{ stock?.quantity }} {{ product?.productType }}</p>
                     </div>
                     <div>
                         <p class="text-sm text-gray-500">Location</p>
@@ -114,27 +114,7 @@
                 </div>
             </div>
 
-            <!-- Threshold information if available -->
-            <div *ngIf="product?.minStock !== undefined" class="bg-gray-50 rounded-lg p-4 mb-6">
-                <h2 class="text-lg font-semibold mb-3">Threshold Information</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <p class="text-sm text-gray-500">Minimum Stock Level</p>
-                        <p class="font-medium">{{ product?.minStock }} {{ product?.unit }}</p>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-500">Status</p>
-                        <p *ngIf="isLowStock()" class="font-medium text-red-600">
-                            Below Minimum ({{ (stock?.quantity || 0) - (product?.minStock || 0) }} {{ product?.unit ||
-                            '' }})
-                        </p>
-                        <p *ngIf="!isLowStock()" class="font-medium text-green-600">
-                            Above Minimum ({{ (stock?.quantity || 0) - (product?.minStock || 0) }} {{ product?.unit ||
-                            '' }})
-                        </p>
-                    </div>
-                </div>
-            </div>
+            <!-- No threshold information section since minStock doesn't exist -->
         </div>
 
         <!-- No stock found message -->

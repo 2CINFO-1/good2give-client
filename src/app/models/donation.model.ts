@@ -9,12 +9,7 @@ export enum DonationStatus {
 
 export interface DonationItem {
   productId: string;
-  name: string;
   quantity: number;
-  unit: string;
-  description?: string;
-  expiryDate?: Date;
-  photos?: string[];
 }
 
 export interface Donation {
@@ -32,8 +27,13 @@ export interface Donation {
 }
 
 export interface DonationRequest {
-  items: Omit<DonationItem, 'productId'>[];
+  donorName: string;
+  items: DonationItem[];
   pickupAddress: string;
   pickupDate: Date;
   notes?: string;
+}
+
+export interface DonationResponse extends Donation {
+  // Add any additional fields returned by the API
 }

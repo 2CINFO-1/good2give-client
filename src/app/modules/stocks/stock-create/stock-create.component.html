@@ -30,7 +30,7 @@
                 <select id="productId" formControlName="productId"
                     class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
                     <option value="">Select a product</option>
-                    <option *ngFor="let product of products" [value]="product.id">
+                    <option *ngFor="let product of products" [value]="product._id">
                         {{ product.name }} ({{ product.category }})
                     </option>
                 </select>

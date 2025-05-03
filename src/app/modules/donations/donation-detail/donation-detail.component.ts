@@ -1,6 +1,8 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Donation, DonationStatus } from 'src/app/models/donation.model';
+import { ProductsService } from 'src/app/services/products.service';
+import { Product } from 'src/app/models/product.model';
 
 @Component({
   selector: 'app-donation-detail',
@@ -14,16 +16,19 @@ export class DonationDetailComponent implements OnInit {
   error = false;
   errorMessage = '';
   DonationStatus = DonationStatus;
+  products: Product[] = [];
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    @Inject('DonationService') private donationService: any
+    @Inject('DonationService') private donationService: any,
+    private productService: ProductsService
   ) {}
 
   ngOnInit(): void {
     this.donationId = this.route.snapshot.paramMap.get('id');
     if (this.donationId) {
+      this.loadProducts();
       this.loadDonation();
     } else {
       this.error = true;
@@ -32,29 +37,42 @@ export class DonationDetailComponent implements OnInit {
     }
   }
 
+  loadProducts(): void {
+    this.productService.getProducts().subscribe(
+      (data: Product[]) => {
+        this.products = data;
+      },
+      (error: any) => {
+        console.error('Error loading products:', error);
+      }
+    );
+  }
+
   loadDonation(): void {
     if (!this.donationId) return;
 
     // This would normally call the actual service
-    // For now we're using a timeout to simulate API call
-    setTimeout(() => {
-      this.donation = {
-        _id: this.donationId!,
-        donorId: 'donor123',
-        donorName: 'John Doe',
-        items: [
-          { productId: 'prod1', name: 'Rice', quantity: 50, unit: 'kg' },
-          { productId: 'prod2', name: 'Beans', quantity: 30, unit: 'kg' },
-        ],
-        status: DonationStatus.APPROVED,
-        pickupAddress: '123 Main St, Anytown, CA',
-        pickupDate: new Date(),
-        notes: 'Please handle with care',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-      this.loading = false;
-    }, 1000);
+    this.donationService.getDonationById(this.donationId).subscribe(
+      (data: Donation) => {
+        this.donation = data;
+        this.loading = false;
+      },
+      (error: any) => {
+        this.error = true;
+        this.errorMessage = 'Failed to load donation details';
+        this.loading = false;
+      }
+    );
+  }
+
+  getProductName(productId: string): string {
+    const product = this.products.find((p) => p._id === productId);
+    return product?.name || '';
+  }
+
+  getProductType(productId: string): string {
+    const product = this.products.find((p) => p._id === productId);
+    return product?.productType || '';
   }
 
   formatDate(date: Date | string | undefined): string {
@@ -68,17 +86,22 @@ export class DonationDetailComponent implements OnInit {
   }
 
   updateStatus(status: DonationStatus): void {
-    if (!this.donation) return;
+    if (!this.donation || !this.donationId) return;
 
-    // This would normally call the actual service
-    // For now we're just updating the local state
     this.loading = true;
-    setTimeout(() => {
-      if (this.donation) {
-        this.donation.status = status;
-        this.donation.updatedAt = new Date();
-      }
-      this.loading = false;
-    }, 1000);
+    this.donationService
+      .updateDonationStatus(this.donationId, status)
+      .subscribe(
+        (response: Donation) => {
+          this.donation = response;
+          this.loading = false;
+        },
+        (error: any) => {
+          console.error('Error updating donation status:', error);
+          this.error = true;
+          this.errorMessage = 'Failed to update donation status';
+          this.loading = false;
+        }
+      );
   }
 }

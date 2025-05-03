@@ -81,69 +81,27 @@
                     </div>
                 </div>
 
-                <!-- Unit -->
+                <!-- Product Type -->
                 <div class="mb-4">
-                    <label for="unit" class="block text-sm font-medium text-gray-700">Unit *</label>
-                    <select id="unit" formControlName="unit"
+                    <label for="productType" class="block text-sm font-medium text-gray-700">Product Type *</label>
+                    <select id="productType" formControlName="productType"
                         class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                        [ngClass]="{'border-red-500': productForm.controls['unit'].invalid && productForm.controls['unit'].touched}">
-                        <option value="" disabled>Select unit</option>
-                        <option *ngFor="let unit of units" [value]="unit">{{ unit }}</option>
+                        [ngClass]="{'border-red-500': productForm.controls['productType'].invalid && productForm.controls['productType'].touched}">
+                        <option value="" disabled>Select product type</option>
+                        <option *ngFor="let type of productTypes" [value]="type">{{ type }}</option>
                     </select>
-                    <div *ngIf="productForm.controls['unit'].invalid && productForm.controls['unit'].touched"
+                    <div *ngIf="productForm.controls['productType'].invalid && productForm.controls['productType'].touched"
                         class="text-red-500 text-sm mt-1">
-                        <span *ngIf="productForm.controls['unit'].errors?.['required']">Unit is required</span>
-                    </div>
-                </div>
-
-                <!-- Min Stock -->
-                <div class="mb-4">
-                    <label for="minStock" class="block text-sm font-medium text-gray-700">Minimum Stock Level *</label>
-                    <input type="number" id="minStock" formControlName="minStock" min="0"
-                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                        [ngClass]="{'border-red-500': productForm.controls['minStock'].invalid && productForm.controls['minStock'].touched}">
-                    <div *ngIf="productForm.controls['minStock'].invalid && productForm.controls['minStock'].touched"
-                        class="text-red-500 text-sm mt-1">
-                        <span *ngIf="productForm.controls['minStock'].errors?.['required']">Minimum stock is
+                        <span *ngIf="productForm.controls['productType'].errors?.['required']">Product type is
                             required</span>
-                        <span *ngIf="productForm.controls['minStock'].errors?.['min']">Minimum stock must be 0 or
-                            greater</span>
                     </div>
                 </div>
 
-                <!-- Track Expiration -->
+                <!-- Status -->
                 <div class="mb-4">
-                    <div class="flex items-center">
-                        <input type="checkbox" id="trackExpiration" formControlName="trackExpiration"
-                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                        <label for="trackExpiration" class="ml-2 block text-sm text-gray-700">
-                            Track expiration date
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Nutrition Info -->
-                <div class="mb-4">
-                    <label for="nutritionInfo" class="block text-sm font-medium text-gray-700">Nutrition
-                        Information</label>
-                    <textarea id="nutritionInfo" formControlName="nutritionInfo" rows="3"
-                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"></textarea>
-                </div>
-
-                <!-- Allergens -->
-                <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Allergens</label>
-                    <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
-                        <div *ngFor="let allergen of allergensList" class="flex items-center">
-                            <button type="button" (click)="toggleAllergen(allergen)"
-                                class="px-3 py-1 rounded-full text-sm font-medium mr-2" [ngClass]="isAllergenSelected(allergen) ? 
-                                    'bg-blue-100 text-blue-800 border border-blue-300' : 
-                                    'bg-gray-100 text-gray-800 border border-gray-300 hover:bg-gray-200'">
-                                {{ allergen }}
-                                <span *ngIf="isAllergenSelected(allergen)" class="ml-1">✓</span>
-                            </button>
-                        </div>
-                    </div>
+                    <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
+                    <input type="text" id="status" formControlName="status"
+                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                 </div>
 
                 <!-- Form Buttons -->

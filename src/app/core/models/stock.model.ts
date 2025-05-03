@@ -10,7 +10,7 @@ export enum StockStatus {
 }
 
 export interface Stock {
-  id: string;
+  _id: string;
   productId: string;
   quantity: number;
   location: string;

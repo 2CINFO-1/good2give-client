@@ -4,7 +4,7 @@ import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 interface Reclamation {
-  id: string;
+  _id: string;
   title: string;
   status: string;
   priority: string;
@@ -33,7 +33,7 @@ export class ReclamationsComponent implements OnInit {
     setTimeout(() => {
       this.reclamations = [
         {
-          id: 'REC-2023-001',
+          _id: 'REC-2023-001',
           title: 'Defective Product',
           status: 'new',
           priority: 'high',
@@ -41,7 +41,7 @@ export class ReclamationsComponent implements OnInit {
           customerName: 'John Doe',
         },
         {
-          id: 'REC-2023-002',
+          _id: 'REC-2023-002',
           title: 'Shipping Delay',
           status: 'in-progress',
           priority: 'medium',
@@ -49,7 +49,7 @@ export class ReclamationsComponent implements OnInit {
           customerName: 'Jane Smith',
         },
         {
-          id: 'REC-2023-003',
+          _id: 'REC-2023-003',
           title: 'Wrong Item Received',
           status: 'resolved',
           priority: 'low',
@@ -57,7 +57,7 @@ export class ReclamationsComponent implements OnInit {
           customerName: 'Michael Johnson',
         },
         {
-          id: 'REC-2023-004',
+          _id: 'REC-2023-004',
           title: 'Billing Issue',
           status: 'new',
           priority: 'high',
@@ -65,7 +65,7 @@ export class ReclamationsComponent implements OnInit {
           customerName: 'Sarah Williams',
         },
         {
-          id: 'REC-2023-005',
+          _id: 'REC-2023-005',
           title: 'Discount Not Applied',
           status: 'in-progress',
           priority: 'medium',
@@ -97,7 +97,7 @@ export class ReclamationsComponent implements OnInit {
         rec.customerName
           .toLowerCase()
           .includes(this.searchTerm.toLowerCase()) ||
-        rec.id.toLowerCase().includes(this.searchTerm.toLowerCase());
+        rec._id.toLowerCase().includes(this.searchTerm.toLowerCase());
 
       // Apply status filter
       const matchesStatus =
@@ -113,5 +113,19 @@ export class ReclamationsComponent implements OnInit {
 
   createReclamation(): void {
     this.router.navigate(['/reclamations/create']);
+  }
+
+  filterReclamations(): void {
+    if (!this.searchTerm) {
+      this.filteredReclamations = this.reclamations;
+      return;
+    }
+
+    this.filteredReclamations = this.reclamations.filter(
+      (rec) =>
+        rec._id.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        rec.title.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        rec.customerName.toLowerCase().includes(this.searchTerm.toLowerCase())
+    );
   }
 }

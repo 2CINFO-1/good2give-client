@@ -75,45 +75,13 @@
         <div class="border-t border-gray-200 px-4 py-5 sm:p-6">
             <dl class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
                 <div class="sm:col-span-1">
-                    <dt class="text-sm font-medium text-gray-500">Unit</dt>
-                    <dd class="mt-1 text-sm text-gray-900">{{ product.unit }}</dd>
-                </div>
-
-                <div class="sm:col-span-1">
-                    <dt class="text-sm font-medium text-gray-500">Minimum Stock</dt>
-                    <dd class="mt-1 text-sm text-gray-900">{{ product.minStock }}</dd>
-                </div>
-
-                <div class="sm:col-span-1">
-                    <dt class="text-sm font-medium text-gray-500">Track Expiration</dt>
-                    <dd class="mt-1 text-sm text-gray-900">
-                        <span *ngIf="product.trackExpiration"
-                            class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Yes</span>
-                        <span *ngIf="!product.trackExpiration"
-                            class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">No</span>
-                    </dd>
+                    <dt class="text-sm font-medium text-gray-500">Product Type</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ product.productType }}</dd>
                 </div>
 
                 <div class="sm:col-span-1">
                     <dt class="text-sm font-medium text-gray-500">ID</dt>
                     <dd class="mt-1 text-sm text-gray-900">{{ product._id }}</dd>
-                </div>
-
-                <div *ngIf="product.allergens" class="sm:col-span-2">
-                    <dt class="text-sm font-medium text-gray-500">Allergens</dt>
-                    <dd class="mt-1 text-sm text-gray-900">
-                        <div class="flex flex-wrap gap-1">
-                            <span *ngFor="let allergen of displayAllergens"
-                                class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                {{ allergen }}
-                            </span>
-                        </div>
-                    </dd>
-                </div>
-
-                <div *ngIf="product.nutritionInfo" class="sm:col-span-2">
-                    <dt class="text-sm font-medium text-gray-500">Nutrition Information</dt>
-                    <dd class="mt-1 text-sm text-gray-900 whitespace-pre-line">{{ product.nutritionInfo }}</dd>
                 </div>
             </dl>
         </div>
@@ -143,7 +111,7 @@
                                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                     Quantity
                                                 </th>
-                                                <th *ngIf="product.trackExpiration" scope="col"
+                                                <th scope="col"
                                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                     Expiration Date
                                                 </th>
@@ -159,10 +127,9 @@
                                                     {{ item.location }}
                                                 </td>
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                    {{ item.quantity }} {{ product.unit }}
+                                                    {{ item.quantity }} {{ product.productType }}
                                                 </td>
-                                                <td *ngIf="product.trackExpiration"
-                                                    class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                     <span [ngClass]="{
                             'text-red-600': isExpired(item.expirationDate),
                             'text-yellow-600': isExpiringSoon(item.expirationDate),
@@ -172,12 +139,10 @@
                                                     </span>
                                                 </td>
                                                 <td class="px-6 py-4 whitespace-nowrap">
-                                                    <span [ngClass]="{
-                            'bg-red-100 text-red-800': item.quantity < product.minStock,
-                            'bg-green-100 text-green-800': item.quantity >= product.minStock
-                          }" class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full">
-                                                        {{ item.quantity < product.minStock ? 'Low Stock' : 'In Stock'
-                                                            }} </span>
+                                                    <span
+                                                        class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                                        In Stock
+                                                    </span>
                                                 </td>
                                             </tr>
                                         </tbody>
