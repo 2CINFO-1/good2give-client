@@ -61,12 +61,12 @@ export class AuthInterceptor implements HttpInterceptor {
 
   private isAuthEndpoint(url: string): boolean {
     const authEndpoints = [
-      `${environment.apiUrl}/auth/login`,
-      `${environment.apiUrl}/auth/register`,
-      `${environment.apiUrl}/auth/refresh-tokens`,
-      `${environment.apiUrl}/auth/forgot-password`,
-      `${environment.apiUrl}/auth/reset-password`,
-      `${environment.apiUrl}/auth/verify-email`,
+      `${environment.apiUrl}/login`,
+      `${environment.apiUrl}/register`,
+      `${environment.apiUrl}/refresh-tokens`,
+      `${environment.apiUrl}/forgot-password`,
+      `${environment.apiUrl}/reset-password`,
+      `${environment.apiUrl}/verify-email`,
     ];
     return authEndpoints.some((endpoint) => url.includes(endpoint));
   }
