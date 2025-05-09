@@ -22,7 +22,6 @@ const routes: Routes = [
     canActivate: [NoAuthGuard],
   },
 ];
-
 @NgModule({
   declarations: [
     LoginComponent,
@@ -36,5 +35,6 @@ const routes: Routes = [
     ReactiveFormsModule,
     RouterModule.forChild(routes),
   ],
+  exports: [RouterModule] // 👈 ADD THIS LINE
 })
 export class AuthModule {}

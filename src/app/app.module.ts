@@ -35,6 +35,7 @@ export function tokenGetter() {
     HomeLayoutComponent,
     AuthLayoutComponent,
     DashboardLayoutComponent,
+    
   ],
   imports: [
     BrowserModule,
@@ -45,6 +46,7 @@ export function tokenGetter() {
     FormsModule,
     AuthModule,
     SharedModule,
+    
     JwtModule.forRoot({
       config: {
         tokenGetter: tokenGetter,

@@ -37,36 +37,65 @@ export class AuthService {
       token ? 'exists' : 'not found'
     );
 
+    // Check if token exists and is not expired
     if (token && !this.jwtHelper.isTokenExpired(token)) {
-      const decodedToken = this.jwtHelper.decodeToken(token);
+      const decodedToken = this.jwtHelper.decodeToken(token);  // Decode the token
       console.log('AuthService loadCurrentUser - Decoded token:', decodedToken);
 
-      // Assuming the user structure is in the root of the token or in a 'user' property
-      const user = decodedToken.user || decodedToken;
+      // Assuming the user data is inside the token, either as part of a 'user' property or directly on the root.
+      // Check if the 'user' is part of the decoded token or directly part of it
+      const user = decodedToken.user || decodedToken;  // Adjusted to decode based on token structure
       console.log('AuthService loadCurrentUser - User object:', user);
 
-      this.currentUserSubject.next(user);
+      // Ensure we have a valid user object
+      if (user) {
+        this.currentUserSubject.next(user);  // Set the user object to BehaviorSubject
+      } else {
+        console.log('AuthService loadCurrentUser - No valid user data found in token');
+      }
+    } else {
+      console.log('AuthService loadCurrentUser - Token expired or not found');
     }
   }
+
+
 
   login(credentials: LoginRequest): Observable<AuthResponse> {
     return this.http
       .post<AuthResponse>(`${this.apiUrl}/login`, credentials)
       .pipe(
-        tap((response) => this.handleAuthResponse(response)),
-        catchError((error) => throwError(() => error))
+        tap((response) => {
+          if (response && response.tokens) {
+            this.handleAuthResponse(response);
+          } else {
+            console.error('Login failed, no tokens received');
+          }
+        }),
+        catchError((error) => {
+          console.error('Login error:', error);
+          return throwError(() => error);
+        })
       );
   }
+
 
   register(userData: RegisterRequest): Observable<AuthResponse> {
     return this.http
       .post<AuthResponse>(`${this.apiUrl}/register`, userData)
       .pipe(
-        tap((response) => this.handleAuthResponse(response)),
-        catchError((error) => throwError(() => error))
+        tap((response) => {
+          if (response && response.tokens) {
+            this.handleAuthResponse(response);
+          } else {
+            console.error('Registration failed, no tokens received');
+          }
+        }),
+        catchError((error) => {
+          console.error('Registration error:', error);
+          return throwError(() => error);
+        })
       );
   }
-
   refreshToken(
     refreshTokenRequest: RefreshTokenRequest
   ): Observable<AuthResponse> {
@@ -95,8 +124,9 @@ export class AuthService {
     console.log('AuthService handleAuthResponse - User:', user);
     console.log('AuthService handleAuthResponse - Tokens:', tokens);
 
-    localStorage.setItem('access_token', tokens.access.token);
-    localStorage.setItem('refresh_token', tokens.refresh.token);
+    localStorage.setItem('access_token', tokens.accessToken);  // New
+localStorage.setItem('refresh_token', tokens.refreshToken);  // New
+
     this.currentUserSubject.next(user);
   }
 
@@ -108,6 +138,7 @@ export class AuthService {
   }
 
   getCurrentUser(): User | null {
+    console.log('AuthService getCurrentUser - Current user:', this.currentUserSubject.value);
     return this.currentUserSubject.value;
   }
 
@@ -121,7 +152,7 @@ export class AuthService {
     console.log('AuthService hasRole - Current user:', currentUser);
     console.log('AuthService hasRole - Required roles:', requiredRoles);
 
-    return !!currentUser && requiredRoles.includes(currentUser.role);
+    return currentUser ? requiredRoles.includes(currentUser.role) : false;
   }
 
   forgotPassword(email: string): Observable<{ message: string }> {

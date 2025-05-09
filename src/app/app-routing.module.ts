@@ -62,7 +62,10 @@ const routes: Routes = [
       },
       {
         path: 'inspection',
-        component: ModulePlaceholderComponent,
+        loadChildren: () =>
+          import('./modules/inspection/inspection.module').then(
+            (m) => m.InspectionModule
+          ),
         canActivate: [AuthGuard],
       },
       {

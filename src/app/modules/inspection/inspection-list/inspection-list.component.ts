@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { InspectionService } from '../../../services/inspection.service';
-import { Inspection, InspectionStatus } from '../../../models/inspection.model';
+import { InspectionReportService } from '../inspection-report.service';
+import { InspectionReport } from 'src/app/models/inspection.model';
+import { Observable, of } from 'rxjs';
+import { catchError, finalize, tap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-inspection-list',
@@ -9,62 +11,71 @@ import { Inspection, InspectionStatus } from '../../../models/inspection.model';
   styleUrls: ['./inspection-list.component.css'],
 })
 export class InspectionListComponent implements OnInit {
-  inspections: Inspection[] = [];
+  inspections: InspectionReport[] = [];
   loading = false;
   error: string | null = null;
-  InspectionStatus = InspectionStatus; // Make enum available in template
 
   constructor(
-    private inspectionService: InspectionService,
-    private router: Router
+    private router: Router,
+    private inspectionService: InspectionReportService
   ) {}
 
   ngOnInit(): void {
     this.loadInspections();
   }
 
+  // Load all inspection reports
   loadInspections(): void {
     this.loading = true;
     this.error = null;
-
-    this.inspectionService.getInspections().subscribe({
-      next: (data) => {
-        this.inspections = data;
-        this.loading = false;
-      },
-      error: (err) => {
-        this.error = 'Failed to load inspections. Please try again.';
-        this.loading = false;
-        console.error('Error loading inspections:', err);
-      },
-    });
+    this.inspectionService
+      .getAll()
+      .pipe(
+        tap((inspections) => {
+          // Debug: Log raw API response
+          console.log('Raw API response for inspections:', JSON.stringify(inspections, null, 2));
+        }),
+        catchError((err) => {
+          this.error = 'Failed to load inspections. Please try again.';
+          console.error('Error fetching inspections:', err);
+          return of([]);
+        }),
+        finalize(() => (this.loading = false))
+      )
+      .subscribe((inspections) => {
+        this.inspections = inspections.map((inspection) => ({
+          ...inspection,
+          inspectorId: inspection.inspectorId || { name: 'Unknown Inspector' },
+        }));
+      });
   }
 
+  // Navigate to inspection detail view
   viewDetails(id: string): void {
     this.router.navigate(['/dashboard/inspection', id]);
   }
 
+  // Navigate to create inspection form
   createInspection(): void {
     this.router.navigate(['/dashboard/inspection/create']);
   }
 
-  getStatusClass(status: InspectionStatus): string {
+  // Return CSS class based on inspection status
+  getStatusClass(status: string): string {
     switch (status) {
-      case InspectionStatus.PASSED:
-        return 'bg-green-100 text-green-800';
-      case InspectionStatus.FAILED:
-        return 'bg-red-100 text-red-800';
-      case InspectionStatus.PENDING:
+      case 'pending':
         return 'bg-yellow-100 text-yellow-800';
-      case InspectionStatus.COMPLETED:
-        return 'bg-blue-100 text-blue-800';
+      case 'approved':
+        return 'bg-green-100 text-green-800';
+      case 'rejected':
+        return 'bg-red-100 text-red-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
   }
 
-  // Format date string to local date
+  // Format a date string into a readable format
   formatDate(date: string): string {
-    return new Date(date).toLocaleDateString();
+    return date ? new Date(date).toLocaleDateString() : '-';
   }
 }

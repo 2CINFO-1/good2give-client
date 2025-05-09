@@ -1,47 +1,33 @@
-export interface Inspection {
+export interface InspectionResult {
+  item: string;
+  status: 'pass' | 'fail';
+  comment?: string;
+  _id?: string;
+}
+
+export interface Inspector {
   _id: string;
-  stockId: string;
-  date: string;
-  inspector: string;
-  status: InspectionStatus;
-  notes?: string;
-  findings: InspectionFinding[];
+  email: string;
+  name: string;
+  role: string;
+  isEmailVerified: boolean;
+  avatar: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface InspectionReport {
+  _id?: string;
+  checklistId?: string; // Optional for list, required for create
+  inspectorId: Inspector; // For inspector name in list
+  deliveryId?: string | null;
+  depotId?: string | null;
+  inspectionDate: string; // ISO 8601 string
+  scheduledDate?: string | null;
+  results: InspectionResult[];
+  issues: string[];
+  status: 'pending' | 'approved' | 'rejected';
+  inspectorNotes?: string;
   createdAt?: string;
   updatedAt?: string;
-}
-
-export enum InspectionStatus {
-  PENDING = 'pending',
-  COMPLETED = 'completed',
-  FAILED = 'failed',
-  PASSED = 'passed',
-}
-
-export interface InspectionFinding {
-  type: FindingType;
-  description: string;
-  severity: FindingSeverity;
-  actionRequired?: string;
-  resolved?: boolean;
-}
-
-export enum FindingType {
-  QUALITY = 'quality',
-  SAFETY = 'safety',
-  COMPLIANCE = 'compliance',
-  OTHER = 'other',
-}
-
-export enum FindingSeverity {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical',
-}
-
-export interface InspectionRequest {
-  stockId: string;
-  inspector: string;
-  notes?: string;
-  findings: Omit<InspectionFinding, 'resolved'>[];
 }

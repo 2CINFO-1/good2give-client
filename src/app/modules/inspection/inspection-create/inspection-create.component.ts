@@ -1,12 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { InspectionService } from '../../../services/inspection.service';
-import {
-  Inspection,
-  FindingType,
-  FindingSeverity,
-} from '../../../models/inspection.model';
+import { InspectionReportService } from '../inspection-report.service';
+import { InspectionReportFormBuilder } from '../inspection-report-form.builder';
 
 @Component({
   selector: 'app-inspection-create',
@@ -14,105 +10,101 @@ import {
   styleUrls: ['./inspection-create.component.css'],
 })
 export class InspectionCreateComponent implements OnInit {
-  inspectionForm: FormGroup;
-  stockId: string | null = null;
-  loading = false;
-  submitting = false;
+  form!: FormGroup;
+  checklistId!: string;
   error: string | null = null;
-
-  // Make enums available in template
-  findingTypes = Object.values(FindingType);
-  findingSeverities = Object.values(FindingSeverity);
 
   constructor(
     private fb: FormBuilder,
-    private route: ActivatedRoute,
+    private reportService: InspectionReportService,
     private router: Router,
-    private inspectionService: InspectionService
-  ) {
-    // Initialize the form
-    this.inspectionForm = this.fb.group({
-      inspector: ['', [Validators.required, Validators.minLength(3)]],
-      notes: [''],
-      findings: this.fb.array([]),
-    });
-  }
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit(): void {
-    this.stockId = this.route.snapshot.paramMap.get('stockId');
-
-    // If no stock ID provided, redirect to the inspection list
-    if (!this.stockId) {
-      this.router.navigate(['/dashboard/inspection']);
+    this.checklistId = this.route.snapshot.paramMap.get('checklistId') || '';
+    this.form = InspectionReportFormBuilder.buildForm(this.fb);
+    if (this.checklistId) {
+      this.form.patchValue({ checklistId: this.checklistId });
     }
   }
 
-  // Getter for the findings FormArray
-  get findings(): FormArray {
-    return this.inspectionForm.get('findings') as FormArray;
+  get results(): FormArray {
+    return this.form.get('results') as FormArray;
   }
 
-  // Add a new finding to the form
-  addFinding(): void {
-    const findingGroup = this.fb.group({
-      type: [FindingType.QUALITY, Validators.required],
-      description: ['', [Validators.required, Validators.minLength(10)]],
-      severity: [FindingSeverity.LOW, Validators.required],
-      actionRequired: [''],
+  get issues(): FormArray {
+    return this.form.get('issues') as FormArray;
+  }
+
+  addResult(): void {
+    const resultGroup = this.fb.group({
+      item: ['', Validators.required],
+      status: ['pass', Validators.required],
+      comment: [''],
     });
-
-    this.findings.push(findingGroup);
+    this.results.push(resultGroup);
   }
 
-  // Remove a finding from the form
-  removeFinding(index: number): void {
-    this.findings.removeAt(index);
+  removeResult(index: number): void {
+    this.results.removeAt(index);
+  }
+
+  addIssue(): void {
+    this.issues.push(this.fb.control(''));
+  }
+
+  removeIssue(index: number): void {
+    this.issues.removeAt(index);
   }
 
   onSubmit(): void {
-    if (this.inspectionForm.invalid) {
-      this.markFormGroupTouched(this.inspectionForm);
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      this.error = 'Please fill out all required fields.';
       return;
     }
 
-    if (!this.stockId) {
-      this.error = 'No stock ID provided';
-      return;
-    }
-
-    this.submitting = true;
-
-    const formData = this.inspectionForm.value;
-    const inspectionData: Partial<Inspection> = {
-      stockId: this.stockId,
-      inspector: formData.inspector,
-      notes: formData.notes,
-      findings: formData.findings,
+    // Transform form data to match backend expectations
+    const formData = this.form.value;
+    const inspectionData = {
+      checklistId: formData.checklistId,
+      deliveryId: formData.deliveryId || null,
+      depotId: formData.depotId || null,
+      inspectionDate: formData.inspectionDate ? `${formData.inspectionDate}T00:00:00.000Z` : null,
+      scheduledDate: formData.scheduledDate ? `${formData.scheduledDate}T00:00:00.000Z` : null,
+      results: formData.results.map((result: any) => ({
+        item: result.item,
+        status: result.status,
+        comment: result.comment || undefined,
+      })),
+      issues: formData.issues.filter((issue: string) => issue), // Remove empty strings
+      status: formData.status,
+      inspectorNotes: formData.inspectorNotes || undefined,
     };
 
-    this.inspectionService.createInspection(inspectionData).subscribe({
-      next: (inspection) => {
-        this.router.navigate(['/dashboard/inspection', inspection._id]);
+    // Debug: Log the exact payload
+    console.log('Submitting inspection data:', JSON.stringify(inspectionData, null, 2));
+
+    this.reportService.create(inspectionData).subscribe({
+      next: (response) => {
+        console.log('Inspection created successfully:', response);
+        this.form.reset();
+        this.results.clear();
+        this.issues.clear();
+        this.error = null;
+        this.router.navigate(['/dashboard/inspection']);
       },
       error: (err) => {
-        this.error = 'Failed to create inspection. Please try again.';
-        this.submitting = false;
-        console.error('Error creating inspection:', err);
+        // Debug: Log full error details
+        console.error('Failed to create inspection:', {
+          status: err.status,
+          statusText: err.statusText,
+          error: err.error,
+          message: err.message,
+        });
+        this.error = err.error?.message || err.message || 'Failed to create inspection. Check console for details.';
       },
-    });
-  }
-
-  onCancel(): void {
-    this.router.navigate(['/dashboard/inspection']);
-  }
-
-  // Helper method to mark all form controls as touched
-  private markFormGroupTouched(formGroup: FormGroup): void {
-    Object.values(formGroup.controls).forEach((control) => {
-      control.markAsTouched();
-      if (control instanceof FormGroup) {
-        this.markFormGroupTouched(control);
-      }
     });
   }
 }

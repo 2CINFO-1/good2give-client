@@ -36,9 +36,12 @@ export class RoleGuard implements CanActivate {
       return false;
     }
 
-    const allowedRoles = route.data['roles'] as Array<string>;
+    const allowedRoles = (route.data['roles'] as Array<string>).map(role => role.toUpperCase()); // Convert to uppercase
     const decodedToken = this.jwtHelper.decodeToken(token);
-    const userRole = decodedToken?.user?.role;
+    console.log('RoleGuard: Decoded token', decodedToken);
+    const userRole = decodedToken?.role.toUpperCase();  // Convert to uppercase
+
+
 
     console.log('RoleGuard: User role', userRole);
     console.log('RoleGuard: Token data', decodedToken);
