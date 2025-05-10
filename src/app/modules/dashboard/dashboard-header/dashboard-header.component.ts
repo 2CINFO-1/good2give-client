@@ -19,8 +19,8 @@ export class DashboardHeaderComponent implements OnInit {
 
   notifications = [
     {
-      id: 1,
-      message: 'New donation received',
+      id: '1',
+      message: 'New delivery scheduled',
       time: '5 minutes ago',
       read: false,
     },

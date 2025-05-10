@@ -27,12 +27,6 @@ export class DashboardLayoutComponent implements OnInit {
       ],
     },
     {
-      name: 'Donations',
-      icon: 'volunteer_activism',
-      route: '/dashboard/donations',
-      roles: [UserRole.ADMIN, UserRole.DONATOR],
-    },
-    {
       name: 'Collections',
       icon: 'local_shipping',
       route: '/dashboard/collectes',

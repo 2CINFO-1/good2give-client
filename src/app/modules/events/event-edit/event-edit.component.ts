@@ -16,6 +16,7 @@ export class EventEditComponent implements OnInit {
   error = '';
   eventId = '';
   eventData: Event | null = null;
+  EventStatus = EventStatus;
 
   constructor(
     private fb: FormBuilder,
@@ -25,13 +26,10 @@ export class EventEditComponent implements OnInit {
   ) {
     this.eventForm = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(3)]],
-      description: ['', [Validators.required, Validators.minLength(10)]],
+      objective: ['', [Validators.required, Validators.minLength(10)]],
       date: ['', Validators.required],
-      time: ['', Validators.required],
-      location: ['', Validators.required],
-      organizer: ['', Validators.required],
-      capacity: [50, [Validators.required, Validators.min(1)]],
-      status: [EventStatus.UPCOMING],
+      numbre: [1, [Validators.required, Validators.min(1)]],
+      status: [EventStatus.UPCOMING, Validators.required],
     });
   }
 
@@ -67,12 +65,9 @@ export class EventEditComponent implements OnInit {
   patchFormValues(event: Event): void {
     this.eventForm.patchValue({
       title: event.title,
-      description: event.description,
+      objective: event.objective,
       date: event.date,
-      time: event.time,
-      location: event.location,
-      organizer: event.organizer,
-      capacity: event.capacity,
+      numbre: event.numbre,
       status: event.status,
     });
   }

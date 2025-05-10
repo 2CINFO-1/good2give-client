@@ -1,6 +1,6 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Collecte, CollecteStatus } from '../../../core/models/collecte.model';
+import { Collecte, CollecteStatus } from '../../../models/collecte.model';
 import { CollecteService } from '../../../services/collecte.service';
 import { catchError, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
@@ -21,7 +21,7 @@ export class CollecteDetailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    @Inject('CollecteService') private collecteService: CollecteService
+    private collecteService: CollecteService
   ) {}
 
   ngOnInit(): void {
@@ -65,7 +65,7 @@ export class CollecteDetailComponent implements OnInit {
     this.error = null;
 
     this.collecteService
-      .updateCollecteStatus(this.collecte._id, status)
+      .updateCollecte(this.collecte._id, { status })
       .pipe(
         catchError((error) => {
           this.error = 'Failed to update collection status. Please try again.';
@@ -75,7 +75,7 @@ export class CollecteDetailComponent implements OnInit {
           this.loading = false;
         })
       )
-      .subscribe((result: Collecte | null) => {
+      .subscribe((result) => {
         if (result) {
           this.collecte = result;
         }
@@ -93,15 +93,6 @@ export class CollecteDetailComponent implements OnInit {
 
   isString(value: any): boolean {
     return typeof value === 'string';
-  }
-
-  getDonationId(donation: any): string {
-    if (typeof donation === 'string') {
-      return donation;
-    } else if (donation && donation._id) {
-      return donation._id;
-    }
-    return 'Unknown';
   }
 
   getTransporterId(transporter: any): string {

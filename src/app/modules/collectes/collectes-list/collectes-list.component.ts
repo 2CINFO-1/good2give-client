@@ -1,6 +1,6 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Collecte, CollecteStatus } from '../../../core/models/collecte.model';
+import { Collecte, CollecteStatus } from '../../../models/collecte.model';
 import { CollecteService } from '../../../services/collecte.service';
 
 @Component({
@@ -9,8 +9,8 @@ import { CollecteService } from '../../../services/collecte.service';
   styleUrls: ['./collectes-list.component.css'],
 })
 export class CollectesListComponent implements OnInit {
-  collectes: any[] = [];
-  filteredCollectes: any[] = [];
+  collectes: Collecte[] = [];
+  filteredCollectes: Collecte[] = [];
   isLoading = true;
   error: string | null = null;
   searchTerm = '';
@@ -29,7 +29,7 @@ export class CollectesListComponent implements OnInit {
 
   constructor(
     private router: Router,
-    @Inject('CollecteService') private collecteService: CollecteService
+    private collecteService: CollecteService
   ) {}
 
   ngOnInit(): void {
@@ -38,31 +38,18 @@ export class CollectesListComponent implements OnInit {
 
   loadCollectes(): void {
     this.isLoading = true;
-    // Simulate API call
-    setTimeout(() => {
-      this.collectes = [
-        {
-          _id: 'coll1',
-          status: CollecteStatus.PENDING,
-          scheduledDate: new Date(),
-          transporter: null,
-        },
-        {
-          _id: 'coll2',
-          status: CollecteStatus.ASSIGNED,
-          scheduledDate: new Date(Date.now() + 86400000), // tomorrow
-          transporter: { _id: 'trans1', name: 'John Doe' },
-        },
-        {
-          _id: 'coll3',
-          status: CollecteStatus.COMPLETED,
-          scheduledDate: new Date(Date.now() - 86400000), // yesterday
-          transporter: { _id: 'trans2', name: 'Jane Smith' },
-        },
-      ];
-      this.applyFilters();
-      this.isLoading = false;
-    }, 800);
+    this.collecteService.getCollectes().subscribe({
+      next: (data) => {
+        this.collectes = data;
+        this.applyFilters();
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Error fetching collectes:', err);
+        this.error = 'Failed to load collectes. Please try again later.';
+        this.isLoading = false;
+      },
+    });
   }
 
   applyFilters(): void {
@@ -79,7 +66,9 @@ export class CollectesListComponent implements OnInit {
       filtered = filtered.filter(
         (c) =>
           c._id.toLowerCase().includes(term) ||
-          (c.notes && c.notes.toLowerCase().includes(term))
+          c.title.toLowerCase().includes(term) ||
+          c.description.toLowerCase().includes(term) ||
+          c.location.toLowerCase().includes(term)
       );
     }
 
@@ -101,22 +90,16 @@ export class CollectesListComponent implements OnInit {
     switch (status) {
       case CollecteStatus.PENDING:
         return 'bg-yellow-100 text-yellow-800';
-      case CollecteStatus.ASSIGNED:
-        return 'bg-blue-100 text-blue-800';
       case CollecteStatus.IN_PROGRESS:
         return 'bg-purple-100 text-purple-800';
       case CollecteStatus.COMPLETED:
         return 'bg-green-100 text-green-800';
-      case CollecteStatus.FAILED:
-        return 'bg-red-100 text-red-800';
-      case CollecteStatus.CANCELLED:
-        return 'bg-gray-100 text-gray-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
   }
 
-  formatDate(date: Date | string): string {
+  formatDate(date: string): string {
     if (!date) return 'N/A';
     return new Date(date).toLocaleDateString();
   }
@@ -127,7 +110,7 @@ export class CollectesListComponent implements OnInit {
       .replace(/\b\w/g, (letter) => letter.toUpperCase());
   }
 
-  viewDetails(collecte: any): void {
+  viewDetails(collecte: Collecte): void {
     this.router.navigate(['/dashboard/collectes', collecte._id]);
   }
 

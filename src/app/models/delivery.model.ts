@@ -1,3 +1,5 @@
+import { User } from './user.model';
+
 export enum DeliveryStatus {
   PENDING = 'pending',
   IN_PROGRESS = 'in_progress',
@@ -11,33 +13,27 @@ export interface DeliveryItem {
   unit: string;
 }
 
-export interface DonationDetails {
-  _id: string;
-  donorName: string;
-  items: DeliveryItem[];
-}
-
 export interface Delivery {
   _id: string;
-  donationId: string;
-  donation: DonationDetails;
-  status: DeliveryStatus | string;
+  deliveryPersonId: string; // Reference to the user assigned for delivery
+  deliveryPersonName?: string; // Name of the delivery person
+  status: DeliveryStatus;
   scheduledDate: Date;
-  completedDate?: Date;
   address: string;
-  recipientName: string;
-  recipientId: string;
-  deliveryPersonName?: string;
-  deliveryPersonId?: string;
   notes?: string;
+  items: DeliveryItem[]; // Adding items directly to delivery
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface DeliveryRequest {
-  donationId: string;
+  deliveryPersonId?: string;
   scheduledDate: Date;
   address: string;
-  recipientId: string;
   notes?: string;
+  items: DeliveryItem[]; // Adding items directly to request
+}
+
+export interface DeliveryResponse extends Delivery {
+  // Any additional fields returned by the API
 }

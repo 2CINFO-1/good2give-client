@@ -10,7 +10,7 @@ export enum StockStatus {
 }
 
 export interface Stock {
-  id: string;
+  _id: string;
   productId: string;
   quantity: number;
   location: string;
@@ -31,10 +31,8 @@ export interface StockAdjustment {
 }
 
 export interface StockRequest {
-  product: string;
+  productId: string;
   quantity: number;
-  expiryDate?: Date;
-  batchNumber?: string;
-  donationSource?: string;
-  location: string;
+  source?: string;
+  notes?: string;
 }

@@ -1,8 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Collecte, CollecteStatus } from '../../../core/models/collecte.model';
-import { User, UserRole } from '../../../core/models/user.model';
+import {
+  Collecte,
+  CollecteStatus,
+  TransporterAssignment,
+} from '../../../models/collecte.model';
+import { User } from '../../../models/user.model';
+import { CollecteService } from '../../../services/collecte.service';
+import { UserService } from '../../../services/user.service';
 
 @Component({
   selector: 'app-collecte-assign',
@@ -22,7 +28,9 @@ export class CollecteAssignComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private collecteService: CollecteService,
+    private userService: UserService
   ) {
     this.assignForm = this.fb.group({
       transporterId: ['', [Validators.required]],
@@ -46,46 +54,36 @@ export class CollecteAssignComponent implements OnInit {
     this.loading = true;
     this.error = false;
 
-    // Simulate API call to load collecte
-    setTimeout(() => {
-      this.collecte = {
-        _id: this.collecteId || '',
-        donation: {
-          _id: 'don123',
-          title: 'Food Donation',
-          description: 'Donation of non-perishable foods',
-        } as any,
-        status: CollecteStatus.PENDING,
-        scheduledDate: new Date(),
-        notes: 'Sample notes for collection',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
+    // Load collecte details
+    this.collecteService.getCollecteById(this.collecteId).subscribe({
+      next: (data) => {
+        this.collecte = data;
+        this.loadTransporters();
+      },
+      error: (err) => {
+        console.error('Error loading collecte:', err);
+        this.error = true;
+        this.errorMessage =
+          'Failed to load collection details. Please try again.';
+        this.loading = false;
+      },
+    });
+  }
 
-      // Simulate loading transporters with proper User structure
-      this.transporters = [
-        {
-          _id: 'trans1',
-          name: 'John Doe',
-          email: 'john.doe@example.com',
-          role: UserRole.TRANSPORTER,
-          // Add these properties for the template to work
-          firstName: 'John',
-          lastName: 'Doe',
-        } as unknown as User,
-        {
-          _id: 'trans2',
-          name: 'Jane Smith',
-          email: 'jane.smith@example.com',
-          role: UserRole.TRANSPORTER,
-          // Add these properties for the template to work
-          firstName: 'Jane',
-          lastName: 'Smith',
-        } as unknown as User,
-      ];
-
-      this.loading = false;
-    }, 1000);
+  loadTransporters(): void {
+    // Load available transporters
+    this.userService.getTransporters().subscribe({
+      next: (transporters) => {
+        this.transporters = transporters;
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Error loading transporters:', err);
+        this.error = true;
+        this.errorMessage = 'Failed to load transporters. Please try again.';
+        this.loading = false;
+      },
+    });
   }
 
   onSubmit(): void {
@@ -97,26 +95,23 @@ export class CollecteAssignComponent implements OnInit {
     this.submitting = true;
     this.error = false;
 
-    // Simulate API call
-    setTimeout(() => {
-      const transporterId = this.assignForm.value.transporterId;
-      const transporter = this.transporters.find(
-        (t) => t._id === transporterId
-      );
+    const assignment: TransporterAssignment = {
+      collecteId: this.collecteId as string,
+      transporterId: this.assignForm.value.transporterId,
+    };
 
-      if (this.collecte && transporter) {
-        this.collecte.transporter = transporter;
-        this.collecte.status = CollecteStatus.ASSIGNED;
-        this.collecte.updatedAt = new Date();
-
+    this.collecteService.assignTransporter(assignment).subscribe({
+      next: () => {
         // Navigate back to the detail page
-        this.router.navigate(['/dashboard/collecte', this.collecteId]);
-      } else {
+        this.router.navigate(['/dashboard/collectes', this.collecteId]);
+      },
+      error: (err) => {
+        console.error('Error assigning transporter:', err);
         this.error = true;
         this.errorMessage = 'Failed to assign transporter. Please try again.';
         this.submitting = false;
-      }
-    }, 800);
+      },
+    });
   }
 
   // Helper method to mark all form controls as touched
@@ -132,7 +127,7 @@ export class CollecteAssignComponent implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/dashboard/collecte', this.collecteId]);
+    this.router.navigate(['/dashboard/collectes', this.collecteId]);
   }
 
   // Getter for form controls for easier access in the template

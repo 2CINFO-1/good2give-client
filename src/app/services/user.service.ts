@@ -1,48 +1,75 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { delay } from 'rxjs/operators';
-import { User, UserRole } from '../core/models/user.model';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
+import {
+  User,
+  UserProfile,
+  UpdatePasswordRequest,
+  UpdateUserProfileRequest,
+} from '../models/user.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class UserService {
-  private mockUsers: User[] = [
-    {
-      _id: 'trans1',
-      firstName: 'John',
-      lastName: 'Doe',
-      email: 'john.doe@example.com',
-      role: UserRole.TRANSPORTER,
-    },
-    {
-      _id: 'trans2',
-      firstName: 'Jane',
-      lastName: 'Smith',
-      email: 'jane.smith@example.com',
-      role: UserRole.TRANSPORTER,
-    },
-    {
-      _id: 'admin1',
-      firstName: 'Admin',
-      lastName: 'User',
-      email: 'admin@example.com',
-      role: UserRole.ADMIN,
-    },
-  ];
+  private apiUrl = `${environment.apiUrl}/users`;
 
-  constructor() {}
+  constructor(private http: HttpClient) {}
 
   getUsers(): Observable<User[]> {
-    // Simulate API call delay
-    return of(this.mockUsers).pipe(delay(800));
+    return this.http.get<User[]>(this.apiUrl);
   }
 
-  getUserById(id: string): Observable<User | null> {
-    const user = this.mockUsers.find((u) => u._id === id);
-    if (!user) {
-      return of(null).pipe(delay(800));
-    }
-    return of(user).pipe(delay(800));
+  getUserById(id: string): Observable<User> {
+    return this.http.get<User>(`${this.apiUrl}/${id}`);
+  }
+
+  getCurrentUserProfile(): Observable<UserProfile> {
+    return this.http.get<UserProfile>(`${this.apiUrl}/profile`);
+  }
+
+  updateUserProfile(
+    profile: UpdateUserProfileRequest
+  ): Observable<UserProfile> {
+    return this.http.put<UserProfile>(`${this.apiUrl}/profile`, profile);
+  }
+
+  updatePassword(
+    passwordData: UpdatePasswordRequest
+  ): Observable<{ message: string }> {
+    return this.http.put<{ message: string }>(
+      `${this.apiUrl}/password`,
+      passwordData
+    );
+  }
+
+  updateUser(id: string, userData: Partial<User>): Observable<User> {
+    return this.http.put<User>(`${this.apiUrl}/${id}`, userData);
+  }
+
+  deleteUser(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  // Role-specific user queries
+  getDonators(): Observable<User[]> {
+    return this.http.get<User[]>(`${this.apiUrl}/role/donator`);
+  }
+
+  getBeneficiaries(): Observable<User[]> {
+    return this.http.get<User[]>(`${this.apiUrl}/role/beneficiary`);
+  }
+
+  getTransporters(): Observable<User[]> {
+    return this.http.get<User[]>(`${this.apiUrl}/role/transporter`);
+  }
+
+  getInspectors(): Observable<User[]> {
+    return this.http.get<User[]>(`${this.apiUrl}/role/inspector`);
+  }
+
+  getAdmins(): Observable<User[]> {
+    return this.http.get<User[]>(`${this.apiUrl}/role/admin`);
   }
 }

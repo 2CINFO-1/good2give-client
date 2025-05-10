@@ -1,7 +1,13 @@
 import { Component, OnInit, Inject } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  FormArray,
+  AbstractControl,
+} from '@angular/forms';
 import { Router } from '@angular/router';
-import { CollecteStatus } from '../../../core/models/collecte.model';
+import { CollecteStatus } from '../../../models/collecte.model';
 import { CollecteService } from '../../../services/collecte.service';
 
 @Component({
@@ -13,10 +19,9 @@ export class CollecteCreateComponent implements OnInit {
   collecteForm: FormGroup;
   isLoading = false;
   error: string | null = null;
-  donations: any[] = [];
   transporters: any[] = [];
-  isLoadingDonations = false;
   isLoadingTransporters = false;
+  submitting = false;
 
   constructor(
     private fb: FormBuilder,
@@ -24,84 +29,98 @@ export class CollecteCreateComponent implements OnInit {
     @Inject('CollecteService') private collecteService: CollecteService
   ) {
     this.collecteForm = this.fb.group({
-      donationId: ['', Validators.required],
+      title: ['', Validators.required],
+      description: ['', Validators.required],
+      location: ['', Validators.required],
       transporterId: [''],
       scheduledDate: ['', Validators.required],
       notes: [''],
+      items: this.fb.array([]),
     });
+
+    // Add at least one item by default
+    this.addItem();
   }
 
   ngOnInit(): void {
-    this.loadMockData();
-  }
-
-  loadMockData(): void {
-    // Simulate loading donations data
-    this.isLoadingDonations = true;
-    setTimeout(() => {
-      this.donations = [
-        {
-          _id: 'don1',
-          title: 'Food Donation',
-          location: 'Paris',
-          status: 'approved',
-        },
-        {
-          _id: 'don2',
-          title: 'Clothing Donation',
-          location: 'Lyon',
-          status: 'approved',
-        },
-      ];
-      this.isLoadingDonations = false;
-    }, 800);
-
-    // Simulate loading transporters data
-    this.isLoadingTransporters = true;
-    setTimeout(() => {
-      this.transporters = [
-        {
-          _id: 'trans1',
-          firstName: 'John',
-          lastName: 'Doe',
-          email: 'john@example.com',
-        },
-        {
-          _id: 'trans2',
-          firstName: 'Jane',
-          lastName: 'Smith',
-          email: 'jane@example.com',
-        },
-      ];
-      this.isLoadingTransporters = false;
-    }, 1000);
-  }
-
-  onSubmit(): void {
-    if (this.collecteForm.invalid) {
-      return;
-    }
-
-    this.isLoading = true;
-    const formValue = this.collecteForm.value;
-
-    // Convert date string to Date object if needed
-    if (typeof formValue.scheduledDate === 'string') {
-      formValue.scheduledDate = new Date(formValue.scheduledDate);
-    }
-
-    // Simulate API call
-    setTimeout(() => {
-      this.isLoading = false;
-      this.router.navigate(['/dashboard/collectes']);
-    }, 1000);
-  }
-
-  cancel(): void {
-    this.router.navigate(['/dashboard/collectes']);
+    this.loadTransporters();
   }
 
   get formControls() {
     return this.collecteForm.controls;
+  }
+
+  get itemsFormArray(): FormArray {
+    return this.collecteForm.get('items') as FormArray;
+  }
+
+  get itemsControls(): AbstractControl[] {
+    return this.itemsFormArray.controls;
+  }
+
+  createItemFormGroup(): FormGroup {
+    return this.fb.group({
+      name: ['', Validators.required],
+      quantity: [1, [Validators.required, Validators.min(1)]],
+      unit: ['pcs'],
+    });
+  }
+
+  addItem(): void {
+    this.itemsFormArray.push(this.createItemFormGroup());
+  }
+
+  removeItem(index: number): void {
+    this.itemsFormArray.removeAt(index);
+  }
+
+  loadTransporters(): void {
+    this.isLoadingTransporters = true;
+
+    // Simulate API call for transporters
+    setTimeout(() => {
+      this.transporters = [
+        { _id: '1', name: 'John Doe' },
+        { _id: '2', name: 'Jane Smith' },
+      ];
+      this.isLoadingTransporters = false;
+    }, 800);
+  }
+
+  onSubmit(): void {
+    if (this.collecteForm.invalid || this.itemsFormArray.length === 0) {
+      // Mark all fields as touched to trigger validation
+      this.collecteForm.markAllAsTouched();
+      this.itemsFormArray.controls.forEach((control) => {
+        control.markAllAsTouched();
+      });
+      return;
+    }
+
+    this.submitting = true;
+    this.error = null;
+
+    const collecteData = {
+      title: this.collecteForm.get('title')?.value,
+      description: this.collecteForm.get('description')?.value,
+      location: this.collecteForm.get('location')?.value,
+      items: this.itemsFormArray.value,
+      status: CollecteStatus.PENDING,
+    };
+
+    this.collecteService.createCollecte(collecteData).subscribe({
+      next: () => {
+        this.router.navigate(['/dashboard/collectes']);
+      },
+      error: (err) => {
+        this.error = 'Failed to create collection. Please try again.';
+        this.submitting = false;
+        console.error(err);
+      },
+    });
+  }
+
+  cancel(): void {
+    this.router.navigate(['/dashboard/collectes']);
   }
 }

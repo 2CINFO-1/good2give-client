@@ -1,10 +1,9 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Collecte, CollecteStatus } from '../../../core/models/collecte.model';
+import { Collecte, CollecteStatus } from '../../../models/collecte.model';
 import { CollecteService } from '../../../services/collecte.service';
 import { catchError, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
-import { Donation } from '../../../core/models/donation.model';
 
 @Component({
   selector: 'app-collecte-list',
@@ -27,7 +26,7 @@ export class CollecteListComponent implements OnInit {
 
   constructor(
     private router: Router,
-    @Inject('CollecteService') private collecteService: CollecteService
+    private collecteService: CollecteService
   ) {}
 
   ngOnInit(): void {
@@ -67,31 +66,6 @@ export class CollecteListComponent implements OnInit {
     this.router.navigate(['/dashboard/collecte', id]);
   }
 
-  assignTransporter(collecteId: string): void {
-    this.loading = true;
-    // In a real application, you would likely show a modal to select a transporter
-    // For now, we'll just simulate assigning a transporter with a hardcoded ID
-    const transporterId = 'transporter-123';
-
-    this.collecteService
-      .assignTransporter(collecteId, transporterId)
-      .pipe(
-        catchError((error) => {
-          this.error = 'Failed to assign transporter. Please try again.';
-          return of(null);
-        }),
-        finalize(() => {
-          this.loading = false;
-        })
-      )
-      .subscribe((result: Collecte | null) => {
-        if (result) {
-          // Refresh the list to show updated status
-          this.loadCollectes();
-        }
-      });
-  }
-
   getPagesArray(): number[] {
     const pageCount = Math.ceil(this.totalItems / this.pageSize);
     return Array.from({ length: pageCount }, (_, i) => i + 1);
@@ -101,17 +75,13 @@ export class CollecteListComponent implements OnInit {
     return typeof value === 'string';
   }
 
-  getDonationId(donation: string | Donation): string {
-    if (typeof donation === 'string') {
-      return donation;
-    } else if (donation && typeof donation === 'object' && '_id' in donation) {
-      return donation._id;
-    }
-    return 'N/A';
-  }
-
   formatDate(date: string | Date): string {
     if (!date) return 'N/A';
     return new Date(date).toLocaleDateString();
+  }
+
+  assignTransporter(collecteId: string): void {
+    // Navigate to assign transporter page or implement modal logic here
+    this.router.navigate(['/dashboard/collecte/assign', collecteId]);
   }
 }

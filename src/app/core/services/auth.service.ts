@@ -31,30 +31,108 @@ export class AuthService {
   }
 
   private loadCurrentUser(): void {
-    const token = localStorage.getItem('access_token');
-    console.log(
-      'AuthService loadCurrentUser - Token:',
-      token ? 'exists' : 'not found'
-    );
+    try {
+      // Try localStorage first, then sessionStorage as fallback
+      let token = localStorage.getItem('access_token');
+      let storageType = 'localStorage';
 
-    if (token && !this.jwtHelper.isTokenExpired(token)) {
-      const decodedToken = this.jwtHelper.decodeToken(token);
-      console.log('AuthService loadCurrentUser - Decoded token:', decodedToken);
+      if (!token) {
+        token = sessionStorage.getItem('access_token');
+        storageType = 'sessionStorage';
+      }
 
-      // Assuming the user structure is in the root of the token or in a 'user' property
-      const user = decodedToken.user || decodedToken;
-      console.log('AuthService loadCurrentUser - User object:', user);
+      console.log(
+        `AuthService loadCurrentUser - Token from ${storageType}:`,
+        token ? 'exists' : 'not found'
+      );
 
-      this.currentUserSubject.next(user);
+      if (!token) {
+        console.log(
+          'AuthService loadCurrentUser - No token found in either storage'
+        );
+        return;
+      }
+
+      try {
+        if (this.jwtHelper.isTokenExpired(token)) {
+          console.log('AuthService loadCurrentUser - Token is expired');
+          return;
+        }
+
+        const decodedToken = this.jwtHelper.decodeToken(token);
+        console.log(
+          'AuthService loadCurrentUser - Decoded token:',
+          decodedToken
+        );
+
+        // Try different possible structures based on the API response
+        let user = null;
+
+        if (decodedToken.user) {
+          // If user data is nested in a 'user' property
+          user = decodedToken.user;
+        } else if (decodedToken.sub) {
+          // If token contains standard JWT claims
+          user = {
+            _id: decodedToken.sub,
+            email: decodedToken.email || '',
+            name: decodedToken.name || '',
+            role: decodedToken.role || '',
+          };
+        } else {
+          // Try using the token directly as user data
+          user = decodedToken;
+        }
+
+        console.log(
+          'AuthService loadCurrentUser - Extracted user object:',
+          user
+        );
+
+        if (user && user._id) {
+          this.currentUserSubject.next(user);
+          console.log(
+            `AuthService loadCurrentUser - User set successfully from ${storageType}`
+          );
+        } else {
+          console.error(
+            'AuthService loadCurrentUser - Could not extract valid user from token'
+          );
+        }
+      } catch (tokenError) {
+        console.error(
+          'AuthService loadCurrentUser - Error parsing token:',
+          tokenError
+        );
+        // Clear invalid tokens from both storages
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        sessionStorage.removeItem('access_token');
+        sessionStorage.removeItem('refresh_token');
+      }
+    } catch (error) {
+      console.error('AuthService loadCurrentUser - Unexpected error:', error);
     }
   }
 
   login(credentials: LoginRequest): Observable<AuthResponse> {
+    console.log('AuthService login - Credentials:', {
+      email: credentials.email,
+      password: '***',
+    });
+    console.log('AuthService login - API URL:', `${this.apiUrl}/login`);
+
     return this.http
       .post<AuthResponse>(`${this.apiUrl}/login`, credentials)
       .pipe(
-        tap((response) => this.handleAuthResponse(response)),
-        catchError((error) => throwError(() => error))
+        tap((response) => {
+          console.log('AuthService login - Success response:', response);
+          this.handleAuthResponse(response);
+        }),
+        catchError((error) => {
+          console.error('AuthService login - Error:', error);
+          return throwError(() => error);
+        })
       );
   }
 
@@ -91,18 +169,136 @@ export class AuthService {
   }
 
   private handleAuthResponse(response: AuthResponse): void {
-    const { user, tokens } = response;
-    console.log('AuthService handleAuthResponse - User:', user);
-    console.log('AuthService handleAuthResponse - Tokens:', tokens);
+    try {
+      console.log('AuthService handleAuthResponse - Full response:', response);
 
-    localStorage.setItem('access_token', tokens.access.token);
-    localStorage.setItem('refresh_token', tokens.refresh.token);
-    this.currentUserSubject.next(user);
+      // Ensure response has the expected structure
+      if (!response) {
+        console.error(
+          'AuthService handleAuthResponse - Response is null or undefined'
+        );
+        return;
+      }
+
+      const { user, tokens } = response;
+      console.log('AuthService handleAuthResponse - User:', user);
+      console.log('AuthService handleAuthResponse - Tokens:', tokens);
+
+      // Check for different token formats and extract tokens accordingly
+      let accessToken = null;
+      let refreshToken = null;
+
+      if (tokens.accessToken && tokens.refreshToken) {
+        // Format: { accessToken: '...', refreshToken: '...' }
+        accessToken = tokens.accessToken;
+        refreshToken = tokens.refreshToken;
+        console.log('AuthService handleAuthResponse - Found flat token format');
+      } else if (tokens.access?.token && tokens.refresh?.token) {
+        // Format: { access: { token: '...' }, refresh: { token: '...' } }
+        accessToken = tokens.access.token;
+        refreshToken = tokens.refresh.token;
+        console.log(
+          'AuthService handleAuthResponse - Found nested token format'
+        );
+      } else {
+        console.error(
+          'AuthService handleAuthResponse - Invalid token format in response'
+        );
+        return;
+      }
+
+      // Test localStorage accessibility with a simple key
+      try {
+        localStorage.setItem('test_storage', 'test');
+        const testValue = localStorage.getItem('test_storage');
+        console.log(
+          'AuthService handleAuthResponse - Test localStorage:',
+          testValue
+        );
+
+        if (testValue !== 'test') {
+          console.error(
+            'AuthService handleAuthResponse - localStorage not working correctly'
+          );
+          // Try session storage instead
+          sessionStorage.setItem('access_token', accessToken);
+          sessionStorage.setItem('refresh_token', refreshToken);
+          console.log(
+            'AuthService handleAuthResponse - Tokens saved to sessionStorage instead'
+          );
+        } else {
+          // localStorage is working, proceed as normal
+          localStorage.removeItem('test_storage');
+          localStorage.setItem('access_token', accessToken);
+          localStorage.setItem('refresh_token', refreshToken);
+
+          // Verify tokens were saved correctly
+          const savedAccessToken = localStorage.getItem('access_token');
+          const savedRefreshToken = localStorage.getItem('refresh_token');
+
+          console.log(
+            'AuthService handleAuthResponse - Saved access_token:',
+            savedAccessToken ? 'saved' : 'not saved'
+          );
+          console.log(
+            'AuthService handleAuthResponse - Saved refresh_token:',
+            savedRefreshToken ? 'saved' : 'not saved'
+          );
+
+          if (!savedAccessToken || !savedRefreshToken) {
+            console.error(
+              'AuthService handleAuthResponse - Tokens not saved correctly to localStorage'
+            );
+            alert(
+              'Warning: Unable to save authentication tokens to localStorage'
+            );
+          }
+        }
+      } catch (storageError: any) {
+        console.error(
+          'AuthService handleAuthResponse - Storage error:',
+          storageError
+        );
+        alert(
+          'Error: Unable to save authentication data. ' + storageError.message
+        );
+
+        // Try using sessionStorage as fallback
+        try {
+          sessionStorage.setItem('access_token', accessToken);
+          sessionStorage.setItem('refresh_token', refreshToken);
+          console.log(
+            'AuthService handleAuthResponse - Using sessionStorage as fallback'
+          );
+        } catch (sessionError) {
+          console.error(
+            'AuthService handleAuthResponse - SessionStorage error:',
+            sessionError
+          );
+        }
+      }
+
+      // Update the current user subject
+      this.currentUserSubject.next(user);
+    } catch (error) {
+      console.error(
+        'AuthService handleAuthResponse - Unexpected error:',
+        error
+      );
+    }
   }
 
   private clearAuthData(): void {
+    // Clear tokens from both storage types
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
+    sessionStorage.removeItem('access_token');
+    sessionStorage.removeItem('refresh_token');
+
+    console.log(
+      'AuthService clearAuthData - Tokens cleared from both storages'
+    );
+
     this.currentUserSubject.next(null);
     this.router.navigate(['/login']);
   }
@@ -112,8 +308,49 @@ export class AuthService {
   }
 
   isAuthenticated(): boolean {
-    const token = localStorage.getItem('access_token');
-    return !!token && !this.jwtHelper.isTokenExpired(token);
+    try {
+      // Check localStorage first
+      let token = localStorage.getItem('access_token');
+      let storageType = 'localStorage';
+
+      // If not in localStorage, check sessionStorage
+      if (!token) {
+        token = sessionStorage.getItem('access_token');
+        storageType = 'sessionStorage';
+      }
+
+      console.log(
+        `AuthService isAuthenticated - Token from ${storageType}:`,
+        !!token
+      );
+
+      if (!token) {
+        return false;
+      }
+
+      try {
+        const isExpired = this.jwtHelper.isTokenExpired(token);
+        console.log(
+          `AuthService isAuthenticated - Token from ${storageType} expired:`,
+          isExpired
+        );
+        return !isExpired;
+      } catch (tokenError) {
+        console.error(
+          'AuthService isAuthenticated - Error validating token:',
+          tokenError
+        );
+        // Clean up invalid tokens from both storages
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        sessionStorage.removeItem('access_token');
+        sessionStorage.removeItem('refresh_token');
+        return false;
+      }
+    } catch (error) {
+      console.error('AuthService isAuthenticated - Unexpected error:', error);
+      return false;
+    }
   }
 
   hasRole(requiredRoles: string[]): boolean {

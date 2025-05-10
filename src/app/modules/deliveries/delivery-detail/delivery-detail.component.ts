@@ -1,7 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DeliveryService } from '../../../services/delivery.service';
-import { Delivery, DeliveryStatus } from '../../../models/delivery.model';
+import {
+  Delivery,
+  DeliveryStatus,
+  DeliveryItem,
+} from '../../../models/delivery.model';
+import { ProductsService } from '../../../services/products.service';
+import { Product } from '../../../models/product.model';
 
 @Component({
   selector: 'app-delivery-detail',
@@ -11,25 +17,40 @@ import { Delivery, DeliveryStatus } from '../../../models/delivery.model';
 export class DeliveryDetailComponent implements OnInit {
   deliveryId: string | null = null;
   delivery: Delivery | null = null;
+  products: Product[] = [];
   loading = true;
   error = false;
   errorMessage = '';
+  DeliveryStatus = DeliveryStatus; // Expose enum to template
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private deliveryService: DeliveryService
+    private deliveryService: DeliveryService,
+    private productService: ProductsService
   ) {}
 
   ngOnInit(): void {
     this.deliveryId = this.route.snapshot.paramMap.get('id');
     if (this.deliveryId) {
+      this.loadProducts();
       this.loadDelivery();
     } else {
       this.error = true;
       this.errorMessage = 'Delivery ID is missing';
       this.loading = false;
     }
+  }
+
+  loadProducts(): void {
+    this.productService.getProducts().subscribe({
+      next: (data) => {
+        this.products = data;
+      },
+      error: (err) => {
+        console.error('Error loading products:', err);
+      },
+    });
   }
 
   loadDelivery(): void {
@@ -52,6 +73,16 @@ export class DeliveryDetailComponent implements OnInit {
     });
   }
 
+  getProductName(productId: string): string {
+    const product = this.products.find((p) => p._id === productId);
+    return product?.name || '';
+  }
+
+  getProductType(productId: string): string {
+    const product = this.products.find((p) => p._id === productId);
+    return product?.productType || '';
+  }
+
   formatDate(date: Date | string): string {
     if (!date) return 'N/A';
     return new Date(date).toLocaleDateString('en-US', {
@@ -65,12 +96,12 @@ export class DeliveryDetailComponent implements OnInit {
     this.router.navigate(['/dashboard/deliveries']);
   }
 
-  updateStatus(newStatus: string): void {
+  updateStatus(newStatus: DeliveryStatus): void {
     if (!this.deliveryId) return;
 
     this.loading = true;
     this.deliveryService
-      .updateDeliveryStatus(this.deliveryId, newStatus as DeliveryStatus)
+      .updateDeliveryStatus(this.deliveryId, newStatus)
       .subscribe({
         next: (event) => {
           this.delivery = event;

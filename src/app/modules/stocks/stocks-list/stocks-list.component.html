@@ -103,13 +103,13 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr *ngFor="let stock of filteredStocks" (click)="viewStockDetails(stock.id)"
+                    <tr *ngFor="let stock of filteredStocks" (click)="viewStockDetails(stock._id)"
                         class="hover:bg-gray-50 cursor-pointer">
                         <td class="py-3 px-4 border-b border-gray-200">
                             {{ getProductName(stock.productId) }}
                         </td>
                         <td class="py-3 px-4 border-b border-gray-200">
-                            {{ stock.quantity }} {{ getProductUnit(stock.productId) }}
+                            {{ stock.quantity }} {{ getProductType(stock.productId) }}
                         </td>
                         <td class="py-3 px-4 border-b border-gray-200">
                             {{ stock.location }}
@@ -137,7 +137,7 @@
                             </div>
                         </td>
                         <td class="py-3 px-4 border-b border-gray-200 text-center">
-                            <button (click)="viewStockDetails(stock.id); $event.stopPropagation()"
+                            <button (click)="viewStockDetails(stock._id); $event.stopPropagation()"
                                 class="text-blue-600 hover:text-blue-800">
                                 <span class="material-icons text-sm">visibility</span>
                             </button>

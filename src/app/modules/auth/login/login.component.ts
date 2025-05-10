@@ -41,7 +41,13 @@ export class LoginComponent implements OnInit {
   }
 
   onSubmit(): void {
+    console.log('LoginComponent onSubmit - Starting login process');
+
     if (this.loginForm.invalid) {
+      console.log(
+        'LoginComponent onSubmit - Form is invalid',
+        this.loginForm.errors
+      );
       return;
     }
 
@@ -53,13 +59,37 @@ export class LoginComponent implements OnInit {
       password: this.loginForm.value.password,
     };
 
+    console.log('LoginComponent onSubmit - Submitting credentials', {
+      email: credentials.email,
+      password: '***',
+    });
+
     this.authService.login(credentials).subscribe({
       next: (response) => {
+        console.log(
+          'LoginComponent onSubmit - Login success response:',
+          response
+        );
+
+        // Check if authentication is working
+        console.log(
+          'LoginComponent onSubmit - Is authenticated:',
+          this.authService.isAuthenticated()
+        );
+        console.log(
+          'LoginComponent onSubmit - Current user:',
+          this.authService.getCurrentUser()
+        );
+
         this.isSubmitting = false;
         this.toastr.success('Login successful');
+
+        console.log('LoginComponent onSubmit - Navigating to:', this.returnUrl);
         this.router.navigateByUrl(this.returnUrl);
       },
       error: (error) => {
+        console.error('LoginComponent onSubmit - Login error:', error);
+
         this.isSubmitting = false;
         this.errorMessage =
           error.error?.message ||

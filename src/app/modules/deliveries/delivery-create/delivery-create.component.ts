@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { Router } from '@angular/router';
 import { DeliveryService } from '../../../services/delivery.service';
-import { DeliveryRequest } from '../../../models/delivery.model';
+import { DeliveryRequest, DeliveryItem } from '../../../models/delivery.model';
 
 @Component({
   selector: 'app-delivery-create',
@@ -21,16 +21,38 @@ export class DeliveryCreateComponent implements OnInit {
     private router: Router
   ) {
     this.deliveryForm = this.fb.group({
-      donationId: ['', [Validators.required]],
       scheduledDate: ['', [Validators.required]],
       address: ['', [Validators.required, Validators.minLength(10)]],
       recipientId: ['', [Validators.required]],
       notes: [''],
+      items: this.fb.array([this.createItem()]),
     });
   }
 
   ngOnInit(): void {
     // Any initialization logic
+  }
+
+  createItem(): FormGroup {
+    return this.fb.group({
+      name: ['', [Validators.required]],
+      quantity: [1, [Validators.required, Validators.min(1)]],
+      unit: ['', [Validators.required]],
+    });
+  }
+
+  get items() {
+    return this.deliveryForm.get('items') as FormArray;
+  }
+
+  addItem(): void {
+    this.items.push(this.createItem());
+  }
+
+  removeItem(index: number): void {
+    if (this.items.length > 1) {
+      this.items.removeAt(index);
+    }
   }
 
   onSubmit(): void {
@@ -43,11 +65,11 @@ export class DeliveryCreateComponent implements OnInit {
     this.error = false;
 
     const deliveryRequest: DeliveryRequest = {
-      donationId: this.deliveryForm.value.donationId,
       scheduledDate: new Date(this.deliveryForm.value.scheduledDate),
       address: this.deliveryForm.value.address,
-      recipientId: this.deliveryForm.value.recipientId,
+      deliveryPersonId: this.deliveryForm.value.recipientId,
       notes: this.deliveryForm.value.notes,
+      items: this.deliveryForm.value.items as DeliveryItem[],
     };
 
     this.deliveryService.createDelivery(deliveryRequest).subscribe({

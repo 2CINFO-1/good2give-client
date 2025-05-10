@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-scrap-detail',
@@ -11,7 +11,7 @@ export class ScrapDetailComponent implements OnInit {
   scrap: any;
   isLoading = true;
 
-  constructor(private route: ActivatedRoute) {
+  constructor(private route: ActivatedRoute, private router: Router) {
     this.scrapId = +this.route.snapshot.paramMap.get('id')!;
   }
 
@@ -30,5 +30,9 @@ export class ScrapDetailComponent implements OnInit {
       };
       this.isLoading = false;
     }, 1000);
+  }
+
+  goBack(): void {
+    this.router.navigate(['/scraps']);
   }
 }

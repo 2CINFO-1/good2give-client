@@ -15,12 +15,12 @@
         <div *ngIf="!loading && delivery">
             <div class="flex items-center space-x-2">
                 <span class="px-3 py-1 text-sm rounded-full" [ngClass]="{
-                    'bg-yellow-100 text-yellow-800': delivery.status === 'pending',
-                    'bg-blue-100 text-blue-800': delivery.status === 'in_progress',
-                    'bg-green-100 text-green-800': delivery.status === 'completed',
-                    'bg-red-100 text-red-800': delivery.status === 'cancelled'
+                    'bg-yellow-100 text-yellow-800': delivery?.status === DeliveryStatus.PENDING,
+                    'bg-blue-100 text-blue-800': delivery?.status === DeliveryStatus.IN_PROGRESS,
+                    'bg-green-100 text-green-800': delivery?.status === DeliveryStatus.COMPLETED,
+                    'bg-red-100 text-red-800': delivery?.status === DeliveryStatus.CANCELLED
                 }">
-                    {{ delivery.status }}
+                    {{ delivery?.status }}
                 </span>
             </div>
         </div>
@@ -58,15 +58,11 @@
                 <dl>
                     <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                         <dt class="text-sm font-medium text-gray-500">Delivery ID</dt>
-                        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2">{{ delivery._id }}</dd>
+                        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2">{{ delivery?._id }}</dd>
                     </div>
                     <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                         <dt class="text-sm font-medium text-gray-500">Status</dt>
-                        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2">{{ delivery.status }}</dd>
-                    </div>
-                    <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                        <dt class="text-sm font-medium text-gray-500">Donation ID</dt>
-                        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2">{{ delivery.donationId }}</dd>
+                        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2">{{ delivery?.status }}</dd>
                     </div>
                 </dl>
             </div>
@@ -82,13 +78,13 @@
                     <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                         <dt class="text-sm font-medium text-gray-500">Name</dt>
                         <dd class="mt-1 text-sm text-gray-900 sm:col-span-2">
-                            {{ delivery.deliveryPersonName || 'Not assigned yet' }}
+                            {{ delivery?.deliveryPersonName || 'Not assigned yet' }}
                         </dd>
                     </div>
                     <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                         <dt class="text-sm font-medium text-gray-500">ID</dt>
                         <dd class="mt-1 text-sm text-gray-900 sm:col-span-2">
-                            {{ delivery.deliveryPersonId || 'N/A' }}
+                            {{ delivery?.deliveryPersonId || 'N/A' }}
                         </dd>
                     </div>
                 </dl>
@@ -104,26 +100,28 @@
                 <dl>
                     <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                         <dt class="text-sm font-medium text-gray-500">Scheduled Date</dt>
-                        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2">{{ formatDate(delivery.scheduledDate) }}
+                        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2">
+                            {{ delivery?.scheduledDate ? formatDate(delivery.scheduledDate) : 'N/A' }}
                         </dd>
                     </div>
                     <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                         <dt class="text-sm font-medium text-gray-500">Address</dt>
-                        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2">{{ delivery.address }}</dd>
+                        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2">{{ delivery?.address }}</dd>
                     </div>
                     <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                         <dt class="text-sm font-medium text-gray-500">Notes</dt>
-                        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2">{{ delivery.notes || 'No notes provided' }}
+                        <dd class="mt-1 text-sm text-gray-900 sm:col-span-2">{{ delivery?.notes || 'No notes provided'
+                            }}
                         </dd>
                     </div>
                 </dl>
             </div>
         </div>
 
-        <!-- Donation Items -->
+        <!-- Delivery Items -->
         <div class="bg-white shadow overflow-hidden sm:rounded-lg lg:col-span-3">
             <div class="px-4 py-5 sm:px-6 bg-gray-50">
-                <h3 class="text-lg leading-6 font-medium text-gray-900">Donation Items</h3>
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Delivery Items</h3>
             </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
@@ -144,17 +142,17 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        <tr *ngFor="let item of delivery.donation.items">
+                        <tr *ngFor="let item of delivery?.items">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-medium text-gray-900">
-                                    {{ item.name }}
+                                    {{ item.name || 'Unknown Product' }}
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm text-gray-900">{{ item.quantity }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ item.unit }}
+                                {{ item.unit || 'N/A' }}
                             </td>
                         </tr>
                     </tbody>
@@ -167,19 +165,19 @@
     <div *ngIf="!loading && !error && delivery" class="mt-8 space-y-4">
         <div class="flex flex-wrap gap-4 justify-end">
             <!-- Show different buttons based on status -->
-            <div *ngIf="delivery.status === 'pending'">
-                <button (click)="updateStatus('in_progress')"
+            <div *ngIf="delivery?.status === DeliveryStatus.PENDING">
+                <button (click)="updateStatus(DeliveryStatus.IN_PROGRESS)"
                     class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                     Start Delivery
                 </button>
-                <button (click)="updateStatus('cancelled')"
+                <button (click)="updateStatus(DeliveryStatus.CANCELLED)"
                     class="ml-3 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
                     Cancel Delivery
                 </button>
             </div>
 
-            <div *ngIf="delivery.status === 'in_progress'">
-                <button (click)="updateStatus('completed')"
+            <div *ngIf="delivery?.status === DeliveryStatus.IN_PROGRESS">
+                <button (click)="updateStatus(DeliveryStatus.COMPLETED)"
                     class="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
                     Complete Delivery
                 </button>

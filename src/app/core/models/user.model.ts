@@ -20,14 +20,19 @@ export interface User {
 export interface AuthResponse {
   user: User;
   tokens: {
-    access: {
+    // Support for both token formats
+    // Format 1 (nested)
+    access?: {
       token: string;
       expires: string;
     };
-    refresh: {
+    refresh?: {
       token: string;
       expires: string;
     };
+    // Format 2 (flat)
+    accessToken?: string;
+    refreshToken?: string;
   };
 }
 

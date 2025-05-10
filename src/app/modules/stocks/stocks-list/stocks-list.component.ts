@@ -72,8 +72,8 @@ export class StocksListComponent implements OnInit {
     return this.products[productId]?.name || 'Unknown Product';
   }
 
-  getProductUnit(productId: string): string {
-    return this.products[productId]?.unit || '';
+  getProductType(productId: string): string {
+    return this.products[productId]?.productType || '';
   }
 
   filterStocks(): void {
@@ -114,8 +114,8 @@ export class StocksListComponent implements OnInit {
 
   isLowStock(stock: Stock): boolean {
     const product = this.products[stock.productId];
-    if (!product || !product.minStock) return false;
-    return stock.quantity <= product.minStock;
+    // Since minStock no longer exists, this method will always return false
+    return false;
   }
 
   isExpiringSoon(stock: Stock): boolean {

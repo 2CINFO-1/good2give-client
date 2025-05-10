@@ -1,33 +1,40 @@
+import { User } from './user.model';
+
+export enum EventStatus {
+  UPCOMING = 'UPCOMING',
+  ONGOING = 'ONGOING',
+  COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED',
+}
+
 export interface Event {
   _id: string;
+  beneficiaryid: User;
   title: string;
-  description: string;
+  objective: string;
+  numbre: number;
   date: string;
-  time: string;
-  location: string;
-  organizer: string;
-  attendees?: number;
-  capacity?: number;
-  imageUrl?: string;
   status: EventStatus;
   createdAt?: string;
   updatedAt?: string;
 }
 
-export enum EventStatus {
-  UPCOMING = 'upcoming',
-  ONGOING = 'ongoing',
-  COMPLETED = 'completed',
-  CANCELLED = 'cancelled',
-}
-
 export interface EventRequest {
   title: string;
-  description: string;
+  objective: string;
+  numbre: number;
   date: string;
-  time: string;
-  location: string;
-  organizer: string;
-  capacity?: number;
-  imageUrl?: string;
+  status: EventStatus;
+}
+
+export interface EventResponse {
+  _id: string;
+  beneficiaryid: User;
+  title: string;
+  objective: string;
+  numbre: number;
+  date: string;
+  status: EventStatus;
+  createdAt: string;
+  updatedAt: string;
 }

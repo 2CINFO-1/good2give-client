@@ -1,39 +1,44 @@
+import { User } from '../../models/user.model';
+
 export enum ProductCategory {
-  FOOD = 'food',
-  CLOTHING = 'clothing',
-  HOUSEHOLD = 'household',
-  HYGIENE = 'hygiene',
-  MEDICAL = 'medical',
-  BABY = 'baby',
-  OTHER = 'other',
+  GRAINS = 'Grains',
+  LEGUMES = 'Legumes',
+  DAIRY = 'Dairy',
+  BAKING = 'Baking',
+  COOKING = 'Cooking',
+  SEASONING = 'Seasoning',
+  VEGETABLES = 'Vegetables',
+  FRUITS = 'Fruits',
+  PROTEIN = 'Protein',
+  OTHER = 'Other',
 }
 
-export enum ProductUnit {
-  PIECE = 'piece',
-  KG = 'kg',
-  LITER = 'liter',
-  BOX = 'box',
-  PACK = 'pack',
+export enum ProductType {
+  PERISHABLE = 'Perishable',
+  NON_PERISHABLE = 'Non-Perishable',
+  FROZEN = 'Frozen',
+  REFRIGERATED = 'Refrigerated',
+  CANNED = 'Canned',
+  DRIED = 'Dried',
+  OTHER = 'Other',
 }
 
 export interface Product {
-  id: string;
+  _id: string;
   name: string;
-  description?: string;
-  category: string;
-  unit: string;
-  minStock?: number;
-  imageUrl?: string;
+  productType: ProductType;
+  category: ProductCategory;
+  description: string;
+  donatorId: User;
+  status?: string;
   createdAt?: string;
   updatedAt?: string;
 }
 
 export interface ProductRequest {
   name: string;
+  productType: ProductType;
   category: ProductCategory;
   description: string;
-  unit: ProductUnit;
-  shelfLife?: number;
-  storageConditions?: string;
-  photos?: string[];
+  status?: string;
 }

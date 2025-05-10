@@ -18,13 +18,59 @@
     </div>
 
     <form [formGroup]="deliveryForm" (ngSubmit)="onSubmit()" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        <!-- Delivery Items Section -->
         <div class="mb-6">
-            <label for="donationId" class="block text-gray-700 text-sm font-bold mb-2">Donation ID*</label>
-            <input type="text" id="donationId" formControlName="donationId"
-                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                placeholder="Enter donation ID">
-            <div *ngIf="f['donationId'].touched && f['donationId'].invalid" class="text-red-500 text-xs mt-1">
-                <div *ngIf="f['donationId'].errors?.['required']">Donation ID is required.</div>
+            <label class="block text-gray-700 text-sm font-bold mb-2">Delivery Items*</label>
+            <div formArrayName="items">
+                <div *ngFor="let item of items.controls; let i = index" [formGroupName]="i"
+                    class="mb-4 p-4 border rounded-lg">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label [for]="'item-name-' + i" class="block text-gray-700 text-sm font-bold mb-2">Item
+                                Name*</label>
+                            <input [id]="'item-name-' + i" formControlName="name" type="text"
+                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                placeholder="Enter item name">
+                            <div *ngIf="item.get('name')?.touched && item.get('name')?.invalid"
+                                class="text-red-500 text-xs mt-1">
+                                <div *ngIf="item.get('name')?.errors?.['required']">Item name is required.</div>
+                            </div>
+                        </div>
+                        <div>
+                            <label [for]="'item-quantity-' + i"
+                                class="block text-gray-700 text-sm font-bold mb-2">Quantity*</label>
+                            <input [id]="'item-quantity-' + i" formControlName="quantity" type="number" min="1"
+                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                placeholder="Enter quantity">
+                            <div *ngIf="item.get('quantity')?.touched && item.get('quantity')?.invalid"
+                                class="text-red-500 text-xs mt-1">
+                                <div *ngIf="item.get('quantity')?.errors?.['required']">Quantity is required.</div>
+                                <div *ngIf="item.get('quantity')?.errors?.['min']">Quantity must be at least 1.</div>
+                            </div>
+                        </div>
+                        <div>
+                            <label [for]="'item-unit-' + i"
+                                class="block text-gray-700 text-sm font-bold mb-2">Unit*</label>
+                            <input [id]="'item-unit-' + i" formControlName="unit" type="text"
+                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                placeholder="e.g., kg, boxes, pieces">
+                            <div *ngIf="item.get('unit')?.touched && item.get('unit')?.invalid"
+                                class="text-red-500 text-xs mt-1">
+                                <div *ngIf="item.get('unit')?.errors?.['required']">Unit is required.</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-end mt-2">
+                        <button type="button" (click)="removeItem(i)" *ngIf="items.length > 1"
+                            class="text-red-600 hover:text-red-800">
+                            Remove
+                        </button>
+                    </div>
+                </div>
+                <button type="button" (click)="addItem()"
+                    class="mt-2 px-3 py-1 bg-blue-100 text-blue-700 text-sm font-medium rounded hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-300">
+                    + Add Item
+                </button>
             </div>
         </div>
 

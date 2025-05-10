@@ -71,9 +71,9 @@
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
-                    <tr *ngFor="let reclamation of filteredReclamations" (click)="viewReclamation(reclamation.id)"
+                    <tr *ngFor="let reclamation of filteredReclamations" (click)="viewReclamation(reclamation._id)"
                         class="hover:bg-gray-50 cursor-pointer transition-colors">
-                        <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ reclamation.id }}
+                        <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ reclamation._id }}
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-800">{{ reclamation.title }}</td>
                         <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-800">{{ reclamation.customerName }}
@@ -100,7 +100,7 @@
                             </span>
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <button (click)="viewReclamation(reclamation.id); $event.stopPropagation();"
+                            <button (click)="viewReclamation(reclamation._id); $event.stopPropagation();"
                                 class="text-emerald-600 hover:text-emerald-900 mr-3">
                                 <span class="material-icons text-base">visibility</span>
                             </button>

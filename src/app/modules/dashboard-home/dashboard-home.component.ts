@@ -7,7 +7,7 @@ import { Component, OnInit } from '@angular/core';
 })
 export class DashboardHomeComponent implements OnInit {
   stats = {
-    donations: 0,
+    deliveries: 0,
     collections: 0,
     products: 0,
     events: 0,
@@ -21,7 +21,7 @@ export class DashboardHomeComponent implements OnInit {
     // Simulate loading dashboard statistics
     setTimeout(() => {
       this.stats = {
-        donations: 24,
+        deliveries: 24,
         collections: 18,
         products: 156,
         events: 12,

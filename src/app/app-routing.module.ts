@@ -40,14 +40,6 @@ const routes: Routes = [
           ),
       },
       {
-        path: 'donations',
-        loadChildren: () =>
-          import('./modules/donations/donations.module').then(
-            (m) => m.DonationsModule
-          ),
-        canActivate: [AuthGuard],
-      },
-      {
         path: 'reclamations',
         loadChildren: () =>
           import('./modules/reclamations/reclamations.module').then(
@@ -73,7 +65,10 @@ const routes: Routes = [
       },
       {
         path: 'deliveries',
-        component: ModulePlaceholderComponent,
+        loadChildren: () =>
+          import('./modules/deliveries/deliveries.module').then(
+            (m) => m.DeliveriesModule
+          ),
         canActivate: [AuthGuard],
       },
       {

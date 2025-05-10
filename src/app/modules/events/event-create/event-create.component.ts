@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { EventService } from 'src/app/services/event.service';
-import { Event } from 'src/app/models/event.model';
+import { Event, EventStatus } from 'src/app/models/event.model';
 
 @Component({
   selector: 'app-event-create',
@@ -13,6 +13,7 @@ export class EventCreateComponent implements OnInit {
   eventForm: FormGroup;
   submitting = false;
   error = '';
+  EventStatus = EventStatus;
 
   constructor(
     private fb: FormBuilder,
@@ -21,12 +22,10 @@ export class EventCreateComponent implements OnInit {
   ) {
     this.eventForm = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(3)]],
-      description: ['', [Validators.required, Validators.minLength(10)]],
+      objective: ['', [Validators.required, Validators.minLength(10)]],
       date: ['', Validators.required],
-      time: ['', Validators.required],
-      location: ['', Validators.required],
-      organizer: ['', Validators.required],
-      capacity: [50, [Validators.required, Validators.min(1)]],
+      numbre: [1, [Validators.required, Validators.min(1)]],
+      status: [EventStatus.UPCOMING, Validators.required],
     });
   }
 

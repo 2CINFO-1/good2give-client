@@ -39,7 +39,7 @@
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
                 <tr *ngFor="let scrap of scraps">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ scrap.id }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ scrap._id }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ scrap.name }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ scrap.quantity }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ scrap.date | date }}</td>
@@ -51,7 +51,7 @@
                         </span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <a [routerLink]="[scrap.id]" class="text-emerald-600 hover:text-emerald-900 mr-3">View</a>
+                        <a [routerLink]="[scrap._id]" class="text-emerald-600 hover:text-emerald-900 mr-3">View</a>
                     </td>
                 </tr>
             </tbody>

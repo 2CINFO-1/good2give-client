@@ -26,7 +26,18 @@ import { environment } from '../environments/environment';
 
 // Token getter function for JWT
 export function tokenGetter() {
-  return localStorage.getItem('access_token');
+  // Check localStorage first
+  let token = localStorage.getItem('access_token');
+  let storageType = 'localStorage';
+
+  // If not in localStorage, check sessionStorage
+  if (!token) {
+    token = sessionStorage.getItem('access_token');
+    storageType = 'sessionStorage';
+  }
+
+  console.log(`AppModule tokenGetter - Token from ${storageType}:`, !!token);
+  return token;
 }
 
 @NgModule({

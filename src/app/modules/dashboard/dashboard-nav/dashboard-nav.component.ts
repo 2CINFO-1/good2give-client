@@ -8,7 +8,6 @@ import { Component, OnInit } from '@angular/core';
 export class DashboardNavComponent implements OnInit {
   navItems = [
     { title: 'Dashboard', route: '/dashboard', icon: 'fas fa-home' },
-    { title: 'Donations', route: '/dashboard/donations', icon: 'fas fa-gift' },
     {
       title: 'Collections',
       route: '/dashboard/collectes',

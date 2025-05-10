@@ -1,5 +1,4 @@
 import { User } from './user.model';
-import { Donation } from './donation.model';
 
 export enum CollecteStatus {
   PENDING = 'pending',
@@ -10,9 +9,15 @@ export enum CollecteStatus {
   CANCELLED = 'cancelled',
 }
 
+export interface CollecteItem {
+  name: string;
+  quantity: number;
+  unit: string;
+}
+
 export interface Collecte {
   _id: string;
-  donation: Donation | string;
+  items: CollecteItem[];
   transporter?: User | string;
   status: CollecteStatus;
   scheduledDate: Date;
@@ -25,7 +30,7 @@ export interface Collecte {
 }
 
 export interface CollecteRequest {
-  donationId: string;
+  items: CollecteItem[];
   transporterId?: string;
   scheduledDate: Date;
   notes?: string;
