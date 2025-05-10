@@ -24,7 +24,6 @@ export class InspectionListComponent implements OnInit {
     this.loadInspections();
   }
 
-  // Load all inspection reports
   loadInspections(): void {
     this.loading = true;
     this.error = null;
@@ -32,35 +31,44 @@ export class InspectionListComponent implements OnInit {
       .getAll()
       .pipe(
         tap((inspections) => {
-          // Debug: Log raw API response
           console.log('Raw API response for inspections:', JSON.stringify(inspections, null, 2));
         }),
         catchError((err) => {
-          this.error = 'Failed to load inspections. Please try again.';
+          this.error = err.status === 401 ? 'Authentication failed. Please log in.' : 'Failed to load inspections. Please try again.';
           console.error('Error fetching inspections:', err);
           return of([]);
         }),
         finalize(() => (this.loading = false))
       )
       .subscribe((inspections) => {
-        this.inspections = inspections.map((inspection) => ({
-          ...inspection,
-          inspectorId: inspection.inspectorId || { name: 'Unknown Inspector' },
-        }));
+        this.inspections = inspections;
+        console.log('Inspections loaded:', JSON.stringify(this.inspections, null, 2));
       });
   }
 
-  // Navigate to inspection detail view
   viewDetails(id: string): void {
     this.router.navigate(['/dashboard/inspection', id]);
   }
 
-  // Navigate to create inspection form
   createInspection(): void {
     this.router.navigate(['/dashboard/inspection/create']);
   }
 
-  // Return CSS class based on inspection status
+  deleteInspection(id: string): void {
+    if (confirm('Are you sure you want to delete this inspection report?')) {
+      this.inspectionService.delete(id).subscribe({
+        next: () => {
+          this.inspections = this.inspections.filter((inspection) => inspection._id !== id);
+          this.error = null;
+        },
+        error: (err) => {
+          this.error = 'Failed to delete inspection report.';
+          console.error('Error deleting inspection:', err);
+        },
+      });
+    }
+  }
+
   getStatusClass(status: string): string {
     switch (status) {
       case 'pending':
@@ -74,7 +82,6 @@ export class InspectionListComponent implements OnInit {
     }
   }
 
-  // Format a date string into a readable format
   formatDate(date: string): string {
     return date ? new Date(date).toLocaleDateString() : '-';
   }

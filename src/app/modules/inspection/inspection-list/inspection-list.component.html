@@ -52,6 +52,9 @@
               Inspection Date
             </th>
             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Issues
+            </th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Status
             </th>
             <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -62,19 +65,18 @@
         <tbody class="bg-white divide-y divide-gray-200">
           <tr *ngFor="let inspection of inspections" class="hover:bg-gray-50 cursor-pointer transition-colors">
             <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-              {{ inspection.inspectorId?.name || 'Unknown Inspector' }}
+              {{ inspection.inspectorId.name || 'Unknown' }}
             </td>
             <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-800">
               {{ formatDate(inspection.inspectionDate) }}
             </td>
+            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-800">
+              {{ inspection.issues.length }} issue(s)
+            </td>
             <td class="px-4 py-4 whitespace-nowrap">
               <span
                 class="px-2 py-1 text-xs rounded-full"
-                [ngClass]="{
-                  'bg-blue-100 text-blue-800': inspection.status === 'pending',
-                  'bg-green-100 text-green-800': inspection.status === 'approved',
-                  'bg-red-100 text-red-800': inspection.status === 'rejected'
-                }"
+                [ngClass]="getStatusClass(inspection.status)"
               >
                 {{ inspection.status | titlecase }}
               </span>
@@ -82,9 +84,15 @@
             <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
               <button
                 (click)="viewDetails(inspection._id!)"
-                class="text-blue-600 hover:text-blue-900"
+                class="text-blue-600 hover:text-blue-900 mr-2"
               >
                 View
+              </button>
+              <button
+                (click)="deleteInspection(inspection._id!)"
+                class="text-red-600 hover:text-red-900"
+              >
+                Delete
               </button>
             </td>
           </tr>
