@@ -79,9 +79,27 @@ const routes: Routes = [
       {
         path: '',
         loadChildren: () =>
-          import('./modules/dashboard/dashboard.module').then(
-            (m) => m.DashboardModule
+          import('./modules/dashboard-home/dashboard-home.module').then(
+            (m) => m.DashboardHomeModule
           ),
+      },
+      {
+        path: 'collecte',
+        loadChildren: () =>
+          import('./modules/collecte/collecte.module').then(
+            (m) => m.CollecteModule
+          ),
+        canActivate: [AuthGuard, RoleGuard],
+        data: { roles: ['ADMIN', 'TRANSPORTER'] },
+      },
+      {
+        path: 'collectes',
+        loadChildren: () =>
+          import('./modules/collectes/collectes.module').then(
+            (m) => m.CollectesModule
+          ),
+        canActivate: [AuthGuard, RoleGuard],
+        data: { roles: ['ADMIN', 'TRANSPORTER'] },
       },
       {
         path: 'reclamations',
@@ -93,15 +111,21 @@ const routes: Routes = [
       },
       {
         path: 'products',
-        redirectTo: '',
-        pathMatch: 'full',
-        canActivate: [AuthGuard],
+        loadChildren: () =>
+          import('./modules/products/products.module').then(
+            (m) => m.ProductsModule
+          ),
+        canActivate: [AuthGuard, RoleGuard],
+        data: { roles: ['ADMIN', 'INSPECTOR'] },
       },
       {
         path: 'inspection',
-        redirectTo: '',
-        pathMatch: 'full',
-        canActivate: [AuthGuard],
+        loadChildren: () =>
+          import('./modules/inspection/inspection.module').then(
+            (m) => m.InspectionModule
+          ),
+        canActivate: [AuthGuard, RoleGuard],
+        data: { roles: ['ADMIN', 'INSPECTOR'] },
       },
       {
         path: 'events',
@@ -118,22 +142,18 @@ const routes: Routes = [
         canActivate: [AuthGuard],
       },
       {
-        path: 'collectes',
-        redirectTo: '',
-        pathMatch: 'full',
-        canActivate: [AuthGuard],
-      },
-      {
         path: 'stocks',
-        redirectTo: '',
-        pathMatch: 'full',
-        canActivate: [AuthGuard],
+        loadChildren: () =>
+          import('./modules/stocks/stocks.module').then((m) => m.StocksModule),
+        canActivate: [AuthGuard, RoleGuard],
+        data: { roles: ['ADMIN', 'INSPECTOR', 'WAREHOUSE'] },
       },
       {
         path: 'scraps',
-        redirectTo: '',
-        pathMatch: 'full',
-        canActivate: [AuthGuard],
+        loadChildren: () =>
+          import('./modules/scraps/scraps.module').then((m) => m.ScrapsModule),
+        canActivate: [AuthGuard, RoleGuard],
+        data: { roles: ['ADMIN', 'INSPECTOR', 'WAREHOUSE'] },
       },
       {
         path: 'settings',
