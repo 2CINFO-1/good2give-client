@@ -1,1 +1,5 @@
-/* All styling is handled by Tailwind CSS */
+/* Optional: Add custom styles if needed */
+.table-container {
+  max-height: 500px;
+  overflow-y: auto;
+}

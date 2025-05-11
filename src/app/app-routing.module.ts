@@ -143,8 +143,7 @@ const routes: Routes = [
           import('./modules/inspection/inspection.module').then(
             (m) => m.InspectionModule
           ),
-        canActivate: [AuthGuard, RoleGuard],
-        data: { roles: ['ADMIN', 'INSPECTOR'] },
+        canActivate: [AuthGuard],
       },
       {
         path: 'events',
