@@ -125,7 +125,7 @@ const routes: Routes = [
           import('./modules/products/products.module').then(
             (m) => m.ProductsModule
           ),
-        canActivate: [AuthGuard, RoleGuard],
+        canActivate: [AuthGuard],
         data: { roles: ['ADMIN', 'INSPECTOR'] },
       },
       {
@@ -155,7 +155,7 @@ const routes: Routes = [
         path: 'stocks',
         loadChildren: () =>
           import('./modules/stocks/stocks.module').then((m) => m.StocksModule),
-        canActivate: [AuthGuard, RoleGuard],
+        canActivate: [AuthGuard],
         data: { roles: ['ADMIN', 'INSPECTOR', 'WAREHOUSE'] },
       },
       {
