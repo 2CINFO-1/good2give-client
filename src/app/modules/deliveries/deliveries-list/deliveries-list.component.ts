@@ -1,5 +1,7 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { DeliveryService } from 'src/app/core/services/delivery.service';
+import { Delivery, DeliveryStatus } from 'src/app/core/models/delivery.model';
 
 @Component({
   selector: 'app-deliveries-list',
@@ -7,67 +9,41 @@ import { Router } from '@angular/router';
   styleUrls: ['./deliveries-list.component.css'],
 })
 export class DeliveriesListComponent implements OnInit {
-  deliveries: any[] = [];
+  deliveries: Delivery[] = [];
   loading = true;
   error = '';
-
-  // Pagination
   currentPage = 1;
   pageSize = 10;
   totalItems = 0;
-
-  // Make Math accessible to the template
   Math = Math;
+  DeliveryStatus = DeliveryStatus;
 
   constructor(
-    @Inject('DeliveryService') private deliveryService: any,
+    private deliveryService: DeliveryService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
+    console.log('DeliveriesListComponent initialized');
     this.loadDeliveries();
   }
 
   loadDeliveries(): void {
     this.loading = true;
-
-    // Simulate API call with mock data
-    setTimeout(() => {
-      const mockDeliveries = [
-        {
-          _id: '1234abcd',
-          deliveryPersonId: 'del456',
-          status: 'pending',
-          scheduledDate: new Date(),
-          address: '123 Main St, Anytown, CA',
-          notes: 'Deliver to back door',
-          items: [
-            { name: 'Food Package', quantity: 2, unit: 'boxes' },
-            { name: 'Hygiene Kit', quantity: 1, unit: 'pack' },
-          ],
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        {
-          _id: '5678efgh',
-          deliveryPersonId: 'del789',
-          status: 'completed',
-          scheduledDate: new Date(),
-          address: '456 Oak St, Othertown, NY',
-          notes: '',
-          items: [
-            { name: 'Winter Clothing', quantity: 3, unit: 'bags' },
-            { name: 'Canned Goods', quantity: 10, unit: 'items' },
-          ],
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      ];
-
-      this.deliveries = mockDeliveries;
-      this.totalItems = mockDeliveries.length;
-      this.loading = false;
-    }, 1000);
+    this.error = '';
+    this.deliveryService.getAllDeliveries().subscribe({
+      next: (data) => {
+        console.log('Deliveries loaded:', data);
+        this.deliveries = data;
+        this.totalItems = data.length;
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = 'Failed to load deliveries. Please try again.';
+        this.loading = false;
+        console.error('Error loading deliveries:', err);
+      },
+    });
   }
 
   onPageChange(page: number): void {
