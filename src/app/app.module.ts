@@ -10,7 +10,6 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 
 // Layouts
-import { AuthLayoutComponent } from './layouts/auth-layout/auth-layout.component';
 import { DashboardLayoutComponent } from './layouts/dashboard-layout/dashboard-layout.component';
 
 // Modules
@@ -40,7 +39,7 @@ export function tokenGetter() {
 }
 
 @NgModule({
-  declarations: [AppComponent, AuthLayoutComponent, DashboardLayoutComponent],
+  declarations: [AppComponent, DashboardLayoutComponent],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
