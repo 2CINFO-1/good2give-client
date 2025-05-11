@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from './core/services/auth.service';
-import { UserStateService } from './core/services/user-state.service';
 
 @Component({
   selector: 'app-root',
@@ -9,10 +8,7 @@ import { UserStateService } from './core/services/user-state.service';
 export class AppComponent implements OnInit {
   title = 'good2give-client';
 
-  constructor(
-    private authService: AuthService,
-    private userState: UserStateService
-  ) {}
+  constructor(private authService: AuthService) {}
 
   ngOnInit(): void {
     try {

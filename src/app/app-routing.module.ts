@@ -88,7 +88,7 @@ const routes: Routes = [
           import('./modules/dashboard-home/dashboard-home.module').then(
             (m) => m.DashboardHomeModule
           ),
-        canActivate: [EmailVerificationGuard],
+        canActivate: [EmailVerificationGuard, AuthGuard],
       },
       {
         path: 'collecte',
