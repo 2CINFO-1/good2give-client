@@ -1,40 +1,42 @@
 import { User } from './user.model';
-import { Stock } from './stock.model';
 
 export enum DeliveryStatus {
   PENDING = 'pending',
-  ASSIGNED = 'assigned',
-  IN_TRANSIT = 'in_transit',
+  IN_PROGRESS = 'in_progress',
   DELIVERED = 'delivered',
-  FAILED = 'failed',
-  CANCELLED = 'cancelled',
-}
-
-export interface DeliveryItem {
-  stock: Stock | string;
-  quantity: number;
+  CANCELED = 'canceled',
 }
 
 export interface Delivery {
   _id: string;
-  items: DeliveryItem[];
+  donator: User | string;
   beneficiary: User | string;
   transporter?: User | string;
   status: DeliveryStatus;
-  deliveryAddress: string;
-  scheduledDate: Date;
-  completedDate?: Date;
-  notes?: string;
-  failureReason?: string;
-  signature?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  pickupDate: Date | string;
+  expectedDeliveryDate?: Date | string;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
 }
 
 export interface DeliveryRequest {
-  items: { stockId: string; quantity: number }[];
+  donorId: string;
   beneficiaryId: string;
-  deliveryAddress: string;
-  scheduledDate: Date;
-  notes?: string;
+  transporterId?: string;
+  foodItemId: string;
+  pickupDate: Date | string;
+  expectedDeliveryDate?: Date | string;
+  status?: DeliveryStatus;
+}
+
+export interface DeliveryResponse {
+  _id: string;
+  donator: User | string;
+  beneficiary: User | string;
+  transporter?: User | string;
+  status: DeliveryStatus;
+  pickupDate: Date | string;
+  expectedDeliveryDate?: Date | string;
+  createdAt: Date | string;
+  updatedAt: Date | string;
 }

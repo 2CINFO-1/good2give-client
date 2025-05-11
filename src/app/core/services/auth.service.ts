@@ -352,19 +352,13 @@ export class AuthService {
       let accessToken: string | null = null;
       let refreshToken: string | null = null;
 
+      // Use consistent token format in line with backend
       if (tokens.accessToken && tokens.refreshToken) {
-        // Format from our backend: { accessToken: '...', refreshToken: '...' }
+        // Backend format: { accessToken: '...', refreshToken: '...' }
         accessToken = tokens.accessToken;
         refreshToken = tokens.refreshToken;
         console.log(
-          'AuthService handleAuthResponse - Found correct token format'
-        );
-      } else if (tokens.access?.token && tokens.refresh?.token) {
-        // Alternative format: { access: { token: '...' }, refresh: { token: '...' } }
-        accessToken = tokens.access.token;
-        refreshToken = tokens.refresh.token;
-        console.log(
-          'AuthService handleAuthResponse - Found nested token format'
+          'AuthService handleAuthResponse - Found tokens in direct format'
         );
       } else {
         console.error(

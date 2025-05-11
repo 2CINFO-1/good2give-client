@@ -1,65 +1,38 @@
 import { User } from './user.model';
 
-export enum EventStatus {
-  UPCOMING = 'UPCOMING',
-  ONGOING = 'ONGOING',
-  COMPLETED = 'COMPLETED',
-  CANCELLED = 'CANCELLED',
-  PLANNED = 'planned',
-}
-
 export interface Event {
   _id: string;
+  beneficiaryid: User;
   title: string;
-  description?: string;
-  objective?: string;
-  location?: string;
-  beneficiaryid?: User;
-  date?: string;
-  startDate?: Date;
-  endDate?: Date;
-  organizer?: User | string;
-  participants?: (User | string)[];
-  status: EventStatus;
-  capacity?: number;
-  numbre?: number;
-  registeredCount?: number;
-  photos?: string[];
-  createdAt?: string | Date;
-  updatedAt?: string | Date;
+  objective: string;
+  numbre: number;
+  date: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-export interface EventRequest {
+export interface CreateEventDto {
+  beneficiaryid: string;
   title: string;
-  description?: string;
-  objective?: string;
-  location?: string;
-  date?: string;
-  startDate?: Date;
-  endDate?: Date;
-  status?: EventStatus;
-  capacity?: number;
-  numbre?: number;
-  photos?: string[];
+  objective: string;
+  numbre: number;
+  date: string;
 }
 
-export interface EventResponse {
+export interface UpdateEventDto {
+  title?: string;
+  objective?: string;
+  numbre?: number;
+  date?: string;
+}
+
+export interface EventSerializer {
   _id: string;
+  beneficiaryid: User;
   title: string;
-  description?: string;
-  objective?: string;
-  location?: string;
-  beneficiaryid?: User;
-  date?: string;
-  startDate?: Date;
-  endDate?: Date;
-  organizer?: User | string;
-  participants?: (User | string)[];
-  status: EventStatus;
-  capacity?: number;
-  numbre?: number;
-  registeredCount?: number;
-  photos?: string[];
-  createdAt: string;
-  updatedAt: string;
+  objective: string;
+  numbre: number;
+  date: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }

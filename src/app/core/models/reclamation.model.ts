@@ -1,11 +1,9 @@
 import { User } from './user.model';
-import { Delivery } from './delivery.model';
 
 export enum ReclamationStatus {
-  OPEN = 'open',
-  UNDER_REVIEW = 'under_review',
+  PENDING = 'pending',
   RESOLVED = 'resolved',
-  REJECTED = 'rejected',
+  CLOSED = 'closed',
 }
 
 export enum ReclamationCategory {
@@ -18,24 +16,42 @@ export enum ReclamationCategory {
 
 export interface Reclamation {
   _id: string;
+  userid: User | string;
   title: string;
-  description: string;
-  category: ReclamationCategory;
-  submittedBy: User | string;
-  assignedTo?: User | string;
-  delivery?: Delivery | string;
+  subject: string;
   status: ReclamationStatus;
-  photos?: string[];
-  resolution?: string;
-  resolutionDate?: Date;
-  createdAt: Date;
-  updatedAt: Date;
+  date: Date | string;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
 }
 
 export interface ReclamationRequest {
+  userid: string;
   title: string;
-  description: string;
-  category: ReclamationCategory;
-  deliveryId?: string;
-  photos?: string[];
+  subject: string;
+  date: string | Date;
+}
+
+export interface ReclamationResponse extends Reclamation {
+  // Any additional fields that might be returned by the API
+}
+
+// ReclamationRES models (resolution models)
+export interface ReclamationResolution {
+  _id: string;
+  reclamid: string;
+  resolnote: string;
+  picid: User | string;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
+}
+
+export interface ReclamationResolutionRequest {
+  reclamid: string;
+  resolnote: string;
+  picid: string;
+}
+
+export interface ReclamationResolutionResponse extends ReclamationResolution {
+  // Any additional fields that might be returned by the API
 }

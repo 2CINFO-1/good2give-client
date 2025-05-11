@@ -4,9 +4,9 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   Event,
-  EventRequest,
-  EventResponse,
-  EventStatus,
+  CreateEventDto,
+  UpdateEventDto,
+  EventSerializer,
 } from '../models/event.model';
 
 @Injectable({
@@ -17,53 +17,72 @@ export class EventService {
 
   constructor(private http: HttpClient) {}
 
-  getEvents(): Observable<Event[]> {
-    return this.http.get<Event[]>(this.apiUrl);
+  /**
+   * Get all events
+   * @returns Array of event objects
+   */
+  getAllEvents(): Observable<EventSerializer[]> {
+    return this.http.get<EventSerializer[]>(this.apiUrl);
   }
 
-  getEventById(id: string): Observable<Event> {
-    return this.http.get<Event>(`${this.apiUrl}/${id}`);
+  /**
+   * Get event by ID
+   * @param id Event ID
+   * @returns Event object
+   */
+  getEventById(id: string): Observable<EventSerializer> {
+    return this.http.get<EventSerializer>(`${this.apiUrl}/${id}`);
   }
 
-  createEvent(eventData: EventRequest): Observable<EventResponse> {
-    return this.http.post<EventResponse>(this.apiUrl, eventData);
+  /**
+   * Create a new event
+   * @param eventData Event creation data
+   * @returns Newly created event
+   */
+  createEvent(eventData: CreateEventDto): Observable<EventSerializer> {
+    return this.http.post<EventSerializer>(this.apiUrl, eventData);
   }
 
+  /**
+   * Update event by ID
+   * @param id Event ID
+   * @param updateData Data to update
+   * @returns Updated event
+   */
   updateEvent(
     id: string,
-    eventData: Partial<EventRequest>
-  ): Observable<EventResponse> {
-    return this.http.put<EventResponse>(`${this.apiUrl}/${id}`, eventData);
+    updateData: UpdateEventDto
+  ): Observable<EventSerializer> {
+    return this.http.put<EventSerializer>(`${this.apiUrl}/${id}`, updateData);
   }
 
-  deleteEvent(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  /**
+   * Delete event by ID
+   * @param id Event ID
+   * @returns Boolean indicating success
+   */
+  deleteEvent(id: string): Observable<boolean> {
+    return this.http.delete<boolean>(`${this.apiUrl}/${id}`);
   }
 
-  // Method to update event status
-  updateEventStatus(id: string, status: EventStatus): Observable<Event> {
-    return this.http.patch<Event>(`${this.apiUrl}/${id}/status`, { status });
-  }
-
-  // Additional methods for specific event operations
-  getMyEvents(): Observable<Event[]> {
-    return this.http.get<Event[]>(`${this.apiUrl}/my-events`);
-  }
-
-  // Get events by beneficiary
-  getEventsByBeneficiary(beneficiaryId: string): Observable<Event[]> {
-    return this.http.get<Event[]>(
-      `${this.apiUrl}/beneficiary/${beneficiaryId}`
-    );
-  }
-
-  // Filter events by date range
-  getEventsByDateRange(
-    startDate: string,
-    endDate: string
-  ): Observable<Event[]> {
-    return this.http.get<Event[]>(`${this.apiUrl}/date-range`, {
-      params: { startDate, endDate },
+  /**
+   * Suggest food for an event
+   * @param eventId Event ID
+   * @param numberOfAttendees Number of attendees
+   * @param eventTitle Event title
+   * @param eventObjective Event objective
+   * @returns Array of food suggestions or null
+   */
+  suggestFood(
+    eventId: string,
+    numberOfAttendees: number,
+    eventTitle: string,
+    eventObjective: string
+  ): Observable<string[]> {
+    return this.http.post<string[]>(`${this.apiUrl}/${eventId}/suggest-food`, {
+      numberOfAttendees,
+      eventTitle,
+      eventObjective,
     });
   }
 }

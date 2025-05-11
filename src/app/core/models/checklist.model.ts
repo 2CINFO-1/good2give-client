@@ -15,11 +15,11 @@ export enum ChecklistType {
 
 export interface Checklist {
   _id: string;
+  inspectorId: User | string;
   type: ChecklistType;
   items: ChecklistItem[];
-  inspectorId: User;
-  createdAt?: string;
-  updatedAt?: string;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
 }
 
 export interface ChecklistRequest {
@@ -29,9 +29,9 @@ export interface ChecklistRequest {
 
 export interface ChecklistResponse {
   _id: string;
+  inspectorId: User | string;
   type: ChecklistType;
   items: ChecklistItem[];
-  inspectorId: User;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: string | Date;
+  updatedAt: string | Date;
 }
