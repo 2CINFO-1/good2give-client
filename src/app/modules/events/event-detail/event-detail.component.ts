@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { EventService } from 'src/app/services/event.service';
-import { Event, EventStatus } from 'src/app/models/event.model';
+import { EventService } from '../../../core/services/event.service';
+import { Event } from '../../../core/models/event.model';
 
 @Component({
   selector: 'app-event-detail',
@@ -12,7 +12,6 @@ export class EventDetailComponent implements OnInit {
   event: Event | null = null;
   loading = true;
   error = '';
-  EventStatus = EventStatus;
 
   constructor(
     private route: ActivatedRoute,
@@ -71,37 +70,8 @@ export class EventDetailComponent implements OnInit {
     }
   }
 
-  updateStatus(status: EventStatus): void {
-    if (this.event) {
-      this.eventService.updateEventStatus(this.event._id, status).subscribe({
-        next: (updatedEvent: Event) => {
-          this.event = updatedEvent;
-        },
-        error: (err: any) => {
-          this.error = 'Failed to update event status. Please try again later.';
-          console.error('Error updating event status:', err);
-        },
-      });
-    }
-  }
-
-  getStatusColor(status: EventStatus): string {
-    switch (status) {
-      case EventStatus.UPCOMING:
-        return 'bg-blue-100 text-blue-800';
-      case EventStatus.ONGOING:
-        return 'bg-green-100 text-green-800';
-      case EventStatus.COMPLETED:
-        return 'bg-gray-100 text-gray-800';
-      case EventStatus.CANCELLED:
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  }
-
-  formatDate(dateString: string): string {
-    const date = new Date(dateString);
+  formatDate(dateString: string | Date): string {
+    const date = dateString instanceof Date ? dateString : new Date(dateString);
     return date.toLocaleDateString();
   }
 }

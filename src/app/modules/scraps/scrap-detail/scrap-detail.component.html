@@ -35,15 +35,15 @@
                     </dd>
                 </div>
                 <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                    <dt class="text-sm font-medium text-gray-500">Quantity</dt>
+                    <dt class="text-sm font-medium text-gray-500">Title</dt>
                     <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                        <span class="font-medium">{{ scrap.quantity }}</span>
+                        <span class="font-medium">{{ scrap.title }}</span>
                     </dd>
                 </div>
                 <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                     <dt class="text-sm font-medium text-gray-500">Date</dt>
                     <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                        <span class="font-medium">{{ scrap.date | date }}</span>
+                        <span class="font-medium">{{ scrap.dateOfScrapping | date }}</span>
                     </dd>
                 </div>
                 <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
@@ -55,26 +55,26 @@
             </dl>
 
             <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                <dt class="text-sm font-medium text-gray-500">Description</dt>
+                <dt class="text-sm font-medium text-gray-500">Objective</dt>
                 <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                    <p class="text-gray-700">{{ scrap.description }}</p>
+                    <p class="text-gray-700">{{ scrap.objective }}</p>
                 </dd>
             </div>
 
             <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                <dt class="text-sm font-medium text-gray-500">Notes</dt>
+                <dt class="text-sm font-medium text-gray-500">Food Items</dt>
                 <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                    <p class="text-gray-700">{{ scrap.notes }}</p>
+                    <ul class="text-gray-700">
+                        <li *ngFor="let item of scrap.foodItems">{{ item }}</li>
+                    </ul>
                 </dd>
             </div>
 
             <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                <dt class="text-sm font-medium text-gray-500">Status</dt>
+                <dt class="text-sm font-medium text-gray-500">Beneficiary ID</dt>
                 <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                    <span
-                        [ngClass]="scrap.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'"
-                        class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full">
-                        {{ scrap.status }}
+                    <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full">
+                        {{ scrap.beneficiaryid }}
                     </span>
                 </dd>
             </div>

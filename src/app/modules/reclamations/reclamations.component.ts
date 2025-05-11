@@ -1,89 +1,60 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-
-interface Reclamation {
-  _id: string;
-  title: string;
-  status: string;
-  priority: string;
-  dateCreated: string;
-  customerName: string;
-}
+import { Router } from '@angular/router';
+import { ReclamationService } from '../../core/services/reclamation.service';
+import {
+  Reclamation,
+  ReclamationStatus,
+} from '../../core/models/reclamation.model';
 
 @Component({
   selector: 'app-reclamations',
+  standalone: true,
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './reclamations.component.html',
   styleUrls: ['./reclamations.component.css'],
-  standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
 })
 export class ReclamationsComponent implements OnInit {
   reclamations: Reclamation[] = [];
   filteredReclamations: Reclamation[] = [];
   isLoading = true;
   searchTerm = '';
-  statusFilter = 'all';
+  statusFilter: string | ReclamationStatus = 'all';
+  error: string | null = null;
+  ReclamationStatus = ReclamationStatus;
 
-  constructor(private router: Router) {}
+  constructor(
+    private reclamationsService: ReclamationService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
-    // Simulate API call with timeout
-    setTimeout(() => {
-      this.reclamations = [
-        {
-          _id: 'REC-2023-001',
-          title: 'Defective Product',
-          status: 'new',
-          priority: 'high',
-          dateCreated: '2023-05-15T10:30:00',
-          customerName: 'John Doe',
-        },
-        {
-          _id: 'REC-2023-002',
-          title: 'Shipping Delay',
-          status: 'in-progress',
-          priority: 'medium',
-          dateCreated: '2023-05-10T14:20:00',
-          customerName: 'Jane Smith',
-        },
-        {
-          _id: 'REC-2023-003',
-          title: 'Wrong Item Received',
-          status: 'resolved',
-          priority: 'low',
-          dateCreated: '2023-05-08T09:15:00',
-          customerName: 'Michael Johnson',
-        },
-        {
-          _id: 'REC-2023-004',
-          title: 'Billing Issue',
-          status: 'new',
-          priority: 'high',
-          dateCreated: '2023-05-14T16:45:00',
-          customerName: 'Sarah Williams',
-        },
-        {
-          _id: 'REC-2023-005',
-          title: 'Discount Not Applied',
-          status: 'in-progress',
-          priority: 'medium',
-          dateCreated: '2023-05-12T11:30:00',
-          customerName: 'David Brown',
-        },
-      ];
+    this.loadReclamations();
+  }
 
-      this.filteredReclamations = [...this.reclamations];
-      this.isLoading = false;
-    }, 1000);
+  loadReclamations(): void {
+    this.isLoading = true;
+    this.reclamationsService.getAllReclamations().subscribe({
+      next: (data) => {
+        this.reclamations = data;
+        this.filteredReclamations = [...this.reclamations];
+        this.isLoading = false;
+      },
+      error: (err) => {
+        this.error = 'Failed to load reclamations. Please try again.';
+        this.isLoading = false;
+        console.error('Error loading reclamations:', err);
+      },
+    });
   }
 
   onSearch(): void {
     this.applyFilters();
   }
 
-  onStatusFilterChange(status: string): void {
+  onStatusFilterChange(status: string | ReclamationStatus): void {
     this.statusFilter = status;
     this.applyFilters();
   }
@@ -93,11 +64,10 @@ export class ReclamationsComponent implements OnInit {
       // Apply search term filter
       const matchesSearch =
         this.searchTerm.trim() === '' ||
+        rec._id.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
         rec.title.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        rec.customerName
-          .toLowerCase()
-          .includes(this.searchTerm.toLowerCase()) ||
-        rec._id.toLowerCase().includes(this.searchTerm.toLowerCase());
+        (rec.subject &&
+          rec.subject.toLowerCase().includes(this.searchTerm.toLowerCase()));
 
       // Apply status filter
       const matchesStatus =
@@ -107,25 +77,29 @@ export class ReclamationsComponent implements OnInit {
     });
   }
 
+  formatStatusLabel(status: ReclamationStatus): string {
+    switch (status) {
+      case ReclamationStatus.PENDING:
+        return 'Pending';
+      case ReclamationStatus.RESOLVED:
+        return 'Resolved';
+      case ReclamationStatus.CLOSED:
+        return 'Closed';
+      default:
+        // Convert status to string and capitalize first letter
+        const statusString = String(status);
+        return (
+          statusString.charAt(0).toUpperCase() +
+          statusString.slice(1).toLowerCase()
+        );
+    }
+  }
+
   viewReclamation(id: string): void {
-    this.router.navigate(['/reclamations', id]);
+    this.router.navigate(['/dashboard/reclamations', id]);
   }
 
   createReclamation(): void {
-    this.router.navigate(['/reclamations/create']);
-  }
-
-  filterReclamations(): void {
-    if (!this.searchTerm) {
-      this.filteredReclamations = this.reclamations;
-      return;
-    }
-
-    this.filteredReclamations = this.reclamations.filter(
-      (rec) =>
-        rec._id.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        rec.title.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        rec.customerName.toLowerCase().includes(this.searchTerm.toLowerCase())
-    );
+    this.router.navigate(['/dashboard/reclamations/create']);
   }
 }

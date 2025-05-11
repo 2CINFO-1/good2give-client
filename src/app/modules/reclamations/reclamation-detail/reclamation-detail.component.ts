@@ -1,27 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
-
-interface Comment {
-  id: string;
-  text: string;
-  author: string;
-  date: string;
-}
-
-interface Reclamation {
-  id: string;
-  title: string;
-  description: string;
-  productId: string;
-  status: string;
-  priority: string;
-  dateCreated: string;
-  lastUpdated: string;
-  customerName: string;
-  customerEmail: string;
-  comments: Comment[];
-}
+import { ReclamationService } from '../../../core/services/reclamation.service';
+import {
+  Reclamation,
+  ReclamationResolution,
+  ReclamationStatus,
+} from '../../../core/models/reclamation.model';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-reclamation-detail',
@@ -30,50 +16,94 @@ interface Reclamation {
   standalone: true,
   imports: [CommonModule, RouterModule],
 })
-export class ReclamationDetailComponent implements OnInit {
+export class ReclamationDetailComponent implements OnInit, OnDestroy {
   reclamationId!: string;
-  reclamation!: Reclamation;
+  reclamation: Reclamation | null = null;
+  resolutions: ReclamationResolution[] = [];
   isLoading = true;
+  error: string | null = null;
+  ReclamationStatus = ReclamationStatus;
+  private subscriptions: Subscription[] = [];
 
-  constructor(private route: ActivatedRoute, private router: Router) {}
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private reclamationService: ReclamationService
+  ) {}
 
   ngOnInit(): void {
     this.reclamationId = this.route.snapshot.paramMap.get('id') || '';
-
-    // Simulate API call with timeout
-    setTimeout(() => {
-      this.reclamation = {
-        id: this.reclamationId,
-        title: 'Defective Product',
-        description:
-          'I received a damaged product. The packaging was intact but the product inside was broken. I would like a replacement or refund.',
-        productId: 'PROD-12345',
-        status: 'in-progress',
-        priority: 'high',
-        dateCreated: '2023-05-15T10:30:00',
-        lastUpdated: '2023-05-16T14:20:00',
-        customerName: 'John Doe',
-        customerEmail: 'john.doe@example.com',
-        comments: [
-          {
-            id: 'COM-001',
-            text: 'We apologize for the inconvenience. We are looking into this issue and will get back to you shortly.',
-            author: 'Support Agent',
-            date: '2023-05-15T14:45:00',
-          },
-          {
-            id: 'COM-002',
-            text: 'We have located a replacement product and will ship it out immediately. You should receive it within 3-5 business days.',
-            author: 'Support Manager',
-            date: '2023-05-16T11:30:00',
-          },
-        ],
-      };
+    if (this.reclamationId) {
+      this.loadReclamationData();
+    } else {
+      this.error = 'Invalid reclamation ID';
       this.isLoading = false;
-    }, 1000);
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
+  }
+
+  loadReclamationData(): void {
+    this.isLoading = true;
+
+    // Load reclamation details
+    const recSub = this.reclamationService
+      .getReclamationById(this.reclamationId)
+      .subscribe({
+        next: (data) => {
+          this.reclamation = data;
+          this.loadResolutions();
+        },
+        error: (err) => {
+          this.error = 'Failed to load reclamation details.';
+          this.isLoading = false;
+          console.error('Error loading reclamation:', err);
+        },
+      });
+
+    this.subscriptions.push(recSub);
+  }
+
+  loadResolutions(): void {
+    // Load reclamation resolutions
+    const resSub = this.reclamationService
+      .getResolutionsForReclamation(this.reclamationId)
+      .subscribe({
+        next: (data) => {
+          this.resolutions = data;
+          this.isLoading = false;
+        },
+        error: (err) => {
+          console.error('Error loading resolutions:', err);
+          this.isLoading = false;
+        },
+      });
+
+    this.subscriptions.push(resSub);
+  }
+
+  formatStatusLabel(status: ReclamationStatus): string {
+    switch (status) {
+      case ReclamationStatus.PENDING:
+        return 'Pending';
+      case ReclamationStatus.RESOLVED:
+        return 'Resolved';
+      case ReclamationStatus.CLOSED:
+        return 'Closed';
+      default:
+        // Convert the status to string, capitalize first letter
+        const statusStr = String(status);
+        return statusStr.charAt(0).toUpperCase() + statusStr.slice(1);
+    }
   }
 
   onUpdate(): void {
-    this.router.navigate(['/reclamations', this.reclamationId, 'update']);
+    this.router.navigate([
+      '/dashboard/reclamations',
+      this.reclamationId,
+      'update',
+    ]);
   }
 }

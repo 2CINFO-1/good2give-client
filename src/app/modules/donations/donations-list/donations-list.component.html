@@ -1,0 +1,118 @@
+<div class="container mx-auto p-4">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-semibold text-gray-800">Donations</h1>
+        <div class="space-x-2">
+            <a routerLink="/dashboard/donations/create"
+                class="px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700 transition-colors flex items-center">
+                <span class="material-icons mr-1 text-sm">add</span>
+                New Donation
+            </a>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <div class="flex-1">
+                <div class="relative">
+                    <input type="text" [(ngModel)]="searchTerm" (input)="applyFilters()"
+                        placeholder="Search by donor, item..."
+                        class="w-full p-2 pl-10 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    <span class="material-icons absolute left-3 top-2 text-gray-400">search</span>
+                </div>
+            </div>
+            <div class="flex-initial">
+                <select [(ngModel)]="statusFilter" (change)="applyFilters()"
+                    class="p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    <option value="">All Statuses</option>
+                    <option value="PENDING">Pending</option>
+                    <option value="RECEIVED">Received</option>
+                    <option value="PROCESSED">Processed</option>
+                    <option value="COMPLETED">Completed</option>
+                </select>
+            </div>
+        </div>
+
+        <div *ngIf="isLoading" class="flex justify-center py-8">
+            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-700"></div>
+        </div>
+
+        <div *ngIf="!isLoading && filteredDonations.length === 0" class="text-center py-8 text-gray-500">
+            No donations found matching your criteria.
+        </div>
+
+        <div *ngIf="!isLoading && filteredDonations.length > 0" class="overflow-x-auto">
+            <table class="min-w-full">
+                <thead class="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            ID
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Donor
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Items
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Date
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Status
+                        </th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Actions
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <tr *ngFor="let donation of filteredDonations"
+                        class="hover:bg-gray-50 cursor-pointer transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap" (click)="viewDonation(donation._id)">
+                            <div class="text-sm text-gray-900">{{ donation._id | slice:0:8 }}...</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap" (click)="viewDonation(donation._id)">
+                            <div class="text-sm font-medium text-gray-900">{{ getDonorName(donation.donorId) }}</div>
+                        </td>
+                        <td class="px-6 py-4" (click)="viewDonation(donation._id)">
+                            <div *ngIf="donation.items && donation.items.length > 0" class="text-sm text-gray-900">
+                                <div *ngFor="let item of donation.items | slice:0:2">
+                                    {{ item.name || item.productId }} ({{ item.quantity }})
+                                </div>
+                                <div *ngIf="donation.items.length > 2" class="text-xs text-gray-500">
+                                    +{{ donation.items.length - 2 }} more items
+                                </div>
+                            </div>
+                            <div *ngIf="!donation.items || donation.items.length === 0" class="text-sm text-gray-500">
+                                No items
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                            (click)="viewDonation(donation._id)">
+                            {{ formatDate(donation.donationDate) }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap" (click)="viewDonation(donation._id)">
+                            <span [ngClass]="{
+                                    'bg-yellow-100 text-yellow-800': donation.status === 'PENDING',
+                                    'bg-blue-100 text-blue-800': donation.status === 'RECEIVED',
+                                    'bg-purple-100 text-purple-800': donation.status === 'PROCESSED',
+                                    'bg-green-100 text-green-800': donation.status === 'COMPLETED'
+                                }" class="px-2 py-1 text-xs rounded-full">
+                                {{ donation.status }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <button (click)="viewDonation(donation._id)"
+                                class="text-emerald-600 hover:text-emerald-900 mr-3">
+                                <span class="material-icons text-base">visibility</span>
+                            </button>
+                            <button (click)="editDonation(donation._id)" *ngIf="donation.status === 'PENDING'"
+                                class="text-blue-600 hover:text-blue-900 mr-3">
+                                <span class="material-icons text-base">edit</span>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

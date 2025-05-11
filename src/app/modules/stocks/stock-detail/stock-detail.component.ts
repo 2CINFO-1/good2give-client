@@ -51,7 +51,15 @@ export class StockDetailComponent implements OnInit {
     });
   }
 
-  loadProductDetails(productId: string): void {
+  loadProductDetails(productId: Product | string): void {
+    // If productId is already a Product object, use it directly
+    if (typeof productId === 'object' && productId !== null) {
+      this.product = productId;
+      this.isLoading = false;
+      return;
+    }
+
+    // Otherwise fetch the product by its ID
     this.productService.getProductById(productId).subscribe({
       next: (data) => {
         this.product = data;
@@ -83,7 +91,12 @@ export class StockDetailComponent implements OnInit {
   goToAdjust(): void {
     if (this.stock) {
       this.router.navigate(['/dashboard/stocks/adjust'], {
-        queryParams: { productId: this.stock.productId },
+        queryParams: {
+          productId:
+            typeof this.stock.productId === 'string'
+              ? this.stock.productId
+              : this.stock.productId._id,
+        },
       });
     }
   }
@@ -91,19 +104,6 @@ export class StockDetailComponent implements OnInit {
   isLowStock(): boolean {
     // Since minStock doesn't exist in the model, always return false
     return false;
-  }
-
-  isExpiringSoon(): boolean {
-    if (!this.stock || !this.stock.expiryDate) {
-      return false;
-    }
-
-    const expiryDate = new Date(this.stock.expiryDate);
-    const today = new Date();
-    const thirtyDaysFromNow = new Date();
-    thirtyDaysFromNow.setDate(today.getDate() + 30);
-
-    return expiryDate <= thirtyDaysFromNow && expiryDate >= today;
   }
 
   confirmDelete(): void {
@@ -123,9 +123,48 @@ export class StockDetailComponent implements OnInit {
     }
   }
 
-  formatDate(dateString: string | null | undefined): string {
-    if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    return date.toLocaleDateString();
+  formatDate(date: string | Date | null | undefined): string {
+    if (!date) return 'N/A';
+    try {
+      const dateObj =
+        typeof date === 'string'
+          ? new Date(date)
+          : date instanceof Date
+          ? date
+          : null;
+      return dateObj ? dateObj.toLocaleDateString() : 'N/A';
+    } catch (error) {
+      return 'Invalid Date';
+    }
+  }
+
+  adjustStock(): void {
+    // Navigate to stock adjustment page
+    if (this.stock) {
+      this.router.navigate(['/dashboard/stocks/adjust', this.stock._id]);
+    }
+  }
+
+  releaseStock(): void {
+    if (!this.stock || this.stock.releasedAt) {
+      return;
+    }
+
+    // Set release date to current date
+    const releaseDate = new Date().toISOString();
+
+    this.stockService
+      .updateStock(this.stock._id, {
+        releasedAt: releaseDate,
+      })
+      .subscribe({
+        next: () => {
+          // Reload the stock details
+          this.loadStockDetails();
+        },
+        error: (err) => {
+          console.error('Error releasing stock:', err);
+        },
+      });
   }
 }

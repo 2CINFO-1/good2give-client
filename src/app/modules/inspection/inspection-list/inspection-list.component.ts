@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { InspectionService } from '../../../services/inspection.service';
-import { Inspection, InspectionStatus } from '../../../models/inspection.model';
+import { InspectionService } from '../../../core/services/inspection.service';
+import { Inspection } from '../../../core/models/inspection.model';
 
 @Component({
   selector: 'app-inspection-list',
@@ -12,11 +12,10 @@ export class InspectionListComponent implements OnInit {
   inspections: Inspection[] = [];
   loading = false;
   error: string | null = null;
-  InspectionStatus = InspectionStatus; // Make enum available in template
 
   constructor(
-    private inspectionService: InspectionService,
-    private router: Router
+    private router: Router,
+    private inspectionService: InspectionService
   ) {}
 
   ngOnInit(): void {
@@ -28,19 +27,19 @@ export class InspectionListComponent implements OnInit {
     this.error = null;
 
     this.inspectionService.getInspections().subscribe({
-      next: (data) => {
+      next: (data: Inspection[]) => {
         this.inspections = data;
         this.loading = false;
       },
-      error: (err) => {
-        this.error = 'Failed to load inspections. Please try again.';
+      error: (err: any) => {
+        this.error = 'Failed to load inspections';
         this.loading = false;
         console.error('Error loading inspections:', err);
       },
     });
   }
 
-  viewDetails(id: string): void {
+  viewInspection(id: string): void {
     this.router.navigate(['/dashboard/inspection', id]);
   }
 
@@ -48,23 +47,52 @@ export class InspectionListComponent implements OnInit {
     this.router.navigate(['/dashboard/inspection/create']);
   }
 
-  getStatusClass(status: InspectionStatus): string {
+  // Format date string to local date and time
+  formatDate(date: string | Date | undefined): string {
+    if (!date) return 'N/A';
+    return new Date(date).toLocaleString();
+  }
+
+  // Get appropriate CSS class for status badges
+  getStatusClass(status: string): string {
     switch (status) {
-      case InspectionStatus.PASSED:
-        return 'bg-green-100 text-green-800';
-      case InspectionStatus.FAILED:
-        return 'bg-red-100 text-red-800';
-      case InspectionStatus.PENDING:
-        return 'bg-yellow-100 text-yellow-800';
-      case InspectionStatus.COMPLETED:
-        return 'bg-blue-100 text-blue-800';
+      case 'PASSED':
+        return 'badge-success';
+      case 'FAILED':
+        return 'badge-danger';
+      case 'PENDING':
+        return 'badge-warning';
+      case 'COMPLETED':
+        return 'badge-info';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'badge-secondary';
     }
   }
 
-  // Format date string to local date
-  formatDate(date: string): string {
-    return new Date(date).toLocaleDateString();
+  // Check if results array exists
+  hasResults(inspection: Inspection): boolean {
+    return Array.isArray(inspection.results) && inspection.results.length > 0;
+  }
+
+  // Count failed results
+  countFailedResults(inspection: Inspection): number {
+    if (!inspection.results) return 0;
+    return inspection.results.filter((r) => r.status === 'fail').length;
+  }
+
+  // Check if issues array exists
+  hasIssues(inspection: Inspection): boolean {
+    return Array.isArray(inspection.issues) && inspection.issues.length > 0;
+  }
+
+  // Get issues count
+  getIssuesCount(inspection: Inspection): number {
+    if (!inspection.issues) return 0;
+    return inspection.issues.length;
+  }
+
+  // Add this method to get the results count
+  getResultsCount(inspection: Inspection): number {
+    return inspection.results?.length || 0;
   }
 }

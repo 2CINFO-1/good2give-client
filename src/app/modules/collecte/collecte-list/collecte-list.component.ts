@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Collecte, CollecteStatus } from '../../../models/collecte.model';
-import { CollecteService } from '../../../services/collecte.service';
+import { Collecte, CollecteStatus } from '../../../core/models/collecte.model';
+import { CollecteService } from '../../../core/services/collecte.service';
 import { catchError, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
 
@@ -38,17 +38,17 @@ export class CollecteListComponent implements OnInit {
     this.error = null;
 
     this.collecteService
-      .getCollectes()
+      .getAllCollectes()
       .pipe(
         catchError((error) => {
-          this.error = 'Failed to load collections. Please try again later.';
+          this.error = 'Failed to load collections. Please try again.';
           return of([]);
         }),
         finalize(() => {
           this.loading = false;
         })
       )
-      .subscribe((data: Collecte[]) => {
+      .subscribe((data) => {
         this.collectes = data;
         this.totalItems = data.length;
       });
@@ -80,8 +80,7 @@ export class CollecteListComponent implements OnInit {
     return new Date(date).toLocaleDateString();
   }
 
-  assignTransporter(collecteId: string): void {
-    // Navigate to assign transporter page or implement modal logic here
-    this.router.navigate(['/dashboard/collecte/assign', collecteId]);
+  createCollecte(): void {
+    this.router.navigate(['/dashboard/collecte/create']);
   }
 }

@@ -1,38 +1,55 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { ScrapService } from '../../../core/services/scrap.service';
+import { FoodScrap } from '../../../core/models/scrap.model';
 
 @Component({
   selector: 'app-scrap-detail',
   templateUrl: './scrap-detail.component.html',
   styleUrls: ['./scrap-detail.component.css'],
+  standalone: true,
+  imports: [CommonModule, RouterModule],
 })
 export class ScrapDetailComponent implements OnInit {
-  scrapId: number;
-  scrap: any;
+  scrapId: string;
+  scrap: FoodScrap | null = null;
   isLoading = true;
+  error: string | null = null;
 
-  constructor(private route: ActivatedRoute, private router: Router) {
-    this.scrapId = +this.route.snapshot.paramMap.get('id')!;
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private scrapService: ScrapService
+  ) {
+    this.scrapId = this.route.snapshot.paramMap.get('id') || '';
   }
 
   ngOnInit(): void {
-    // Simulate API call
-    setTimeout(() => {
-      this.scrap = {
-        id: this.scrapId,
-        name: `Scrap Item ${this.scrapId}`,
-        description: 'Detailed description of the scrap item.',
-        quantity: 10,
-        date: new Date(),
-        status: 'Pending',
-        location: 'Warehouse A',
-        notes: 'Additional notes about this scrap item.',
-      };
+    this.loadScrapDetails();
+  }
+
+  loadScrapDetails(): void {
+    if (!this.scrapId) {
+      this.error = 'Invalid scrap ID';
       this.isLoading = false;
-    }, 1000);
+      return;
+    }
+
+    this.scrapService.getScrapById(this.scrapId).subscribe({
+      next: (data) => {
+        this.scrap = data;
+        this.isLoading = false;
+      },
+      error: (err) => {
+        this.error = 'Failed to load scrap details. Please try again later.';
+        this.isLoading = false;
+        console.error('Error loading scrap details:', err);
+      },
+    });
   }
 
   goBack(): void {
-    this.router.navigate(['/scraps']);
+    this.router.navigate(['/dashboard/scraps']);
   }
 }

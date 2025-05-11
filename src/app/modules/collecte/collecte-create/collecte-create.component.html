@@ -50,80 +50,13 @@
             </div>
 
             <div class="mb-4">
-                <label for="scheduledDate" class="block text-gray-700 text-sm font-medium mb-2">Scheduled Date*</label>
-                <input id="scheduledDate" type="date" formControlName="scheduledDate"
+                <label for="status" class="block text-gray-700 text-sm font-medium mb-2">Status</label>
+                <select id="status" formControlName="status"
                     class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                <div *ngIf="f['scheduledDate'].touched && f['scheduledDate'].errors" class="text-red-500 text-sm mt-1">
-                    <div *ngIf="f['scheduledDate'].errors?.['required']">Scheduled date is required</div>
-                </div>
-            </div>
-
-            <div class="mb-4">
-                <div class="flex justify-between items-center mb-2">
-                    <label class="block text-gray-700 text-sm font-medium">Items to Collect*</label>
-                    <button type="button" (click)="addItem()"
-                        class="px-2 py-1 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 text-sm">
-                        + Add Item
-                    </button>
-                </div>
-
-                <div formArrayName="items" class="space-y-2">
-                    <div *ngFor="let item of itemsControls.controls; let i = index" [formGroupName]="i"
-                        class="p-3 border border-gray-200 rounded-md bg-gray-50">
-                        <div class="flex justify-between items-center mb-2">
-                            <h3 class="text-sm font-medium text-gray-700">Item #{{ i + 1 }}</h3>
-                            <button type="button" (click)="removeItem(i)"
-                                class="text-red-600 hover:text-red-800 text-sm">
-                                Remove
-                            </button>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                            <div>
-                                <label [for]="'item-name-' + i" class="block text-gray-700 text-xs mb-1">Name*</label>
-                                <input [id]="'item-name-' + i" type="text" formControlName="name"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm">
-                                <div *ngIf="item.get('name')?.touched && item.get('name')?.errors"
-                                    class="text-red-500 text-xs mt-1">
-                                    <div *ngIf="item.get('name')?.errors?.['required']">Name is required</div>
-                                </div>
-                            </div>
-                            <div>
-                                <label [for]="'item-quantity-' + i"
-                                    class="block text-gray-700 text-xs mb-1">Quantity*</label>
-                                <input [id]="'item-quantity-' + i" type="number" formControlName="quantity"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm">
-                                <div *ngIf="item.get('quantity')?.touched && item.get('quantity')?.errors"
-                                    class="text-red-500 text-xs mt-1">
-                                    <div *ngIf="item.get('quantity')?.errors?.['required']">Quantity is required</div>
-                                </div>
-                            </div>
-                            <div>
-                                <label [for]="'item-unit-' + i" class="block text-gray-700 text-xs mb-1">Unit*</label>
-                                <input [id]="'item-unit-' + i" type="text" formControlName="unit"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm">
-                                <div *ngIf="item.get('unit')?.touched && item.get('unit')?.errors"
-                                    class="text-red-500 text-xs mt-1">
-                                    <div *ngIf="item.get('unit')?.errors?.['required']">Unit is required</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div *ngIf="itemsControls.controls.length === 0"
-                    class="p-4 bg-gray-50 text-center text-gray-500 rounded-md">
-                    No items added. Click "Add Item" to add items to collect.
-                </div>
-
-                <div *ngIf="itemsControls.touched && itemsControls.invalid" class="text-red-500 text-sm mt-1">
-                    <div *ngIf="itemsControls.errors?.['required']">At least one item is required</div>
-                </div>
-            </div>
-
-            <div class="mb-6">
-                <label for="notes" class="block text-gray-700 text-sm font-medium mb-2">Notes</label>
-                <textarea id="notes" rows="3" formControlName="notes"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+                    <option [value]="CollecteStatus.PENDING">Pending</option>
+                    <option [value]="CollecteStatus.IN_PROGRESS">In Progress</option>
+                    <option [value]="CollecteStatus.COMPLETED">Completed</option>
+                </select>
             </div>
 
             <div class="flex justify-end space-x-3">

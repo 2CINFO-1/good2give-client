@@ -1,13 +1,32 @@
-<div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-    <div class="px-4 py-6 sm:px-0">
-        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
-            <!-- Loading State -->
-            <div *ngIf="loading" class="flex justify-center my-8 p-6">
-                <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+<div class="container mx-auto px-4 py-8">
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <div class="px-4 py-5 sm:px-6">
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">
+                    Inspection Details
+                </h3>
+                <button (click)="goBack()"
+                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                        fill="currentColor">
+                        <path fill-rule="evenodd"
+                            d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
+                            clip-rule="evenodd" />
+                    </svg>
+                    Back
+                </button>
             </div>
+            <p class="mt-1 max-w-2xl text-sm text-gray-500">
+                Inspection Date: {{ inspection?.inspectionDate ? formatDate(inspection?.inspectionDate) : 'N/A' }}
+            </p>
+            <p *ngIf="inspection?.scheduledDate" class="mt-1 max-w-2xl text-sm text-gray-500">
+                Scheduled Date: {{ formatDate(inspection?.scheduledDate) }}
+            </p>
+        </div>
 
-            <!-- Error Message -->
-            <div *ngIf="error" class="bg-red-50 border-l-4 border-red-500 p-4 m-6">
+        <!-- Error Message -->
+        <div *ngIf="error" class="border-t border-gray-200 px-4 py-5">
+            <div class="bg-red-50 border-l-4 border-red-500 p-4">
                 <div class="flex">
                     <div class="flex-shrink-0">
                         <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
@@ -22,127 +41,125 @@
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Inspection Details -->
-            <div *ngIf="!loading && !error && inspection">
-                <!-- Header -->
-                <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
-                    <div>
-                        <h3 class="text-lg leading-6 font-medium text-gray-900">
-                            Inspection Details
-                        </h3>
-                        <p class="mt-1 max-w-2xl text-sm text-gray-500">
-                            {{ formatDate(inspection.date) }}
-                        </p>
-                    </div>
-                    <button (click)="goBack()"
-                        class="inline-flex items-center px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-                        <svg class="-ml-1 mr-1 h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd"
-                                d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
-                                clip-rule="evenodd" />
-                        </svg>
-                        Back
-                    </button>
+        <!-- Inspection Status Section -->
+        <div class="border-t border-gray-200">
+            <dl>
+                <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                    <dt class="text-sm font-medium text-gray-500">Status</dt>
+                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                            [ngClass]="getStatusClass(inspection?.status || '')">
+                            {{ inspection?.status }}
+                        </span>
+
+                        <div *ngIf="inspection && !loading" class="mt-4 flex space-x-3">
+                            <button (click)="updateStatus(StatusValues.APPROVED)"
+                                [disabled]="inspection.status === StatusValues.APPROVED"
+                                class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50">
+                                Approve
+                            </button>
+
+                            <button (click)="updateStatus(StatusValues.REJECTED)"
+                                [disabled]="inspection.status === StatusValues.REJECTED"
+                                class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50">
+                                Reject
+                            </button>
+
+                            <button (click)="updateStatus(StatusValues.PENDING)"
+                                [disabled]="inspection.status === StatusValues.PENDING"
+                                class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 disabled:opacity-50">
+                                Mark Pending
+                            </button>
+                        </div>
+                    </dd>
                 </div>
 
-                <!-- Basic Info -->
-                <div class="border-t border-gray-200">
-                    <dl>
-                        <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                            <dt class="text-sm font-medium text-gray-500">Stock ID</dt>
-                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ inspection.stockId }}</dd>
-                        </div>
-                        <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                            <dt class="text-sm font-medium text-gray-500">Inspector</dt>
-                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ inspection.inspector }}</dd>
-                        </div>
-                        <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                            <dt class="text-sm font-medium text-gray-500">Status</dt>
-                            <dd class="mt-1 text-sm sm:mt-0 sm:col-span-2">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
-                                    [ngClass]="getStatusClass(inspection.status)">
-                                    {{ inspection.status }}
-                                </span>
-
-                                <!-- Status Actions -->
-                                <div class="mt-2 space-x-2">
-                                    <button *ngIf="inspection.status !== InspectionStatus.PASSED"
-                                        (click)="updateStatus(InspectionStatus.PASSED)"
-                                        class="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-green-700 bg-green-100 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                                        Mark as Passed
-                                    </button>
-                                    <button *ngIf="inspection.status !== InspectionStatus.FAILED"
-                                        (click)="updateStatus(InspectionStatus.FAILED)"
-                                        class="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
-                                        Mark as Failed
-                                    </button>
-                                    <button *ngIf="inspection.status !== InspectionStatus.COMPLETED"
-                                        (click)="updateStatus(InspectionStatus.COMPLETED)"
-                                        class="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                        Mark as Completed
-                                    </button>
-                                </div>
-                            </dd>
-                        </div>
-                        <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                            <dt class="text-sm font-medium text-gray-500">Notes</dt>
-                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ inspection.notes || 'No
-                                notes provided' }}</dd>
-                        </div>
-
-                        <!-- Findings Section -->
-                        <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                            <dt class="text-sm font-medium text-gray-500">Findings</dt>
-                            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                <div *ngIf="inspection.findings.length === 0" class="text-sm text-gray-500">
-                                    No findings reported
-                                </div>
-
-                                <ul *ngIf="inspection.findings.length > 0"
-                                    class="border border-gray-200 rounded-md divide-y divide-gray-200">
-                                    <li *ngFor="let finding of inspection.findings; let i = index"
-                                        class="pl-3 pr-4 py-3 flex items-center justify-between text-sm">
-                                        <div class="w-0 flex-1 flex flex-col">
-                                            <div class="flex items-center">
-                                                <span
-                                                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full mr-2"
-                                                    [ngClass]="getTypeClass(finding.type)">
-                                                    {{ finding.type }}
-                                                </span>
-                                                <span
-                                                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
-                                                    [ngClass]="getSeverityClass(finding.severity)">
-                                                    {{ finding.severity }}
-                                                </span>
-                                            </div>
-                                            <span class="mt-2 text-gray-900 truncate">{{ finding.description }}</span>
-
-                                            <div *ngIf="finding.actionRequired" class="mt-1">
-                                                <span class="text-xs text-gray-500">Action required:</span>
-                                                <span class="ml-1 text-xs text-gray-700">{{ finding.actionRequired
-                                                    }}</span>
-                                            </div>
-
-                                            <div *ngIf="finding.resolved"
-                                                class="mt-1 text-xs text-green-600 font-semibold">
-                                                Resolved
-                                            </div>
-                                        </div>
-
-                                        <div class="ml-4 flex-shrink-0" *ngIf="!finding.resolved">
-                                            <button (click)="resolveFinding(i)"
-                                                class="font-medium text-blue-600 hover:text-blue-500">
-                                                Mark as resolved
-                                            </button>
-                                        </div>
-                                    </li>
-                                </ul>
-                            </dd>
-                        </div>
-                    </dl>
+                <!-- Inspector Notes -->
+                <div *ngIf="inspection?.inspectorNotes"
+                    class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                    <dt class="text-sm font-medium text-gray-500">Inspector Notes</dt>
+                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ inspection?.inspectorNotes }}</dd>
                 </div>
+            </dl>
+        </div>
+
+        <!-- Inspection Results Section -->
+        <div *ngIf="hasResults()" class="border-t border-gray-200">
+            <div class="bg-gray-50 px-4 py-5 sm:px-6">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Results</h3>
+                <p class="mt-1 max-w-2xl text-sm text-gray-500">Detailed inspection results</p>
+            </div>
+            <div class="px-4 py-5 sm:px-6">
+                <div class="flow-root">
+                    <ul role="list" class="-mb-8">
+                        <li *ngFor="let result of inspection?.results; let i = index"
+                            class="pb-5 border-b border-gray-200 mb-5 last:mb-0 last:border-b-0">
+                            <div class="relative flex space-x-3">
+                                <div>
+                                    <span
+                                        class="h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white"
+                                        [ngClass]="result.status === 'pass' ? 'bg-green-50' : 'bg-red-50'">
+                                        <svg *ngIf="result.status === 'pass'" class="h-5 w-5 text-green-500"
+                                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd"
+                                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                        <svg *ngIf="result.status === 'fail'" class="h-5 w-5 text-red-500"
+                                            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd"
+                                                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                    </span>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-center">
+                                        <p class="text-sm text-gray-500">{{ result.item }}</p>
+                                        <span class="ml-3 px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                                            [ngClass]="getResultStatusClass(result.status)">
+                                            {{ result.status }}
+                                        </span>
+                                    </div>
+                                    <div *ngIf="result.comment" class="mt-2 text-sm text-gray-700">
+                                        <p>{{ result.comment }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Issues Section -->
+        <div *ngIf="hasIssues()" class="border-t border-gray-200">
+            <div class="bg-gray-50 px-4 py-5 sm:px-6">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Issues</h3>
+                <p class="mt-1 max-w-2xl text-sm text-gray-500">Problems that need to be addressed</p>
+            </div>
+            <div class="px-4 py-5 sm:px-6">
+                <ul class="border border-gray-200 rounded-md divide-y divide-gray-200">
+                    <li *ngFor="let issue of inspection?.issues; let i = index"
+                        class="pl-3 pr-4 py-3 flex items-center justify-between text-sm">
+                        <div class="w-0 flex-1 flex items-center">
+                            <svg class="flex-shrink-0 h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            <span class="ml-2 flex-1 w-0 truncate">{{ issue }}</span>
+                        </div>
+                        <div class="ml-4 flex-shrink-0">
+                            <button (click)="resolveIssue(i)" class="font-medium text-indigo-600 hover:text-indigo-500">
+                                Resolve
+                            </button>
+                        </div>
+                    </li>
+                </ul>
             </div>
         </div>
     </div>

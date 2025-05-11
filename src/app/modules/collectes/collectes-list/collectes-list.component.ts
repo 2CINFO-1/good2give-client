@@ -1,35 +1,30 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { Collecte, CollecteStatus } from '../../../models/collecte.model';
-import { CollecteService } from '../../../services/collecte.service';
+import { CommonModule } from '@angular/common';
+import { Router, RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { catchError, finalize, of } from 'rxjs';
+import { Collecte, CollecteStatus } from '../../../core/models/collecte.model';
+import { CollecteService } from '../../../core/services/collecte.service';
 
 @Component({
   selector: 'app-collectes-list',
   templateUrl: './collectes-list.component.html',
   styleUrls: ['./collectes-list.component.css'],
+  standalone: true,
+  imports: [CommonModule, RouterModule, FormsModule],
 })
 export class CollectesListComponent implements OnInit {
   collectes: Collecte[] = [];
   filteredCollectes: Collecte[] = [];
-  isLoading = true;
+  isLoading = false;
   error: string | null = null;
   searchTerm = '';
-  statusFilter: CollecteStatus | 'ALL' = 'ALL';
-  collecteStatus = CollecteStatus;
-  statusOptions = [
-    { value: 'ALL', label: 'All Status' },
-    ...Object.values(CollecteStatus).map((value) => ({
-      value,
-      label: this.formatStatusLabel(value),
-    })),
-  ];
-
-  // Add the Math object to the component for use in template
-  Math = Math;
+  statusFilter: string = '';
+  CollecteStatus = CollecteStatus;
 
   constructor(
-    private router: Router,
-    private collecteService: CollecteService
+    private collecteService: CollecteService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -38,83 +33,72 @@ export class CollectesListComponent implements OnInit {
 
   loadCollectes(): void {
     this.isLoading = true;
-    this.collecteService.getCollectes().subscribe({
-      next: (data) => {
+    this.error = null;
+
+    this.collecteService
+      .getAllCollectes()
+      .pipe(
+        catchError((error) => {
+          this.error = 'Failed to load collections. Please try again.';
+          console.error('Error loading collectes:', error);
+          return of([]);
+        }),
+        finalize(() => {
+          this.isLoading = false;
+        })
+      )
+      .subscribe((data) => {
         this.collectes = data;
         this.applyFilters();
-        this.isLoading = false;
-      },
-      error: (err) => {
-        console.error('Error fetching collectes:', err);
-        this.error = 'Failed to load collectes. Please try again later.';
-        this.isLoading = false;
-      },
-    });
+      });
   }
 
   applyFilters(): void {
-    let filtered = [...this.collectes];
+    this.filteredCollectes = this.collectes.filter((collecte) => {
+      // Status filter
+      const statusMatch =
+        !this.statusFilter ||
+        collecte.status.toLowerCase() === this.statusFilter.toLowerCase();
 
-    // Apply status filter
-    if (this.statusFilter !== 'ALL') {
-      filtered = filtered.filter((c) => c.status === this.statusFilter);
-    }
+      // Search term filter
+      const searchMatch =
+        !this.searchTerm ||
+        collecte.title.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        collecte.description
+          .toLowerCase()
+          .includes(this.searchTerm.toLowerCase()) ||
+        collecte.location.toLowerCase().includes(this.searchTerm.toLowerCase());
 
-    // Apply search term
-    if (this.searchTerm.trim()) {
-      const term = this.searchTerm.toLowerCase().trim();
-      filtered = filtered.filter(
-        (c) =>
-          c._id.toLowerCase().includes(term) ||
-          c.title.toLowerCase().includes(term) ||
-          c.description.toLowerCase().includes(term) ||
-          c.location.toLowerCase().includes(term)
-      );
-    }
-
-    this.filteredCollectes = filtered;
+      return statusMatch && searchMatch;
+    });
   }
 
   onSearchChange(): void {
     this.applyFilters();
   }
 
-  onStatusFilterChange(event: Event): void {
-    this.statusFilter = (event.target as HTMLSelectElement).value as
-      | CollecteStatus
-      | 'ALL';
+  onStatusFilterChange(status: string): void {
+    this.statusFilter = status;
     this.applyFilters();
   }
 
-  getStatusClass(status: CollecteStatus): string {
-    switch (status) {
-      case CollecteStatus.PENDING:
-        return 'bg-yellow-100 text-yellow-800';
-      case CollecteStatus.IN_PROGRESS:
-        return 'bg-purple-100 text-purple-800';
-      case CollecteStatus.COMPLETED:
-        return 'bg-green-100 text-green-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
+  clearFilters(): void {
+    this.statusFilter = '';
+    this.searchTerm = '';
+    this.applyFilters();
   }
 
-  formatDate(date: string): string {
-    if (!date) return 'N/A';
-    return new Date(date).toLocaleDateString();
-  }
-
-  formatStatusLabel(status: string): string {
-    return status
-      .replace(/_/g, ' ')
-      .replace(/\b\w/g, (letter) => letter.toUpperCase());
-  }
-
-  viewDetails(collecte: Collecte): void {
-    this.router.navigate(['/dashboard/collectes', collecte._id]);
+  viewCollecteDetails(id: string): void {
+    this.router.navigate(['/dashboard/collectes', id]);
   }
 
   createCollecte(): void {
     this.router.navigate(['/dashboard/collectes/create']);
+  }
+
+  // Helper method to format dates consistently
+  formatDate(date: Date | string): string {
+    if (!date) return 'N/A';
+    return new Date(date).toLocaleDateString();
   }
 }

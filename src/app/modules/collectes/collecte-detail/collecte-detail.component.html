@@ -11,8 +11,7 @@
     </div>
 
     <div *ngIf="isLoading" class="flex justify-center py-8">
-        <div class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate
--spin"></div>
+        <div class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
     </div>
 
     <div *ngIf="!isLoading && !error && collecte" class="bg-white rounded-lg shadow-md overflow-hidden">
@@ -33,59 +32,29 @@
                 <h3 class="text-lg font-semibold mb-4">Collection Information</h3>
                 <div class="space-y-3">
                     <div>
-                        <p class="text-gray-500 text-sm">Date Scheduled</p>
-                        <p>{{ formatDate(collecte.scheduledDate) }}</p>
+                        <p class="text-gray-500 text-sm">Created At</p>
+                        <p>{{ formatDate(collecte.createdAt) }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500 text-sm">Updated At</p>
+                        <p>{{ formatDate(collecte.updatedAt) }}</p>
                     </div>
                     <div>
                         <p class="text-gray-500 text-sm">Location</p>
                         <p>{{ collecte.location || 'Not specified' }}</p>
                     </div>
-                    <div>
-                        <p class="text-gray-500 text-sm">Items</p>
-                        <ul class="list-disc pl-5">
-                            <li *ngFor="let item of collecte.items">{{ item.name }} - {{ item.quantity }} units</li>
-                        </ul>
-                    </div>
                 </div>
             </div>
 
             <div>
-                <h3 class="text-lg font-semibold mb-4">Contact Information</h3>
+                <h3 class="text-lg font-semibold mb-4">Collection ID</h3>
                 <div class="space-y-3">
                     <div>
-                        <p class="text-gray-500 text-sm">Donor</p>
-                        <p>{{ collecte.donorName || 'Anonymous' }}</p>
-                    </div>
-                    <div>
-                        <p class="text-gray-500 text-sm">Phone</p>
-                        <p>{{ collecte.contactPhone || 'Not provided' }}</p>
-                    </div>
-                    <div>
-                        <p class="text-gray-500 text-sm">Email</p>
-                        <p>{{ collecte.contactEmail || 'Not provided' }}</p>
+                        <p class="text-gray-500 text-sm">ID</p>
+                        <p>{{ collecte._id }}</p>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Transporter Information -->
-        <div class="p-6 border-t border-gray-200" *ngIf="collecte.transporter">
-            <h3 class="text-lg font-semibold mb-4">Assigned Transporter</h3>
-            <div class="flex items-center space-x-4">
-                <div class="rounded-full bg-gray-200 w-12 h-12 flex items-center justify-center text-xl">
-                    {{ collecte.transporter.name?.charAt(0) || 'T' }}
-                </div>
-                <div>
-                    <p class="font-medium">{{ collecte.transporter.name }}</p>
-                    <p class="text-sm text-gray-600">{{ collecte.transporter.phone || 'No phone' }}</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Notes -->
-        <div class="p-6 border-t border-gray-200" *ngIf="collecte.notes">
-            <h3 class="text-lg font-semibold mb-4">Notes</h3>
-            <p class="whitespace-pre-line">{{ collecte.notes }}</p>
         </div>
 
         <!-- Admin Actions -->
@@ -98,19 +67,6 @@
                     [disabled]="collecte.status === status || isLoading">
                     Mark as {{ status }}
                 </button>
-            </div>
-
-            <div *ngIf="!collecte.transporter">
-                <h4 class="font-medium mb-2">Assign Transporter</h4>
-                <!-- Simplified for demo - in real app, this would include a dropdown of available transporters -->
-                <div class="flex items-center">
-                    <input type="text" placeholder="Transporter ID" #transporterId
-                        class="border p-2 rounded-l-md flex-grow" />
-                    <button (click)="assignTransporter(transporterId.value)"
-                        class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-r-md">
-                        Assign
-                    </button>
-                </div>
             </div>
         </div>
     </div>

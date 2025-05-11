@@ -1,39 +1,31 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { RouterModule, Routes } from '@angular/router';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { CollectesListComponent } from './collectes-list/collectes-list.component';
-import { CollecteDetailComponent } from './collecte-detail/collecte-detail.component';
-import { CollecteCreateComponent } from './collecte-create/collecte-create.component';
-import { CollecteService } from '../../services/collecte.service';
 
 const routes: Routes = [
   {
     path: '',
-    component: CollectesListComponent,
+    loadComponent: () =>
+      import('./collectes-list/collectes-list.component').then(
+        (c) => c.CollectesListComponent
+      ),
   },
   {
     path: 'create',
-    component: CollecteCreateComponent,
+    loadComponent: () =>
+      import('./collecte-create/collecte-create.component').then(
+        (c) => c.CollecteCreateComponent
+      ),
   },
   {
     path: ':id',
-    component: CollecteDetailComponent,
+    loadComponent: () =>
+      import('./collecte-detail/collecte-detail.component').then(
+        (c) => c.CollecteDetailComponent
+      ),
   },
 ];
 
 @NgModule({
-  declarations: [
-    CollectesListComponent,
-    CollecteDetailComponent,
-    CollecteCreateComponent,
-  ],
-  imports: [
-    CommonModule,
-    RouterModule.forChild(routes),
-    FormsModule,
-    ReactiveFormsModule,
-  ],
-  providers: [{ provide: 'CollecteService', useClass: CollecteService }],
+  imports: [RouterModule.forChild(routes)],
 })
 export class CollectesModule {}

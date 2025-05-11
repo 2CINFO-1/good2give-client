@@ -6,7 +6,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CollecteListComponent } from './collecte-list/collecte-list.component';
 import { CollecteDetailComponent } from './collecte-detail/collecte-detail.component';
 import { CollecteCreateComponent } from './collecte-create/collecte-create.component';
-import { CollecteService } from '../../services/collecte.service';
+import { CollecteService } from '../../core/services/collecte.service';
 
 const routes: Routes = [
   {
@@ -35,6 +35,6 @@ const routes: Routes = [
     ReactiveFormsModule,
     RouterModule.forChild(routes),
   ],
-  providers: [{ provide: 'CollecteService', useClass: CollecteService }],
+  providers: [CollecteService],
 })
 export class CollecteModule {}

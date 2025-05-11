@@ -1,13 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import {
-  Product,
-  ProductCategory,
-  ProductType,
-} from '../../../models/product.model';
-import { ProductsService } from '../../../services/products.service';
+import { Product, ProductStatus } from '../../../core/models/product.model';
+import { ProductService } from '../../../core/services/product.service';
 import { FormsModule } from '@angular/forms';
-import { AuthService } from '../../../services/auth.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-products-list',
@@ -18,11 +14,12 @@ export class ProductsListComponent implements OnInit {
   products: Product[] = [];
   filteredProducts: Product[] = [];
   loading = true;
-  error = '';
+  error: string | null = null;
   successMessage = '';
   productToDelete: Product | null = null;
   showDeleteModal = false;
   Math = Math;
+  showArchived = false;
 
   // Permissions
   canEdit = false;
@@ -43,7 +40,7 @@ export class ProductsListComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private productsService: ProductsService,
+    private productService: ProductService,
     private authService: AuthService
   ) {}
 
@@ -53,23 +50,29 @@ export class ProductsListComponent implements OnInit {
   }
 
   checkPermissions(): void {
-    this.canEdit = this.authService.hasPermission('products:edit');
-    this.canDelete = this.authService.hasPermission('products:delete');
+    this.canEdit = this.authService.hasRole(['admin', 'product-manager']);
+    this.canDelete = this.authService.hasRole(['admin']);
   }
 
   loadProducts(): void {
     this.loading = true;
-    this.error = '';
+    this.error = null;
 
-    this.productsService.getProducts().subscribe({
-      next: (data) => {
+    this.productService.getAllProducts().subscribe({
+      next: (data: Product[]) => {
         this.products = data;
+        if (!this.showArchived) {
+          this.products = this.products.filter(
+            (product) => product.status !== 'Inactive'
+          );
+        }
         this.applyFilters();
         this.loading = false;
       },
-      error: (err) => {
-        this.error = err.message || 'Failed to load products';
+      error: (err: any) => {
+        this.error = 'Failed to load products. Please try again.';
         this.loading = false;
+        console.error('Error loading products:', err);
       },
     });
   }
@@ -140,11 +143,11 @@ export class ProductsListComponent implements OnInit {
   }
 
   viewProduct(id: string): void {
-    this.router.navigate(['/dashboard/products', id]);
+    this.router.navigate([`/dashboard/products/${id}`]);
   }
 
   editProduct(id: string): void {
-    this.router.navigate(['/dashboard/products/edit', id]);
+    this.router.navigate([`/dashboard/products/edit/${id}`]);
   }
 
   confirmDelete(product: Product): void {
@@ -156,13 +159,13 @@ export class ProductsListComponent implements OnInit {
     if (!this.productToDelete) return;
 
     this.loading = true;
-    this.productsService.deleteProduct(this.productToDelete._id).subscribe({
+    this.productService.deleteProduct(this.productToDelete._id).subscribe({
       next: () => {
         this.successMessage = `Product "${this.productToDelete?.name}" was successfully deleted.`;
         this.loadProducts();
         this.cancelDelete();
       },
-      error: (err) => {
+      error: (err: any) => {
         this.error = err.message || 'Failed to delete product';
         this.loading = false;
         this.cancelDelete();
@@ -193,5 +196,14 @@ export class ProductsListComponent implements OnInit {
     if (status === 'Out of Stock') return 'bg-red-100 text-red-800';
     if (status === 'Low Stock') return 'bg-yellow-100 text-yellow-800';
     return 'bg-green-100 text-green-800';
+  }
+
+  toggleArchivedProducts(): void {
+    this.showArchived = !this.showArchived;
+    this.loadProducts();
+  }
+
+  getStatusClass(status: string): string {
+    return status === 'Active' ? 'status-active' : 'status-inactive';
   }
 }

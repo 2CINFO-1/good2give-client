@@ -1,14 +1,14 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { CollecteService } from '../../../services/collecte.service';
-import { catchError, finalize } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { CollecteService } from '../../../core/services/collecte.service';
 import {
+  Collecte,
   CollecteRequest,
   CollecteStatus,
-  CollecteItem,
-} from '../../../models/collecte.model';
+} from '../../../core/models/collecte.model';
+import { catchError, finalize } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 @Component({
   selector: 'app-collecte-create',
@@ -16,87 +16,49 @@ import {
   styleUrls: ['./collecte-create.component.css'],
 })
 export class CollecteCreateComponent implements OnInit {
-  collecteForm: FormGroup;
+  collecteForm!: FormGroup;
   loading = false;
   error: string | null = null;
+
+  // Expose enum to template
+  CollecteStatus = CollecteStatus;
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
     private collecteService: CollecteService
-  ) {
+  ) {}
+
+  ngOnInit(): void {
+    this.initForm();
+  }
+
+  initForm(): void {
     this.collecteForm = this.fb.group({
-      title: ['', [Validators.required]],
-      description: ['', [Validators.required]],
-      location: ['', [Validators.required]],
-      scheduledDate: ['', [Validators.required]],
-      notes: [''],
-      items: this.fb.array([], [Validators.required]),
+      title: ['', Validators.required],
+      description: ['', Validators.required],
+      location: ['', Validators.required],
       status: [CollecteStatus.PENDING],
     });
   }
 
-  ngOnInit(): void {
-    // Add an initial item
-    this.addItem();
-  }
-
+  // Getter for form controls (used in template)
   get f() {
     return this.collecteForm.controls;
   }
 
-  get itemsControls() {
-    return this.collecteForm.get('items') as FormArray;
-  }
-
-  createItem(): FormGroup {
-    return this.fb.group({
-      name: ['', Validators.required],
-      quantity: [1, [Validators.required, Validators.min(1)]],
-      unit: ['', Validators.required],
-    });
-  }
-
-  addItem(): void {
-    this.itemsControls.push(this.createItem());
-  }
-
-  removeItem(index: number): void {
-    this.itemsControls.removeAt(index);
-  }
-
   onSubmit(): void {
     if (this.collecteForm.invalid) {
-      // Mark all fields as touched to trigger validation
-      Object.keys(this.collecteForm.controls).forEach((key) => {
-        const control = this.collecteForm.get(key);
-        control?.markAsTouched();
-      });
-
-      // Mark all items form fields as touched
-      for (let i = 0; i < this.itemsControls.length; i++) {
-        const itemGroup = this.itemsControls.at(i) as FormGroup;
-        Object.keys(itemGroup.controls).forEach((key) => {
-          itemGroup.get(key)?.markAsTouched();
-        });
-      }
-
       return;
     }
 
     this.loading = true;
     this.error = null;
 
-    const collecteData: CollecteRequest = {
-      title: this.f['title'].value,
-      description: this.f['description'].value,
-      location: this.f['location'].value,
-      items: this.f['items'].value,
-      status: this.f['status'].value,
-    };
+    const collecteRequest = this.collecteForm.value;
 
     this.collecteService
-      .createCollecte(collecteData)
+      .createCollecte(collecteRequest)
       .pipe(
         catchError((error) => {
           this.error = 'Failed to create collection. Please try again.';
@@ -106,8 +68,8 @@ export class CollecteCreateComponent implements OnInit {
           this.loading = false;
         })
       )
-      .subscribe((result) => {
-        if (result) {
+      .subscribe((response) => {
+        if (response) {
           this.router.navigate(['/dashboard/collecte']);
         }
       });

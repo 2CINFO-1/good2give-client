@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { EventService } from 'src/app/services/event.service';
-import { Event, EventStatus } from 'src/app/models/event.model';
+import { EventService } from '../../../core/services/event.service';
+import { Event } from '../../../core/models/event.model';
 
 @Component({
   selector: 'app-events-list',
@@ -12,7 +12,6 @@ export class EventsListComponent implements OnInit {
   events: Event[] = [];
   loading = true;
   error = '';
-  EventStatus = EventStatus;
 
   constructor(private eventService: EventService, private router: Router) {}
 
@@ -22,7 +21,7 @@ export class EventsListComponent implements OnInit {
 
   loadEvents(): void {
     this.loading = true;
-    this.eventService.getEvents().subscribe({
+    this.eventService.getAllEvents().subscribe({
       next: (data: Event[]) => {
         this.events = data;
         this.loading = false;
@@ -58,21 +57,6 @@ export class EventsListComponent implements OnInit {
           console.error('Error deleting event:', err);
         },
       });
-    }
-  }
-
-  getStatusColor(status: EventStatus): string {
-    switch (status) {
-      case EventStatus.UPCOMING:
-        return 'bg-blue-100 text-blue-800';
-      case EventStatus.ONGOING:
-        return 'bg-green-100 text-green-800';
-      case EventStatus.COMPLETED:
-        return 'bg-gray-100 text-gray-800';
-      case EventStatus.CANCELLED:
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
     }
   }
 }
