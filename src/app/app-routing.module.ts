@@ -103,15 +103,6 @@ const routes: Routes = [
         pathMatch: 'full',
       },
       {
-        path: 'collecte',
-        loadChildren: () =>
-          import('./modules/collecte/collecte.module').then(
-            (m) => m.CollecteModule
-          ),
-        canActivate: [AuthGuard, RoleGuard],
-        data: { roles: ['ADMIN', 'TRANSPORTER'] },
-      },
-      {
         path: 'collectes',
         loadChildren: () =>
           import('./modules/collectes/collectes.module').then(
