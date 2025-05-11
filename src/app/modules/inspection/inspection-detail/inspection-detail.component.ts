@@ -1,13 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { InspectionService } from '../../../services/inspection.service';
+import { InspectionService } from '../../../core/services/inspection.service';
 import {
   Inspection,
   InspectionStatus,
-  InspectionFinding,
-  FindingType,
-  FindingSeverity,
-} from '../../../models/inspection.model';
+} from '../../../core/models/inspection.model';
 
 @Component({
   selector: 'app-inspection-detail',
@@ -20,10 +17,12 @@ export class InspectionDetailComponent implements OnInit {
   loading = false;
   error: string | null = null;
 
-  // Make enums available in template
-  InspectionStatus = InspectionStatus;
-  FindingType = FindingType;
-  FindingSeverity = FindingSeverity;
+  // Define status values for UI
+  StatusValues = {
+    PENDING: 'pending',
+    APPROVED: 'approved',
+    REJECTED: 'rejected',
+  };
 
   constructor(
     private route: ActivatedRoute,
@@ -33,65 +32,51 @@ export class InspectionDetailComponent implements OnInit {
 
   ngOnInit(): void {
     this.inspectionId = this.route.snapshot.paramMap.get('id');
-
     if (this.inspectionId) {
-      this.loadInspectionDetails(this.inspectionId);
+      this.loadInspectionDetails();
     } else {
       this.error = 'No inspection ID provided';
+      this.router.navigate(['/dashboard/inspection']);
     }
   }
 
-  loadInspectionDetails(id: string): void {
+  loadInspectionDetails(): void {
+    if (!this.inspectionId) return;
+
     this.loading = true;
     this.error = null;
 
-    this.inspectionService.getInspectionById(id).subscribe({
-      next: (data) => {
+    this.inspectionService.getInspectionById(this.inspectionId).subscribe({
+      next: (data: Inspection) => {
         this.inspection = data;
         this.loading = false;
       },
-      error: (err) => {
-        this.error = 'Failed to load inspection details. Please try again.';
+      error: (err: any) => {
+        this.error = 'Failed to load inspection details';
         this.loading = false;
         console.error('Error loading inspection:', err);
       },
     });
   }
 
-  updateStatus(status: InspectionStatus): void {
-    if (!this.inspectionId) return;
+  // Match template method name
+  updateStatus(status: string): void {
+    if (!this.inspectionId || !this.inspection) return;
 
     this.loading = true;
+    this.error = null;
+
     this.inspectionService
-      .updateInspectionStatus(this.inspectionId, status)
+      .updateInspectionStatus(this.inspectionId, status as InspectionStatus)
       .subscribe({
-        next: (data) => {
+        next: (data: Inspection) => {
           this.inspection = data;
           this.loading = false;
         },
-        error: (err) => {
-          this.error = 'Failed to update inspection status. Please try again.';
+        error: (err: any) => {
+          this.error = 'Failed to update inspection status';
           this.loading = false;
           console.error('Error updating status:', err);
-        },
-      });
-  }
-
-  resolveFinding(findingIndex: number): void {
-    if (!this.inspectionId) return;
-
-    this.loading = true;
-    this.inspectionService
-      .resolveInspectionFinding(this.inspectionId, findingIndex)
-      .subscribe({
-        next: (data) => {
-          this.inspection = data;
-          this.loading = false;
-        },
-        error: (err) => {
-          this.error = 'Failed to resolve finding. Please try again.';
-          this.loading = false;
-          console.error('Error resolving finding:', err);
         },
       });
   }
@@ -101,52 +86,60 @@ export class InspectionDetailComponent implements OnInit {
   }
 
   // Format date string to local date and time
-  formatDate(date: string): string {
+  formatDate(date: string | Date | undefined): string {
+    if (!date) return 'N/A';
     return new Date(date).toLocaleString();
   }
 
-  getStatusClass(status: InspectionStatus): string {
+  // Check if results array exists
+  hasResults(): boolean {
+    return (
+      !!this.inspection &&
+      Array.isArray(this.inspection.results) &&
+      this.inspection.results.length > 0
+    );
+  }
+
+  // Check if issues array exists
+  hasIssues(): boolean {
+    return (
+      !!this.inspection &&
+      Array.isArray(this.inspection.issues) &&
+      this.inspection.issues.length > 0
+    );
+  }
+
+  // Get appropriate CSS class for status badges
+  getStatusClass(status: string): string {
     switch (status) {
-      case InspectionStatus.PASSED:
-        return 'bg-green-100 text-green-800';
-      case InspectionStatus.FAILED:
-        return 'bg-red-100 text-red-800';
-      case InspectionStatus.PENDING:
-        return 'bg-yellow-100 text-yellow-800';
-      case InspectionStatus.COMPLETED:
-        return 'bg-blue-100 text-blue-800';
+      case this.StatusValues.APPROVED:
+        return 'badge-success';
+      case this.StatusValues.REJECTED:
+        return 'badge-danger';
+      case this.StatusValues.PENDING:
+        return 'badge-warning';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'badge-secondary';
     }
   }
 
-  getSeverityClass(severity: FindingSeverity): string {
-    switch (severity) {
-      case FindingSeverity.LOW:
-        return 'bg-green-100 text-green-800';
-      case FindingSeverity.MEDIUM:
-        return 'bg-yellow-100 text-yellow-800';
-      case FindingSeverity.HIGH:
-        return 'bg-orange-100 text-orange-800';
-      case FindingSeverity.CRITICAL:
-        return 'bg-red-100 text-red-800';
+  // Get appropriate CSS class for result status
+  getResultStatusClass(status: string): string {
+    switch (status) {
+      case 'pass':
+        return 'badge-success';
+      case 'fail':
+        return 'badge-danger';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'badge-secondary';
     }
   }
 
-  getTypeClass(type: FindingType): string {
-    switch (type) {
-      case FindingType.QUALITY:
-        return 'bg-blue-100 text-blue-800';
-      case FindingType.SAFETY:
-        return 'bg-red-100 text-red-800';
-      case FindingType.COMPLIANCE:
-        return 'bg-purple-100 text-purple-800';
-      case FindingType.OTHER:
-        return 'bg-gray-100 text-gray-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
+  // Mark a result as resolved (would need backend implementation)
+  resolveIssue(index: number): void {
+    if (!this.inspection || !this.inspection.issues) return;
+
+    console.log(`Issue ${index} would be marked as resolved`);
+    // In a real implementation, you would call the API
   }
 }

@@ -7,6 +7,12 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
+import { ReclamationService } from '../../../core/services/reclamation.service';
+import {
+  ReclamationRequest,
+  ReclamationStatus,
+} from '../../../core/models/reclamation.model';
+import { UserStateService } from '../../../core/services/user-state.service';
 
 @Component({
   selector: 'app-reclamation-create',
@@ -18,8 +24,15 @@ import { Router, RouterModule } from '@angular/router';
 export class ReclamationCreateComponent implements OnInit {
   reclamationForm!: FormGroup;
   isSubmitting = false;
+  error: string | null = null;
+  ReclamationStatus = ReclamationStatus;
 
-  constructor(private fb: FormBuilder, private router: Router) {}
+  constructor(
+    private fb: FormBuilder,
+    private router: Router,
+    private reclamationService: ReclamationService,
+    private userStateService: UserStateService
+  ) {}
 
   ngOnInit(): void {
     this.initForm();
@@ -28,30 +41,47 @@ export class ReclamationCreateComponent implements OnInit {
   initForm(): void {
     this.reclamationForm = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(5)]],
-      description: ['', [Validators.required, Validators.minLength(20)]],
-      productId: ['', Validators.required],
-      priority: ['medium', Validators.required],
-      customerName: ['', Validators.required],
-      customerEmail: ['', [Validators.required, Validators.email]],
+      subject: ['', [Validators.required, Validators.minLength(20)]],
+      date: [new Date().toISOString().split('T')[0], Validators.required],
     });
   }
 
   onSubmit(): void {
     if (this.reclamationForm.invalid) {
+      this.reclamationForm.markAllAsTouched();
       return;
     }
 
     this.isSubmitting = true;
 
-    // Simulate API call with timeout
-    setTimeout(() => {
-      console.log('Form submitted:', this.reclamationForm.value);
+    const currentUser = this.userStateService.getCurrentUser();
+    if (!currentUser || !currentUser._id) {
+      this.error = 'User information not available';
       this.isSubmitting = false;
-      this.router.navigate(['/reclamations']);
-    }, 1000);
+      return;
+    }
+
+    const reclamationData: ReclamationRequest = {
+      userid: currentUser._id,
+      title: this.reclamationForm.value.title,
+      subject: this.reclamationForm.value.subject,
+      date: this.reclamationForm.value.date,
+    };
+
+    this.reclamationService.createReclamation(reclamationData).subscribe({
+      next: () => {
+        this.isSubmitting = false;
+        this.router.navigate(['/dashboard/reclamations']);
+      },
+      error: (err) => {
+        this.error = 'Failed to create reclamation. Please try again.';
+        this.isSubmitting = false;
+        console.error('Error creating reclamation:', err);
+      },
+    });
   }
 
   onCancel(): void {
-    this.router.navigate(['/reclamations']);
+    this.router.navigate(['/dashboard/reclamations']);
   }
 }

@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { EventService } from 'src/app/services/event.service';
-import { Event, EventStatus } from 'src/app/models/event.model';
+import { EventService } from '../../../core/services/event.service';
+import { Event } from '../../../core/models/event.model';
 
 @Component({
   selector: 'app-event-create',
@@ -13,7 +13,6 @@ export class EventCreateComponent implements OnInit {
   eventForm: FormGroup;
   submitting = false;
   error = '';
-  EventStatus = EventStatus;
 
   constructor(
     private fb: FormBuilder,
@@ -25,7 +24,6 @@ export class EventCreateComponent implements OnInit {
       objective: ['', [Validators.required, Validators.minLength(10)]],
       date: ['', Validators.required],
       numbre: [1, [Validators.required, Validators.min(1)]],
-      status: [EventStatus.UPCOMING, Validators.required],
     });
   }
 

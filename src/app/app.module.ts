@@ -10,13 +10,10 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 
 // Layouts
-import { HomeLayoutComponent } from './layouts/home-layout/home-layout.component';
-import { AuthLayoutComponent } from './layouts/auth-layout/auth-layout.component';
 import { DashboardLayoutComponent } from './layouts/dashboard-layout/dashboard-layout.component';
 
 // Modules
 import { AuthModule } from './modules/auth/auth.module';
-import { SharedModule } from './shared/shared.module';
 
 // Interceptors
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
@@ -41,12 +38,7 @@ export function tokenGetter() {
 }
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    HomeLayoutComponent,
-    AuthLayoutComponent,
-    DashboardLayoutComponent,
-  ],
+  declarations: [AppComponent, DashboardLayoutComponent],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
@@ -55,7 +47,6 @@ export function tokenGetter() {
     ReactiveFormsModule,
     FormsModule,
     AuthModule,
-    SharedModule,
 
     JwtModule.forRoot({
       config: {

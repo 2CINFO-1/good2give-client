@@ -24,9 +24,6 @@
         <div class="p-6">
             <div class="flex justify-between items-start mb-4">
                 <h1 class="text-3xl font-bold text-gray-800">{{ event.title }}</h1>
-                <span [class]="getStatusColor(event.status)" class="px-3 py-1 text-sm rounded-full">
-                    {{ event.status }}
-                </span>
             </div>
 
             <div class="mb-6">
@@ -80,32 +77,6 @@
                     <h2 class="text-xl font-semibold text-gray-800 mb-4">Manage Event</h2>
 
                     <div class="space-y-4">
-                        <div>
-                            <p class="text-gray-800 font-medium mb-2">Change Status</p>
-                            <div class="flex flex-wrap gap-2">
-                                <button *ngIf="event.status !== EventStatus.UPCOMING"
-                                    (click)="updateStatus(EventStatus.UPCOMING)"
-                                    class="px-3 py-1.5 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors">
-                                    Mark as Upcoming
-                                </button>
-                                <button *ngIf="event.status !== EventStatus.ONGOING"
-                                    (click)="updateStatus(EventStatus.ONGOING)"
-                                    class="px-3 py-1.5 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors">
-                                    Mark as Ongoing
-                                </button>
-                                <button *ngIf="event.status !== EventStatus.COMPLETED"
-                                    (click)="updateStatus(EventStatus.COMPLETED)"
-                                    class="px-3 py-1.5 bg-gray-600 text-white text-sm rounded hover:bg-gray-700 transition-colors">
-                                    Mark as Completed
-                                </button>
-                                <button *ngIf="event.status !== EventStatus.CANCELLED"
-                                    (click)="updateStatus(EventStatus.CANCELLED)"
-                                    class="px-3 py-1.5 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition-colors">
-                                    Cancel Event
-                                </button>
-                            </div>
-                        </div>
-
                         <div>
                             <p class="text-gray-800 font-medium mb-2">Actions</p>
                             <div class="flex gap-3">

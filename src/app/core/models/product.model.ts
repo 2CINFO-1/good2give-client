@@ -1,44 +1,52 @@
-import { User } from '../../models/user.model';
+import { User } from './user.model';
 
-export enum ProductCategory {
-  GRAINS = 'Grains',
-  LEGUMES = 'Legumes',
-  DAIRY = 'Dairy',
-  BAKING = 'Baking',
-  COOKING = 'Cooking',
-  SEASONING = 'Seasoning',
-  VEGETABLES = 'Vegetables',
-  FRUITS = 'Fruits',
-  PROTEIN = 'Protein',
-  OTHER = 'Other',
+/**
+ * Product status enum matching backend values
+ */
+export enum ProductStatus {
+  PENDING = 'Pending',
+  APPROVED = 'Approved',
+  REJECTED = 'Rejected',
+  AVAILABLE = 'Available',
+  DONATED = 'Donated',
 }
 
-export enum ProductType {
-  PERISHABLE = 'Perishable',
-  NON_PERISHABLE = 'Non-Perishable',
-  FROZEN = 'Frozen',
-  REFRIGERATED = 'Refrigerated',
-  CANNED = 'Canned',
-  DRIED = 'Dried',
-  OTHER = 'Other',
-}
-
+/**
+ * Product interface matching backend IProduct
+ */
 export interface Product {
   _id: string;
   name: string;
-  productType: ProductType;
-  category: ProductCategory;
+  productType: string;
+  category: string;
+  donatorId: User | string;
   description: string;
-  donatorId: User;
-  status?: string;
-  createdAt?: string;
-  updatedAt?: string;
+  status: ProductStatus | string;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
 }
 
+/**
+ * Product creation request
+ */
 export interface ProductRequest {
   name: string;
-  productType: ProductType;
-  category: ProductCategory;
+  productType: string;
+  category: string;
+  donatorId?: string;
+}
+
+/**
+ * Product response from API
+ */
+export interface ProductResponse {
+  _id: string;
+  name: string;
+  productType: string;
+  category: string;
+  donatorId: User | string;
   description: string;
-  status?: string;
+  status: ProductStatus | string;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
 }

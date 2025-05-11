@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, throwError, BehaviorSubject } from 'rxjs';
-import { tap, catchError } from 'rxjs/operators';
+import { Injectable, Injector } from '@angular/core';
+import { HttpClient, HttpBackend } from '@angular/common/http';
+import { Observable, throwError, BehaviorSubject, of, map } from 'rxjs';
+import { tap, catchError, switchMap } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import {
@@ -13,24 +13,31 @@ import {
   LogoutRequest,
 } from '../models/user.model';
 import { JwtHelperService } from '@auth0/angular-jwt';
+import { UserStateService } from './user-state.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   private apiUrl = `${environment.apiUrl}/auth`;
-  private currentUserSubject = new BehaviorSubject<User | null>(null);
-  public currentUser$ = this.currentUserSubject.asObservable();
+  private usersApiUrl = `${environment.apiUrl}/users`;
+
+  // This HttpClient instance bypasses all interceptors
+  private httpWithoutInterceptors: HttpClient;
 
   constructor(
     private http: HttpClient,
     private router: Router,
-    private jwtHelper: JwtHelperService
+    private jwtHelper: JwtHelperService,
+    private userState: UserStateService,
+    private httpBackend: HttpBackend
   ) {
+    // Create an HttpClient that bypasses all interceptors to avoid circular dependencies
+    this.httpWithoutInterceptors = new HttpClient(httpBackend);
     this.loadCurrentUser();
   }
 
-  private loadCurrentUser(): void {
+  public loadCurrentUser(): void {
     try {
       // Try localStorage first, then sessionStorage as fallback
       let token = localStorage.getItem('access_token');
@@ -50,68 +57,96 @@ export class AuthService {
         console.log(
           'AuthService loadCurrentUser - No token found in either storage'
         );
+        this.userState.setAuthLoaded();
         return;
       }
 
       try {
         if (this.jwtHelper.isTokenExpired(token)) {
           console.log('AuthService loadCurrentUser - Token is expired');
+          this.userState.setAuthLoaded();
           return;
         }
 
-        const decodedToken = this.jwtHelper.decodeToken(token);
-        console.log(
-          'AuthService loadCurrentUser - Decoded token:',
-          decodedToken
-        );
+        // Instead of decoding the token first, let's directly call the API
+        console.log('AuthService loadCurrentUser - Fetching user profile');
 
-        // Try different possible structures based on the API response
-        let user = null;
+        // Use httpWithoutInterceptors to avoid circular dependency
+        this.httpWithoutInterceptors
+          .get<User>(`${this.usersApiUrl}/profile`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+          .pipe(
+            catchError((error) => {
+              console.error('Error fetching user profile:', error);
 
-        if (decodedToken.user) {
-          // If user data is nested in a 'user' property
-          user = decodedToken.user;
-        } else if (decodedToken.sub) {
-          // If token contains standard JWT claims
-          user = {
-            _id: decodedToken.sub,
-            email: decodedToken.email || '',
-            name: decodedToken.name || '',
-            role: decodedToken.role || '',
-          };
-        } else {
-          // Try using the token directly as user data
-          user = decodedToken;
-        }
+              // If API call fails, only then use token data as fallback
+              try {
+                // We've already checked token isn't null, but TypeScript doesn't know that
+                // so we need to do an additional null check
+                if (token) {
+                  const decodedToken = this.jwtHelper.decodeToken(token);
+                  console.log(
+                    'AuthService loadCurrentUser - Using token data as fallback'
+                  );
 
-        console.log(
-          'AuthService loadCurrentUser - Extracted user object:',
-          user
-        );
+                  const userId = decodedToken._id;
+                  if (userId) {
+                    const basicUser = {
+                      _id: userId,
+                      email: decodedToken.email || '',
+                      name: decodedToken.name || '',
+                      role: decodedToken.role || '',
+                    };
+                    this.userState.setCurrentUser(basicUser);
+                  } else {
+                    console.error('Could not extract user ID from token');
+                  }
+                }
+              } catch (tokenError) {
+                console.error('Error decoding token:', tokenError);
 
-        if (user && user._id) {
-          this.currentUserSubject.next(user);
-          console.log(
-            `AuthService loadCurrentUser - User set successfully from ${storageType}`
-          );
-        } else {
-          console.error(
-            'AuthService loadCurrentUser - Could not extract valid user from token'
-          );
-        }
-      } catch (tokenError) {
-        console.error(
-          'AuthService loadCurrentUser - Error parsing token:',
-          tokenError
-        );
-        // Clear invalid tokens from both storages
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        sessionStorage.removeItem('access_token');
-        sessionStorage.removeItem('refresh_token');
+                // Clear invalid tokens
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('refresh_token');
+                sessionStorage.removeItem('access_token');
+                sessionStorage.removeItem('refresh_token');
+              }
+
+              return of(null);
+            })
+          )
+          .subscribe({
+            next: (user) => {
+              if (user && user._id) {
+                console.log(
+                  'AuthService loadCurrentUser - User profile loaded:',
+                  user
+                );
+                this.userState.setCurrentUser(user);
+                this.userState.setAuthLoaded();
+              } else {
+                console.error('Invalid user profile received from API');
+                this.userState.setAuthLoaded();
+              }
+            },
+            error: (err) => {
+              console.error('Failed to load user profile:', err);
+              this.userState.setAuthLoaded();
+            },
+            complete: () => {
+              this.userState.setAuthLoaded();
+            },
+          });
+      } catch (error) {
+        console.error('AuthService loadCurrentUser - Error:', error);
+        this.userState.setAuthLoaded();
       }
     } catch (error) {
       console.error('AuthService loadCurrentUser - Unexpected error:', error);
+      this.userState.setAuthLoaded();
     }
   }
 
@@ -127,7 +162,42 @@ export class AuthService {
       .pipe(
         tap((response) => {
           console.log('AuthService login - Success response:', response);
+          // First handle the initial auth response (store tokens and basic user info)
           this.handleAuthResponse(response);
+        }),
+        switchMap((response) => {
+          // Then fetch the full user profile from the API using the client without interceptors
+          // to avoid circular dependency issues
+          const token =
+            localStorage.getItem('access_token') ||
+            sessionStorage.getItem('access_token');
+
+          return this.httpWithoutInterceptors
+            .get<User>(`${this.usersApiUrl}/profile`, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            })
+            .pipe(
+              tap((userProfile) => {
+                console.log(
+                  'AuthService login - User profile fetched:',
+                  userProfile
+                );
+                // Update the global state with the complete user profile
+                this.userState.setCurrentUser(userProfile);
+              }),
+              // Return the original login response to maintain the API contract
+              map(() => response),
+              catchError((profileError) => {
+                console.error(
+                  'AuthService login - Error fetching profile:',
+                  profileError
+                );
+                // If profile fetch fails, we already set basic user info in handleAuthResponse
+                return of(response);
+              })
+            );
         }),
         catchError((error) => {
           console.error('AuthService login - Error:', error);
@@ -140,8 +210,102 @@ export class AuthService {
     return this.http
       .post<AuthResponse>(`${this.apiUrl}/register`, userData)
       .pipe(
-        tap((response) => this.handleAuthResponse(response)),
-        catchError((error) => throwError(() => error))
+        tap((response) => {
+          console.log('AuthService register - Success response:', response);
+          // First handle the initial auth response (store tokens and basic user info)
+          this.handleAuthResponse(response);
+        }),
+        switchMap((response) => {
+          // Then fetch the full user profile from the API using the client without interceptors
+          // to avoid circular dependency issues
+          const token =
+            localStorage.getItem('access_token') ||
+            sessionStorage.getItem('access_token');
+
+          return this.httpWithoutInterceptors
+            .get<User>(`${this.usersApiUrl}/profile`, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            })
+            .pipe(
+              tap((userProfile) => {
+                console.log(
+                  'AuthService register - User profile fetched:',
+                  userProfile
+                );
+                // Update the global state with the complete user profile
+                this.userState.setCurrentUser(userProfile);
+              }),
+              // Return the original register response to maintain the API contract
+              map(() => response),
+              catchError((profileError) => {
+                console.error(
+                  'AuthService register - Error fetching profile:',
+                  profileError
+                );
+                // If profile fetch fails, we already set basic user info in handleAuthResponse
+                return of(response);
+              })
+            );
+        }),
+        catchError((error) => {
+          console.error('AuthService register - Error:', error);
+          return throwError(() => error);
+        })
+      );
+  }
+
+  // Google Sign-in method
+  googleSignIn(token: string): Observable<AuthResponse> {
+    console.log('AuthService googleSignIn - Token received');
+
+    return this.http
+      .post<AuthResponse>(`${this.apiUrl}/google-auth`, { token })
+      .pipe(
+        tap((response) => {
+          console.log('AuthService googleSignIn - Success response:', response);
+          // First handle the initial auth response (store tokens and basic user info)
+          this.handleAuthResponse(response);
+        }),
+        switchMap((response) => {
+          // Then fetch the full user profile from the API using the client without interceptors
+          // to avoid circular dependency issues
+          const accessToken =
+            localStorage.getItem('access_token') ||
+            sessionStorage.getItem('access_token');
+
+          return this.httpWithoutInterceptors
+            .get<User>(`${this.usersApiUrl}/profile`, {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+              },
+            })
+            .pipe(
+              tap((userProfile) => {
+                console.log(
+                  'AuthService googleSignIn - User profile fetched:',
+                  userProfile
+                );
+                // Update the global state with the complete user profile
+                this.userState.setCurrentUser(userProfile);
+              }),
+              // Return the original googleSignIn response to maintain the API contract
+              map(() => response),
+              catchError((profileError) => {
+                console.error(
+                  'AuthService googleSignIn - Error fetching profile:',
+                  profileError
+                );
+                // If profile fetch fails, we already set basic user info in handleAuthResponse
+                return of(response);
+              })
+            );
+        }),
+        catchError((error) => {
+          console.error('AuthService googleSignIn - Error:', error);
+          return throwError(() => error);
+        })
       );
   }
 
@@ -185,20 +349,16 @@ export class AuthService {
       console.log('AuthService handleAuthResponse - Tokens:', tokens);
 
       // Check for different token formats and extract tokens accordingly
-      let accessToken = null;
-      let refreshToken = null;
+      let accessToken: string | null = null;
+      let refreshToken: string | null = null;
 
+      // Use consistent token format in line with backend
       if (tokens.accessToken && tokens.refreshToken) {
-        // Format: { accessToken: '...', refreshToken: '...' }
+        // Backend format: { accessToken: '...', refreshToken: '...' }
         accessToken = tokens.accessToken;
         refreshToken = tokens.refreshToken;
-        console.log('AuthService handleAuthResponse - Found flat token format');
-      } else if (tokens.access?.token && tokens.refresh?.token) {
-        // Format: { access: { token: '...' }, refresh: { token: '...' } }
-        accessToken = tokens.access.token;
-        refreshToken = tokens.refresh.token;
         console.log(
-          'AuthService handleAuthResponse - Found nested token format'
+          'AuthService handleAuthResponse - Found tokens in direct format'
         );
       } else {
         console.error(
@@ -221,65 +381,70 @@ export class AuthService {
             'AuthService handleAuthResponse - localStorage not working correctly'
           );
           // Try session storage instead
-          sessionStorage.setItem('access_token', accessToken);
-          sessionStorage.setItem('refresh_token', refreshToken);
-          console.log(
-            'AuthService handleAuthResponse - Tokens saved to sessionStorage instead'
-          );
-        } else {
-          // localStorage is working, proceed as normal
-          localStorage.removeItem('test_storage');
-          localStorage.setItem('access_token', accessToken);
-          localStorage.setItem('refresh_token', refreshToken);
-
-          // Verify tokens were saved correctly
-          const savedAccessToken = localStorage.getItem('access_token');
-          const savedRefreshToken = localStorage.getItem('refresh_token');
-
-          console.log(
-            'AuthService handleAuthResponse - Saved access_token:',
-            savedAccessToken ? 'saved' : 'not saved'
-          );
-          console.log(
-            'AuthService handleAuthResponse - Saved refresh_token:',
-            savedRefreshToken ? 'saved' : 'not saved'
-          );
-
-          if (!savedAccessToken || !savedRefreshToken) {
-            console.error(
-              'AuthService handleAuthResponse - Tokens not saved correctly to localStorage'
+          if (accessToken && refreshToken) {
+            sessionStorage.setItem('access_token', accessToken);
+            sessionStorage.setItem('refresh_token', refreshToken);
+            console.log(
+              'AuthService handleAuthResponse - Tokens saved to sessionStorage instead'
             );
-            alert(
-              'Warning: Unable to save authentication tokens to localStorage'
+          }
+        } else {
+          // Use localStorage for token storage
+          if (accessToken && refreshToken) {
+            localStorage.setItem('access_token', accessToken);
+            localStorage.setItem('refresh_token', refreshToken);
+            console.log(
+              'AuthService handleAuthResponse - Tokens saved to localStorage'
             );
           }
         }
-      } catch (storageError: any) {
+
+        localStorage.removeItem('test_storage');
+      } catch (storageError) {
         console.error(
-          'AuthService handleAuthResponse - Storage error:',
+          'AuthService handleAuthResponse - Error accessing localStorage:',
           storageError
         );
-        alert(
-          'Error: Unable to save authentication data. ' + storageError.message
-        );
 
-        // Try using sessionStorage as fallback
+        // Fallback to sessionStorage
         try {
-          sessionStorage.setItem('access_token', accessToken);
-          sessionStorage.setItem('refresh_token', refreshToken);
-          console.log(
-            'AuthService handleAuthResponse - Using sessionStorage as fallback'
-          );
+          if (accessToken && refreshToken) {
+            sessionStorage.setItem('access_token', accessToken);
+            sessionStorage.setItem('refresh_token', refreshToken);
+            console.log(
+              'AuthService handleAuthResponse - Tokens saved to sessionStorage as fallback'
+            );
+          }
         } catch (sessionError) {
           console.error(
-            'AuthService handleAuthResponse - SessionStorage error:',
+            'AuthService handleAuthResponse - Error accessing sessionStorage:',
             sessionError
           );
         }
       }
 
-      // Update the current user subject
-      this.currentUserSubject.next(user);
+      // The user object comes directly from the backend response
+      // We'll still use the full profile API to ensure complete data
+      // But we'll set basic user info immediately for better UX
+      if (user && user._id) {
+        this.userState.setCurrentUser(user);
+      } else if (accessToken) {
+        // If no user object in response, we'll decode from token
+        try {
+          const decodedToken = this.jwtHelper.decodeToken(accessToken);
+          if (decodedToken && decodedToken._id) {
+            const basicUser = {
+              _id: decodedToken._id,
+              email: decodedToken.email || '',
+              role: decodedToken.role || '',
+              name: decodedToken.name || '', // This may not be in the token
+            };
+            this.userState.setCurrentUser(basicUser);
+          }
+        } catch (decodeError) {
+          console.error('Error decoding token for user data:', decodeError);
+        }
+      }
     } catch (error) {
       console.error(
         'AuthService handleAuthResponse - Unexpected error:',
@@ -288,77 +453,29 @@ export class AuthService {
     }
   }
 
-  private clearAuthData(): void {
-    // Clear tokens from both storage types
+  public clearAuthData(): void {
+    // Clear tokens from storage
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     sessionStorage.removeItem('access_token');
     sessionStorage.removeItem('refresh_token');
 
-    console.log(
-      'AuthService clearAuthData - Tokens cleared from both storages'
-    );
+    // Clear state
+    this.userState.clearState();
 
-    this.currentUserSubject.next(null);
-    this.router.navigate(['/login']);
+    console.log('AuthService clearAuthData - Auth data cleared');
   }
 
   getCurrentUser(): User | null {
-    return this.currentUserSubject.value;
+    return this.userState.getCurrentUser();
   }
 
   isAuthenticated(): boolean {
-    try {
-      // Check localStorage first
-      let token = localStorage.getItem('access_token');
-      let storageType = 'localStorage';
-
-      // If not in localStorage, check sessionStorage
-      if (!token) {
-        token = sessionStorage.getItem('access_token');
-        storageType = 'sessionStorage';
-      }
-
-      console.log(
-        `AuthService isAuthenticated - Token from ${storageType}:`,
-        !!token
-      );
-
-      if (!token) {
-        return false;
-      }
-
-      try {
-        const isExpired = this.jwtHelper.isTokenExpired(token);
-        console.log(
-          `AuthService isAuthenticated - Token from ${storageType} expired:`,
-          isExpired
-        );
-        return !isExpired;
-      } catch (tokenError) {
-        console.error(
-          'AuthService isAuthenticated - Error validating token:',
-          tokenError
-        );
-        // Clean up invalid tokens from both storages
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        sessionStorage.removeItem('access_token');
-        sessionStorage.removeItem('refresh_token');
-        return false;
-      }
-    } catch (error) {
-      console.error('AuthService isAuthenticated - Unexpected error:', error);
-      return false;
-    }
+    return this.userState.isAuthenticated();
   }
 
   hasRole(requiredRoles: string[]): boolean {
-    const currentUser = this.getCurrentUser();
-    console.log('AuthService hasRole - Current user:', currentUser);
-    console.log('AuthService hasRole - Required roles:', requiredRoles);
-
-    return !!currentUser && requiredRoles.includes(currentUser.role);
+    return this.userState.hasRole(requiredRoles);
   }
 
   forgotPassword(email: string): Observable<{ message: string }> {

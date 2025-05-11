@@ -44,7 +44,7 @@ export class AuthGuard implements CanActivate {
       'AuthGuard canActivate - Authentication failed, redirecting to login'
     );
     this.toastr.error('Please log in to access this page');
-    this.router.navigate(['/login'], {
+    this.router.navigate(['/auth/login'], {
       queryParams: { returnUrl: state.url },
     });
     return false;

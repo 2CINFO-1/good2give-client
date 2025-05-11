@@ -17,7 +17,6 @@ export class StocksListComponent implements OnInit {
   isLoading = true;
   errorMessage = '';
   searchTerm = '';
-  locationFilter = '';
 
   constructor(
     private stockService: StockService,
@@ -47,11 +46,17 @@ export class StocksListComponent implements OnInit {
   loadProducts(): void {
     // Get unique product IDs
     const productIds = [
-      ...new Set(this.stocks.map((stock) => stock.productId)),
+      ...new Set(
+        this.stocks.map((stock) => {
+          return typeof stock.productId === 'string'
+            ? stock.productId
+            : stock.productId._id;
+        })
+      ),
     ];
 
     // Create a map of product data for quick lookup
-    const productRequests = productIds.map((id) =>
+    productIds.forEach((id) =>
       this.productService.getProductById(id).subscribe({
         next: (product) => {
           this.products[id] = product;
@@ -68,36 +73,40 @@ export class StocksListComponent implements OnInit {
     }, 500);
   }
 
-  getProductName(productId: string): string {
+  getProductName(productId: Product | string): string {
+    if (typeof productId === 'object' && productId !== null) {
+      return productId.name || 'Unknown Product';
+    }
     return this.products[productId]?.name || 'Unknown Product';
   }
 
-  getProductType(productId: string): string {
+  getProductType(productId: Product | string): string {
+    if (typeof productId === 'object' && productId !== null) {
+      return productId.productType || '';
+    }
     return this.products[productId]?.productType || '';
+  }
+
+  // Method to apply filters based on search term
+  applyFilters(): void {
+    this.filterStocks();
   }
 
   filterStocks(): void {
     this.filteredStocks = this.stocks.filter((stock) => {
-      const matchesSearch =
-        !this.searchTerm ||
-        this.getProductName(stock.productId)
-          .toLowerCase()
-          .includes(this.searchTerm.toLowerCase()) ||
-        stock.location.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        stock.batchNumber
-          ?.toLowerCase()
-          .includes(this.searchTerm.toLowerCase());
+      if (!this.searchTerm) return true;
 
-      const matchesLocation =
-        !this.locationFilter ||
-        stock.location.toLowerCase() === this.locationFilter.toLowerCase();
+      const productName = this.getProductName(stock.productId).toLowerCase();
+      const donatorId =
+        typeof stock.donatorId === 'string'
+          ? stock.donatorId.toLowerCase()
+          : stock.donatorId._id.toLowerCase();
 
-      return matchesSearch && matchesLocation;
+      return (
+        productName.includes(this.searchTerm.toLowerCase()) ||
+        donatorId.includes(this.searchTerm.toLowerCase())
+      );
     });
-  }
-
-  getUniqueLocations(): string[] {
-    return [...new Set(this.stocks.map((stock) => stock.location))];
   }
 
   viewStockDetails(stockId: string): void {
@@ -108,42 +117,19 @@ export class StocksListComponent implements OnInit {
     this.router.navigate(['/dashboard/stocks/create']);
   }
 
-  adjustStock(): void {
-    this.router.navigate(['/dashboard/stocks/adjustment']);
+  // Update to accept stockId parameter
+  adjustStock(stockId?: string): void {
+    if (stockId) {
+      this.router.navigate(['/dashboard/stocks/adjustment', stockId]);
+    } else {
+      this.router.navigate(['/dashboard/stocks/adjustment']);
+    }
   }
 
-  isLowStock(stock: Stock): boolean {
-    const product = this.products[stock.productId];
-    // Since minStock no longer exists, this method will always return false
-    return false;
-  }
-
-  isExpiringSoon(stock: Stock): boolean {
-    if (!stock.expiryDate) return false;
-
-    const expiryDate = new Date(stock.expiryDate);
-    const today = new Date();
-    const thirtyDaysFromNow = new Date();
-    thirtyDaysFromNow.setDate(today.getDate() + 30);
-
-    return expiryDate <= thirtyDaysFromNow && expiryDate >= today;
-  }
-
-  onSearchChange(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    this.searchTerm = input.value;
-    this.filterStocks();
-  }
-
-  onLocationChange(event: Event): void {
-    const select = event.target as HTMLSelectElement;
-    this.locationFilter = select.value;
-    this.filterStocks();
-  }
-
-  formatDate(dateString: string | null | undefined): string {
+  formatDate(dateString: string | Date | null | undefined): string {
     if (!dateString) return '-';
-    const date = new Date(dateString);
+    const date =
+      typeof dateString === 'string' ? new Date(dateString) : dateString;
     return date.toLocaleDateString();
   }
 }

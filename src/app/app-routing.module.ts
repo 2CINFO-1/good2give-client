@@ -2,13 +2,14 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { DashboardLayoutComponent } from './layouts/dashboard-layout/dashboard-layout.component';
 import { RegisterComponent } from './modules/auth/register/register.component';
-import { ModulePlaceholderComponent } from './shared/components/module-placeholder/module-placeholder.component';
 
 // Guards
 import { AuthGuard } from './core/guards/auth.guard';
 import { NoAuthGuard } from './core/guards/no-auth.guard';
 import { RoleGuard } from './core/guards/role.guard';
 import { UserRole } from './core/models/user.model';
+import { ForgotPasswordComponent } from './modules/auth/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './modules/auth/reset-password/reset-password.component';
 
 const routes: Routes = [
   {
@@ -17,15 +18,58 @@ const routes: Routes = [
       import('./modules/home/home.module').then((m) => m.HomeModule),
   },
   {
+    path: 'auth',
+    children: [
+      {
+        path: 'login',
+        loadChildren: () =>
+          import('./modules/auth/auth.module').then((m) => m.AuthModule),
+        canActivate: [NoAuthGuard],
+      },
+      {
+        path: 'register',
+        component: RegisterComponent,
+        canActivate: [NoAuthGuard],
+      },
+      {
+        path: 'forgot-password',
+        component: ForgotPasswordComponent,
+        canActivate: [NoAuthGuard],
+      },
+      {
+        path: 'reset-password',
+        component: ResetPasswordComponent,
+        canActivate: [NoAuthGuard],
+      },
+      {
+        path: 'callback',
+        loadChildren: () =>
+          import('./modules/auth/auth-callback/auth-callback.module').then(
+            (m) => m.AuthCallbackModule
+          ),
+      },
+    ],
+  },
+  // Keep old routes temporarily for backward compatibility
+  {
     path: 'login',
-    loadChildren: () =>
-      import('./modules/auth/auth.module').then((m) => m.AuthModule),
-    canActivate: [NoAuthGuard],
+    redirectTo: 'auth/login',
+    pathMatch: 'full',
   },
   {
     path: 'register',
-    component: RegisterComponent,
-    canActivate: [NoAuthGuard],
+    redirectTo: 'auth/register',
+    pathMatch: 'full',
+  },
+  {
+    path: 'forgot-password',
+    redirectTo: 'auth/forgot-password',
+    pathMatch: 'full',
+  },
+  {
+    path: 'reset-password',
+    redirectTo: 'auth/reset-password',
+    pathMatch: 'full',
   },
   {
     path: 'dashboard',
@@ -35,9 +79,27 @@ const routes: Routes = [
       {
         path: '',
         loadChildren: () =>
-          import('./modules/dashboard/dashboard.module').then(
-            (m) => m.DashboardModule
+          import('./modules/dashboard-home/dashboard-home.module').then(
+            (m) => m.DashboardHomeModule
           ),
+      },
+      {
+        path: 'collecte',
+        loadChildren: () =>
+          import('./modules/collecte/collecte.module').then(
+            (m) => m.CollecteModule
+          ),
+        canActivate: [AuthGuard, RoleGuard],
+        data: { roles: ['ADMIN', 'TRANSPORTER'] },
+      },
+      {
+        path: 'collectes',
+        loadChildren: () =>
+          import('./modules/collectes/collectes.module').then(
+            (m) => m.CollectesModule
+          ),
+        canActivate: [AuthGuard, RoleGuard],
+        data: { roles: ['ADMIN', 'TRANSPORTER'] },
       },
       {
         path: 'reclamations',
@@ -49,13 +111,21 @@ const routes: Routes = [
       },
       {
         path: 'products',
-        component: ModulePlaceholderComponent,
-        canActivate: [AuthGuard],
+        loadChildren: () =>
+          import('./modules/products/products.module').then(
+            (m) => m.ProductsModule
+          ),
+        canActivate: [AuthGuard, RoleGuard],
+        data: { roles: ['ADMIN', 'INSPECTOR'] },
       },
       {
         path: 'inspection',
-        component: ModulePlaceholderComponent,
-        canActivate: [AuthGuard],
+        loadChildren: () =>
+          import('./modules/inspection/inspection.module').then(
+            (m) => m.InspectionModule
+          ),
+        canActivate: [AuthGuard, RoleGuard],
+        data: { roles: ['ADMIN', 'INSPECTOR'] },
       },
       {
         path: 'events',
@@ -72,19 +142,18 @@ const routes: Routes = [
         canActivate: [AuthGuard],
       },
       {
-        path: 'collectes',
-        component: ModulePlaceholderComponent,
-        canActivate: [AuthGuard],
-      },
-      {
         path: 'stocks',
-        component: ModulePlaceholderComponent,
-        canActivate: [AuthGuard],
+        loadChildren: () =>
+          import('./modules/stocks/stocks.module').then((m) => m.StocksModule),
+        canActivate: [AuthGuard, RoleGuard],
+        data: { roles: ['ADMIN', 'INSPECTOR', 'WAREHOUSE'] },
       },
       {
         path: 'scraps',
-        component: ModulePlaceholderComponent,
-        canActivate: [AuthGuard],
+        loadChildren: () =>
+          import('./modules/scraps/scraps.module').then((m) => m.ScrapsModule),
+        canActivate: [AuthGuard, RoleGuard],
+        data: { roles: ['ADMIN', 'INSPECTOR', 'WAREHOUSE'] },
       },
       {
         path: 'settings',

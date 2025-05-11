@@ -48,15 +48,9 @@
 
             <div *ngIf="stocks.length > 0" class="bg-gray-50 p-4 rounded-lg">
                 <h3 class="text-md font-semibold mb-2">Current Stock Information</h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <p class="text-sm text-gray-500">Total Available Quantity</p>
-                        <p class="font-medium">{{ getTotalQuantity() }} {{ getProductType() }}</p>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-500">Locations</p>
-                        <p class="font-medium">{{ getStockLocations() }}</p>
-                    </div>
+                <div>
+                    <p class="text-sm text-gray-500">Total Available Items</p>
+                    <p class="font-medium">{{ getTotalQuantity() }} {{ getProductType() }}</p>
                 </div>
             </div>
 

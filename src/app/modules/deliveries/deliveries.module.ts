@@ -6,7 +6,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { DeliveriesListComponent } from './deliveries-list/deliveries-list.component';
 import { DeliveryDetailComponent } from './delivery-detail/delivery-detail.component';
 import { DeliveryCreateComponent } from './delivery-create/delivery-create.component';
-import { DeliveryService } from '../../services/delivery.service';
+import { DeliveryService } from '../../core/services/delivery.service';
 
 const routes: Routes = [
   { path: '', component: DeliveriesListComponent },

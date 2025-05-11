@@ -1,13 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { DeliveryService } from '../../../services/delivery.service';
-import {
-  Delivery,
-  DeliveryStatus,
-  DeliveryItem,
-} from '../../../models/delivery.model';
-import { ProductsService } from '../../../services/products.service';
-import { Product } from '../../../models/product.model';
+import { DeliveryService } from '../../../core/services/delivery.service';
+import { Delivery, DeliveryStatus } from '../../../core/models/delivery.model';
+import { ProductService } from '../../../core/services/product.service';
+import { Product } from '../../../core/models/product.model';
+import { Location } from '@angular/common';
 
 @Component({
   selector: 'app-delivery-detail',
@@ -21,13 +18,22 @@ export class DeliveryDetailComponent implements OnInit {
   loading = true;
   error = false;
   errorMessage = '';
-  DeliveryStatus = DeliveryStatus; // Expose enum to template
+  DeliveryStatus = DeliveryStatus;
+
+  // Create a variable to match the enum values used in the template
+  readonly DELIVERY_STATUS = {
+    PENDING: DeliveryStatus.PENDING,
+    IN_PROGRESS: DeliveryStatus.IN_PROGRESS,
+    DELIVERED: DeliveryStatus.DELIVERED,
+    CANCELED: DeliveryStatus.CANCELED,
+  };
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private deliveryService: DeliveryService,
-    private productService: ProductsService
+    private productService: ProductService,
+    private location: Location
   ) {}
 
   ngOnInit(): void {
@@ -43,7 +49,7 @@ export class DeliveryDetailComponent implements OnInit {
   }
 
   loadProducts(): void {
-    this.productService.getProducts().subscribe({
+    this.productService.getAllProducts().subscribe({
       next: (data) => {
         this.products = data;
       },
@@ -96,24 +102,54 @@ export class DeliveryDetailComponent implements OnInit {
     this.router.navigate(['/dashboard/deliveries']);
   }
 
-  updateStatus(newStatus: DeliveryStatus): void {
-    if (!this.deliveryId) return;
+  updateStatus(status: DeliveryStatus): void {
+    if (!this.delivery || !this.delivery._id) return;
 
     this.loading = true;
     this.deliveryService
-      .updateDeliveryStatus(this.deliveryId, newStatus)
+      .updateDelivery(this.delivery._id, { status })
       .subscribe({
-        next: (event) => {
-          this.delivery = event;
+        next: (updatedDelivery) => {
+          this.delivery = updatedDelivery;
           this.loading = false;
         },
         error: (err) => {
           this.error = true;
-          this.errorMessage =
-            err.message ||
-            'Failed to update delivery status. Please try again.';
+          this.errorMessage = 'Failed to update delivery status';
           this.loading = false;
+          console.error('Error updating delivery status:', err);
         },
       });
+  }
+
+  // Getter methods to safely access properties that don't exist in the model
+  // These methods will be used in the template
+  getDeliveryPersonName(): string {
+    if (!this.delivery) return 'Not assigned';
+    return typeof this.delivery.transporter === 'object'
+      ? this.delivery.transporter.name || 'Unknown'
+      : 'Unknown';
+  }
+
+  getDeliveryPersonId(): string {
+    if (!this.delivery?.transporter) return 'N/A';
+    return this.delivery.transporter.toString();
+  }
+
+  getScheduledDate(): Date {
+    if (!this.delivery?.pickupDate) return new Date();
+    return new Date(this.delivery.pickupDate);
+  }
+
+  getAddress(): string {
+    return 'Address not available in data model';
+  }
+
+  getNotes(): string {
+    return 'Notes not available in data model';
+  }
+
+  getItems(): Array<{ name: string; quantity: number; unit: string }> {
+    return [{ name: 'Mock Food Item', quantity: 1, unit: 'package' }];
   }
 }

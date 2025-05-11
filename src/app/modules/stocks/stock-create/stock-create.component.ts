@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { StockService } from '../../../core/services/stock.service';
 import { ProductService } from '../../../core/services/product.service';
 import { Product } from '../../../core/models/product.model';
+import { StockRequest } from '../../../core/models/stock.model';
 
 @Component({
   selector: 'app-stock-create',
@@ -26,9 +27,7 @@ export class StockCreateComponent implements OnInit {
     this.stockForm = this.fb.group({
       productId: ['', Validators.required],
       quantity: ['', [Validators.required, Validators.min(1)]],
-      location: ['', Validators.required],
       expiryDate: ['', Validators.required],
-      batchNumber: [''],
     });
   }
 
@@ -38,12 +37,12 @@ export class StockCreateComponent implements OnInit {
 
   loadProducts(): void {
     this.isLoading = true;
-    this.productService.getProducts().subscribe({
-      next: (data) => {
+    this.productService.getAllProducts().subscribe({
+      next: (data: Product[]) => {
         this.products = data;
         this.isLoading = false;
       },
-      error: (error) => {
+      error: (error: any) => {
         this.errorMessage = 'Failed to load products. Please try again.';
         this.isLoading = false;
       },
@@ -53,7 +52,10 @@ export class StockCreateComponent implements OnInit {
   onSubmit(): void {
     if (this.stockForm.valid) {
       this.isSubmitting = true;
-      const stockData = this.stockForm.value;
+      // Create a StockRequest object with only the properties defined in the model
+      const stockData: StockRequest = {
+        productId: this.stockForm.value.productId,
+      };
 
       this.stockService.createStock(stockData).subscribe({
         next: () => {
@@ -63,6 +65,7 @@ export class StockCreateComponent implements OnInit {
         error: (error) => {
           this.isSubmitting = false;
           this.errorMessage = 'Failed to create stock. Please try again.';
+          console.error('Stock creation error:', error);
         },
       });
     } else {

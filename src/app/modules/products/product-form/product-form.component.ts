@@ -1,12 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ProductsService } from '../../../services/products.service';
-import {
-  Product,
-  ProductCategory,
-  ProductType,
-} from '../../../models/product.model';
+import { ProductService } from '../../../core/services/product.service';
+import { first } from 'rxjs/operators';
+import { Product } from '../../../core/models/product.model';
 
 @Component({
   selector: 'app-product-form',
@@ -14,126 +11,148 @@ import {
   styleUrls: ['./product-form.component.css'],
 })
 export class ProductFormComponent implements OnInit {
-  productForm: FormGroup;
-  isEditMode = false;
+  productForm!: FormGroup;
   productId: string | null = null;
+  isEditMode = false;
   loading = false;
-  submitting = false;
   error: string | null = null;
-
-  // Use the enum values for the dropdowns
-  categories = Object.values(ProductCategory);
-  productTypes = Object.values(ProductType);
+  successMessage: string | null = null;
+  categories: string[] = ['Medicine', 'Equipment', 'Consumable', 'Other'];
+  productTypes: string[] = [
+    'Tablet',
+    'Liquid',
+    'Capsule',
+    'Injection',
+    'Cream',
+    'Equipment',
+    'Other',
+  ];
+  statusOptions: string[] = ['Active', 'Inactive'];
 
   constructor(
-    private fb: FormBuilder,
+    private formBuilder: FormBuilder,
+    private productService: ProductService,
     private route: ActivatedRoute,
-    private router: Router,
-    private productsService: ProductsService
-  ) {
-    this.productForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(3)]],
-      description: ['', [Validators.required, Validators.minLength(10)]],
-      category: ['', Validators.required],
-      productType: ['', Validators.required],
-      status: [''],
-    });
-  }
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
+    this.initForm();
     this.productId = this.route.snapshot.paramMap.get('id');
-    this.isEditMode = !!this.productId;
-
-    if (this.isEditMode && this.productId) {
-      this.loadProductDetails(this.productId);
+    if (this.productId) {
+      this.isEditMode = true;
+      this.loadProductDetails();
     }
   }
 
-  loadProductDetails(id: string): void {
-    this.loading = true;
-    this.error = null;
+  initForm(): void {
+    this.productForm = this.formBuilder.group({
+      name: ['', [Validators.required]],
+      description: [''],
+      category: ['', [Validators.required]],
+      productType: ['', [Validators.required]],
+      status: ['Active', [Validators.required]],
+    });
+  }
 
-    this.productsService.getProductById(id).subscribe({
-      next: (product) => {
-        this.populateForm(product);
+  loadProductDetails(): void {
+    if (!this.productId) return;
+
+    this.loading = true;
+    this.productService.getProductById(this.productId).subscribe({
+      next: (product: Product) => {
+        this.productForm.patchValue({
+          name: product.name,
+          description: product.description,
+          category: product.category,
+          productType: product.productType,
+          status: product.status,
+        });
         this.loading = false;
       },
-      error: (err) => {
-        this.error = 'Failed to load product details. Please try again.';
+      error: (err: any) => {
+        this.error = 'Failed to load product details.';
         this.loading = false;
         console.error('Error loading product:', err);
       },
     });
   }
 
-  populateForm(product: Product): void {
-    this.productForm.patchValue({
-      name: product.name,
-      description: product.description || '',
-      category: product.category,
-      productType: product.productType,
-      status: product.status || '',
-    });
-  }
-
   onSubmit(): void {
     if (this.productForm.invalid) {
-      this.markFormGroupTouched(this.productForm);
       return;
     }
 
-    this.submitting = true;
-    const productData = this.prepareProductData();
+    this.loading = true;
+    this.error = null;
+    this.successMessage = null;
+    const productData = this.productForm.value;
 
     if (this.isEditMode && this.productId) {
-      this.updateProduct(this.productId, productData);
+      this.productService
+        .updateProduct(this.productId, productData)
+        .pipe(first())
+        .subscribe({
+          next: () => {
+            this.successMessage = 'Product updated successfully!';
+            this.loading = false;
+            setTimeout(() => {
+              this.router.navigate(['/dashboard/products']);
+            }, 1500);
+          },
+          error: (err: any) => {
+            this.error = 'Failed to update product.';
+            this.loading = false;
+            console.error('Error updating product:', err);
+          },
+        });
     } else {
-      this.createProduct(productData);
+      this.productService
+        .createProduct(productData)
+        .pipe(first())
+        .subscribe({
+          next: () => {
+            this.successMessage = 'Product created successfully!';
+            this.loading = false;
+            setTimeout(() => {
+              this.router.navigate(['/dashboard/products']);
+            }, 1500);
+          },
+          error: (err: any) => {
+            this.error = 'Failed to create product.';
+            this.loading = false;
+            console.error('Error creating product:', err);
+          },
+        });
     }
   }
 
-  prepareProductData(): Product {
-    const formValue = this.productForm.value;
-    return formValue as Product;
-  }
-
-  createProduct(product: Product): void {
-    this.productsService.createProduct(product).subscribe({
-      next: () => {
-        this.router.navigate(['/dashboard/products']);
-      },
-      error: (err) => {
-        this.error = 'Failed to create product. Please try again.';
-        this.submitting = false;
-        console.error('Error creating product:', err);
-      },
-    });
-  }
-
-  updateProduct(id: string, product: Product): void {
-    this.productsService.updateProduct(id, product).subscribe({
-      next: () => {
-        this.router.navigate(['/dashboard/products']);
-      },
-      error: (err) => {
-        this.error = 'Failed to update product. Please try again.';
-        this.submitting = false;
-        console.error('Error updating product:', err);
-      },
-    });
-  }
-
-  onCancel(): void {
+  cancel(): void {
     this.router.navigate(['/dashboard/products']);
   }
 
-  // Helper method to mark all form controls as touched
-  private markFormGroupTouched(formGroup: FormGroup): void {
-    Object.values(formGroup.controls).forEach((control) => {
-      control.markAsTouched();
-      if (control instanceof FormGroup) {
-        this.markFormGroupTouched(control);
-      }
-    });
+  deleteProduct(): void {
+    if (!this.productId) return;
+
+    if (confirm('Are you sure you want to delete this product?')) {
+      this.loading = true;
+      this.error = null;
+      this.successMessage = null;
+
+      this.productService.deleteProduct(this.productId).subscribe({
+        next: () => {
+          this.successMessage = 'Product deleted successfully!';
+          this.loading = false;
+          setTimeout(() => {
+            this.router.navigate(['/dashboard/products']);
+          }, 1500);
+        },
+        error: (err: any) => {
+          this.error = 'Failed to delete product.';
+          this.loading = false;
+          console.error('Error deleting product:', err);
+        },
+      });
+    }
   }
 }

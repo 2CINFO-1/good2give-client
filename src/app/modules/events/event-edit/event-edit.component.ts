@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { EventService } from 'src/app/services/event.service';
-import { Event, EventStatus } from 'src/app/models/event.model';
+import { EventService } from '../../../core/services/event.service';
+import { Event } from '../../../core/models/event.model';
 
 @Component({
   selector: 'app-event-edit',
@@ -16,7 +16,6 @@ export class EventEditComponent implements OnInit {
   error = '';
   eventId = '';
   eventData: Event | null = null;
-  EventStatus = EventStatus;
 
   constructor(
     private fb: FormBuilder,
@@ -29,7 +28,6 @@ export class EventEditComponent implements OnInit {
       objective: ['', [Validators.required, Validators.minLength(10)]],
       date: ['', Validators.required],
       numbre: [1, [Validators.required, Validators.min(1)]],
-      status: [EventStatus.UPCOMING, Validators.required],
     });
   }
 
@@ -49,7 +47,7 @@ export class EventEditComponent implements OnInit {
   loadEvent(id: string): void {
     this.loading = true;
     this.eventService.getEventById(id).subscribe({
-      next: (data) => {
+      next: (data: Event) => {
         this.eventData = data;
         this.patchFormValues(data);
         this.loading = false;
@@ -63,13 +61,15 @@ export class EventEditComponent implements OnInit {
   }
 
   patchFormValues(event: Event): void {
-    this.eventForm.patchValue({
-      title: event.title,
-      objective: event.objective,
-      date: event.date,
-      numbre: event.numbre,
-      status: event.status,
-    });
+    // Create a local placeholder object for any missing fields
+    const eventFormData = {
+      title: event.title || '',
+      objective: event.objective || '',
+      date: event.date || '',
+      numbre: event.numbre || 1,
+    };
+
+    this.eventForm.patchValue(eventFormData);
   }
 
   onSubmit(): void {

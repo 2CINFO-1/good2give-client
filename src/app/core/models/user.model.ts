@@ -6,6 +6,28 @@ export enum UserRole {
   INSPECTOR = 'inspector',
 }
 
+export enum UserStatus {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+  PENDING = 'pending',
+  SUSPENDED = 'suspended',
+}
+
+export interface UserAddress {
+  street: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country: string;
+}
+
+export interface UserOrganization {
+  name: string;
+  role?: string;
+  website?: string;
+  taxId?: string;
+}
+
 export interface User {
   _id: string;
   email: string;
@@ -17,22 +39,54 @@ export interface User {
   updatedAt?: string;
 }
 
+export interface UserRequest {
+  email: string;
+  password: string;
+  name: string;
+  role?: UserRole;
+  avatar?: string;
+}
+
+export interface UserResponse {
+  _id: string;
+  email: string;
+  name: string;
+  role: UserRole;
+  avatar?: string;
+  isEmailVerified: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UserProfile extends User {
+  // Additional profile fields can be added here
+}
+
+export interface UpdateUserProfileRequest {
+  email?: string;
+  name?: string;
+  avatar?: string;
+}
+
+export interface UpdatePasswordRequest {
+  oldPassword: string;
+  newPassword: string;
+}
+
+export interface RequestPasswordResetRequest {
+  email: string;
+}
+
+export interface ResetPasswordRequest {
+  token: string;
+  newPassword: string;
+}
+
 export interface AuthResponse {
   user: User;
   tokens: {
-    // Support for both token formats
-    // Format 1 (nested)
-    access?: {
-      token: string;
-      expires: string;
-    };
-    refresh?: {
-      token: string;
-      expires: string;
-    };
-    // Format 2 (flat)
-    accessToken?: string;
-    refreshToken?: string;
+    accessToken: string;
+    refreshToken: string;
   };
 }
 
@@ -46,7 +100,6 @@ export interface RegisterRequest {
   password: string;
   name: string;
   role?: UserRole;
-  avatar?: string;
 }
 
 export interface RefreshTokenRequest {

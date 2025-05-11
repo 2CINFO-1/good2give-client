@@ -1,7 +1,9 @@
 <div class="container mx-auto px-4 py-6">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold text-gray-800">Collections</h1>
-        <!-- You can add a button to create collections if needed -->
+        <button (click)="createCollecte()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+            Create Collection
+        </button>
     </div>
 
     <!-- Loading state -->
@@ -33,14 +35,13 @@
                     <th scope="col"
                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                     <th scope="col"
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Items
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title
                     </th>
                     <th scope="col"
                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status
                     </th>
                     <th scope="col"
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Scheduled
-                        Date
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created
                     </th>
                     <th scope="col"
                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions
@@ -55,14 +56,13 @@
                         </a>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {{ collecte.items?.length || 0 }} items
+                        {{ collecte.title }}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full" [ngClass]="{
                             'bg-yellow-100 text-yellow-800': collecte.status === CollecteStatus.PENDING,
-                            'bg-blue-100 text-blue-800': collecte.status === CollecteStatus.ASSIGNED || collecte.status === CollecteStatus.IN_PROGRESS,
-                            'bg-green-100 text-green-800': collecte.status === CollecteStatus.COMPLETED,
-                            'bg-red-100 text-red-800': collecte.status === CollecteStatus.FAILED || collecte.status === CollecteStatus.CANCELLED
+                            'bg-blue-100 text-blue-800': collecte.status === CollecteStatus.IN_PROGRESS,
+                            'bg-green-100 text-green-800': collecte.status === CollecteStatus.COMPLETED
                           }">
                             {{ collecte.status }}
                         </span>
@@ -76,10 +76,6 @@
                                 class="text-blue-600 hover:text-blue-800">
                                 View
                             </a>
-                            <button *ngIf="collecte.status === CollecteStatus.PENDING && !collecte.transporter"
-                                (click)="assignTransporter(collecte._id)" class="text-green-600 hover:text-green-800">
-                                Assign
-                            </button>
                         </div>
                     </td>
                 </tr>

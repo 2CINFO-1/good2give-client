@@ -34,8 +34,8 @@
                 </button>
 
                 <div class="hidden md:flex items-center space-x-4">
-                    <a routerLink="/login" class="text-gray-600 hover:text-primary-600 font-medium">Sign In</a>
-                    <a routerLink="/register"
+                    <a routerLink="/auth/login" class="text-gray-600 hover:text-primary-600 font-medium">Sign In</a>
+                    <a routerLink="/auth/register"
                         class="bg-primary-600 text-white px-4 py-2 rounded-md hover:bg-primary-700 font-medium transition-colors">
                         Join Now
                     </a>
@@ -51,8 +51,9 @@
                     <a (click)="scrollToSection('contact')"
                         class="text-gray-600 hover:text-primary-600 font-medium py-2 cursor-pointer">Contact</a>
                     <div class="flex flex-col space-y-3 pt-3 border-t border-gray-200">
-                        <a routerLink="/login" class="text-gray-600 hover:text-primary-600 font-medium py-2">Sign In</a>
-                        <a routerLink="/register"
+                        <a routerLink="/auth/login" class="text-gray-600 hover:text-primary-600 font-medium py-2">Sign
+                            In</a>
+                        <a routerLink="/auth/register"
                             class="bg-primary-600 text-white px-4 py-2 rounded-md hover:bg-primary-700 font-medium transition-colors text-center">
                             Join Now
                         </a>
@@ -75,10 +76,10 @@
                 <p class="text-xl mb-10">Connecting supermarkets, restaurants, and communities to reduce food waste and
                     fight hunger</p>
                 <div class="flex flex-wrap justify-center gap-4">
-                    <a routerLink="/login" class="btn-primary">
+                    <a routerLink="/auth/login" class="btn-primary">
                         Sign In
                     </a>
-                    <a routerLink="/register" class="btn-secondary">
+                    <a routerLink="/auth/register" class="btn-secondary">
                         Join Our Network
                     </a>
                 </div>
@@ -251,10 +252,10 @@
             <p class="text-xl mb-8 max-w-2xl mx-auto">Connect with us to help reduce food waste, support your community,
                 and create a more sustainable future.</p>
             <div class="flex flex-wrap justify-center gap-4">
-                <a routerLink="/register" class="btn-white">
+                <a routerLink="/auth/register" class="btn-white">
                     Register as Partner
                 </a>
-                <a routerLink="/register?type=beneficiary" class="btn-outline-white">
+                <a routerLink="/auth/register?type=beneficiary" class="btn-outline-white">
                     Register as Distribution Center
                 </a>
             </div>

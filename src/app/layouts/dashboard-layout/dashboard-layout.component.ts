@@ -1,17 +1,19 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { UserStateService } from '../../core/services/user-state.service';
 import { User, UserRole } from '../../core/models/user.model';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard-layout',
   templateUrl: './dashboard-layout.component.html',
-  styleUrls: ['./dashboard-layout.component.css'],
 })
-export class DashboardLayoutComponent implements OnInit {
+export class DashboardLayoutComponent implements OnInit, OnDestroy {
   currentUser: User | null = null;
   isSidebarOpen = true;
   UserRole = UserRole;
+  private userSubscription: Subscription | null = null;
 
   menuItems = [
     {
@@ -88,13 +90,23 @@ export class DashboardLayoutComponent implements OnInit {
     },
   ];
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private authService: AuthService,
+    private userState: UserStateService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
-    this.currentUser = this.authService.getCurrentUser();
-    this.authService.currentUser$.subscribe((user) => {
+    this.currentUser = this.userState.getCurrentUser();
+    this.userSubscription = this.userState.currentUser$.subscribe((user) => {
       this.currentUser = user;
     });
+  }
+
+  ngOnDestroy(): void {
+    if (this.userSubscription) {
+      this.userSubscription.unsubscribe();
+    }
   }
 
   toggleSidebar(): void {
@@ -104,12 +116,12 @@ export class DashboardLayoutComponent implements OnInit {
   logout(): void {
     this.authService.logout().subscribe({
       next: () => {
-        this.router.navigate(['/login']);
+        this.router.navigate(['/auth/login']);
       },
       error: (error) => {
         console.error('Logout error', error);
         // Force navigation even if API call fails
-        this.router.navigate(['/login']);
+        this.router.navigate(['/auth/login']);
       },
     });
   }

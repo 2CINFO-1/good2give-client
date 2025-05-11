@@ -2,12 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { OAuthService } from '../../../core/services/oauth.service';
 import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css'],
 })
 export class LoginComponent implements OnInit {
   loginForm: FormGroup;
@@ -20,6 +20,7 @@ export class LoginComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private authService: AuthService,
+    private oauthService: OAuthService,
     private toastr: ToastrService
   ) {
     this.loginForm = this.formBuilder.group({
@@ -33,11 +34,29 @@ export class LoginComponent implements OnInit {
     // Get return url from route parameters or default to '/dashboard'
     this.returnUrl =
       this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
+
+    // Check if there's an error from the callback
+    const error = this.route.snapshot.queryParams['error'];
+    if (error) {
+      this.errorMessage = 'Authentication failed. Please try again.';
+      this.toastr.error(this.errorMessage);
+    }
   }
 
   // Getter methods for form validation
   get f() {
     return this.loginForm.controls;
+  }
+
+  // Method to handle Google sign-in
+  signInWithGoogle(): void {
+    this.isSubmitting = true;
+    this.errorMessage = '';
+
+    console.log('Redirecting to Google authentication');
+
+    // Redirect to the backend's Google auth endpoint
+    window.location.href = this.oauthService.getGoogleAuthUrl();
   }
 
   onSubmit(): void {

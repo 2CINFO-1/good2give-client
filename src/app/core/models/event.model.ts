@@ -1,35 +1,38 @@
 import { User } from './user.model';
 
-export enum EventStatus {
-  PLANNED = 'planned',
-  ONGOING = 'ongoing',
-  COMPLETED = 'completed',
-  CANCELLED = 'cancelled',
-}
-
 export interface Event {
   _id: string;
+  beneficiaryid: User;
   title: string;
-  description: string;
-  location: string;
-  startDate: Date;
-  endDate: Date;
-  organizer: User | string;
-  participants?: (User | string)[];
-  status: EventStatus;
-  capacity?: number;
-  registeredCount?: number;
-  photos?: string[];
+  objective: string;
+  numbre: number;
+  date: Date;
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface EventRequest {
+export interface CreateEventDto {
+  beneficiaryid: string;
   title: string;
-  description: string;
-  location: string;
-  startDate: Date;
-  endDate: Date;
-  capacity?: number;
-  photos?: string[];
+  objective: string;
+  numbre: number;
+  date: string;
+}
+
+export interface UpdateEventDto {
+  title?: string;
+  objective?: string;
+  numbre?: number;
+  date?: string;
+}
+
+export interface EventSerializer {
+  _id: string;
+  beneficiaryid: User;
+  title: string;
+  objective: string;
+  numbre: number;
+  date: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }

@@ -8,7 +8,6 @@ import { RegisterRequest, UserRole } from '../../../core/models/user.model';
 @Component({
   selector: 'app-register',
   templateUrl: './register.component.html',
-  styleUrls: ['./register.component.css'],
 })
 export class RegisterComponent implements OnInit {
   registerForm: FormGroup;
@@ -50,6 +49,17 @@ export class RegisterComponent implements OnInit {
     return this.registerForm.controls;
   }
 
+  // Method to handle Google sign-in
+  signInWithGoogle(): void {
+    this.isSubmitting = true;
+    this.errorMessage = '';
+
+    console.log('Redirecting to Google authentication');
+
+    // Redirect to the backend's Google auth endpoint
+    window.location.href = `${this.authService['apiUrl']}/google`;
+  }
+
   onSubmit() {
     if (this.registerForm.invalid) {
       return;
@@ -69,7 +79,7 @@ export class RegisterComponent implements OnInit {
       next: (response) => {
         this.isSubmitting = false;
         this.toastr.success('Registration successful! You can now log in.');
-        this.router.navigate(['/login']);
+        this.router.navigate(['/auth/login']);
       },
       error: (error) => {
         this.isSubmitting = false;

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Collecte, CollecteStatus } from '../../../models/collecte.model';
-import { CollecteService } from '../../../services/collecte.service';
+import { Collecte, CollecteStatus } from '../../../core/models/collecte.model';
+import { CollecteService } from '../../../core/services/collecte.service';
 import { catchError, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
 
@@ -25,16 +25,15 @@ export class CollecteDetailComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadCollecte();
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.loadCollecte(id);
+    } else {
+      this.error = 'No collection ID provided.';
+    }
   }
 
-  loadCollecte(): void {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (!id) {
-      this.error = 'Collection ID is required';
-      return;
-    }
-
+  loadCollecte(id: string): void {
     this.loading = true;
     this.error = null;
 
@@ -42,20 +41,20 @@ export class CollecteDetailComponent implements OnInit {
       .getCollecteById(id)
       .pipe(
         catchError((error) => {
-          this.error =
-            'Failed to load collection details. Please try again later.';
+          this.error = 'Failed to load collection details. Please try again.';
           return of(null);
         }),
         finalize(() => {
           this.loading = false;
         })
       )
-      .subscribe((data: Collecte | null) => {
+      .subscribe((data) => {
         this.collecte = data;
-        if (!data) {
-          this.error = 'Collection not found';
-        }
       });
+  }
+
+  formatDate(date: string | Date): string {
+    return new Date(date).toLocaleDateString();
   }
 
   updateStatus(status: CollecteStatus): void {
@@ -84,32 +83,5 @@ export class CollecteDetailComponent implements OnInit {
 
   goBack(): void {
     this.router.navigate(['/dashboard/collecte']);
-  }
-
-  formatDate(date: string | undefined): string {
-    if (!date) return 'N/A';
-    return new Date(date).toLocaleDateString();
-  }
-
-  isString(value: any): boolean {
-    return typeof value === 'string';
-  }
-
-  getTransporterId(transporter: any): string {
-    if (typeof transporter === 'string') {
-      return transporter;
-    } else if (transporter && transporter._id) {
-      return transporter._id;
-    }
-    return 'Unknown';
-  }
-
-  getTransporterName(transporter: any): string {
-    if (typeof transporter === 'string') {
-      return transporter;
-    } else if (transporter && transporter.name) {
-      return transporter.name;
-    }
-    return 'Not specified';
   }
 }

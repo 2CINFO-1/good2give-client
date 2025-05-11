@@ -1,6 +1,10 @@
 import { Product } from './product.model';
 import { User } from './user.model';
 
+/**
+ * Stock status enum
+ * Note: This is not part of the backend model but useful for frontend display
+ */
 export enum StockStatus {
   AVAILABLE = 'available',
   RESERVED = 'reserved',
@@ -9,30 +13,41 @@ export enum StockStatus {
   SCRAPPED = 'scrapped',
 }
 
+/**
+ * Stock interface matching backend IStock model
+ */
 export interface Stock {
   _id: string;
-  productId: string;
-  quantity: number;
-  location: string;
-  expiryDate: string;
-  batchNumber?: string;
-  createdAt?: string;
-  updatedAt?: string;
+  productId: Product | string;
+  releasedAt?: string;
+  donatorId: User | string;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
 }
 
-export interface StockAdjustment {
-  _id: string;
-  stock: Stock | string;
-  adjustmentType: 'increase' | 'decrease';
-  quantity: number;
-  reason: string;
-  performedBy: User | string;
-  createdAt: Date;
-}
-
+/**
+ * Stock creation request matching backend CreateStockDto
+ */
 export interface StockRequest {
   productId: string;
-  quantity: number;
-  source?: string;
-  notes?: string;
+  donatorId?: string;
+}
+
+/**
+ * Stock update request matching backend UpdateStockDto
+ */
+export interface StockUpdateRequest {
+  releasedAt: string;
+}
+
+/**
+ * Stock response from API
+ */
+export interface StockResponse extends Stock {
+  _id: string;
+  productId: Product | string;
+  releasedAt?: string;
+  donatorId: User | string;
+  createdAt: string | Date;
+  updatedAt: string | Date;
 }
