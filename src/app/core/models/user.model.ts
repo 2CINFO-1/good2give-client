@@ -17,6 +17,21 @@ export interface User {
   updatedAt?: string;
 }
 
+export interface UserProfile extends User {
+  // Additional profile fields can be added here
+}
+
+export interface UpdateUserProfileRequest {
+  email?: string;
+  name?: string;
+  avatar?: string;
+}
+
+export interface UpdatePasswordRequest {
+  oldPassword: string;
+  newPassword: string;
+}
+
 export interface AuthResponse {
   user: User;
   tokens: {

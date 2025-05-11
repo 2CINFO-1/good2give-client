@@ -2,7 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Stock } from '../models/stock.model';
+import {
+  Stock,
+  StockItem,
+  StockRequest,
+  StockResponse,
+  StockAdjustment,
+} from '../models/stock.model';
 
 @Injectable({
   providedIn: 'root',
@@ -16,27 +22,60 @@ export class StockService {
     return this.http.get<Stock[]>(this.apiUrl);
   }
 
+  getAllStockItems(): Observable<StockItem[]> {
+    return this.http.get<StockItem[]>(this.apiUrl);
+  }
+
   getStockById(id: string): Observable<Stock> {
     return this.http.get<Stock>(`${this.apiUrl}/${id}`);
+  }
+
+  getStockItemById(id: string): Observable<StockItem> {
+    return this.http.get<StockItem>(`${this.apiUrl}/${id}`);
   }
 
   getStockByProduct(productId: string): Observable<Stock[]> {
     return this.http.get<Stock[]>(`${this.apiUrl}/product/${productId}`);
   }
 
-  createStock(stock: Stock): Observable<Stock> {
-    return this.http.post<Stock>(this.apiUrl, stock);
+  getStockBySource(source: string): Observable<Stock[]> {
+    return this.http.get<Stock[]>(`${this.apiUrl}/source/${source}`);
   }
 
-  updateStock(id: string, stock: Stock): Observable<Stock> {
-    return this.http.put<Stock>(`${this.apiUrl}/${id}`, stock);
+  createStock(stock: StockRequest): Observable<StockResponse> {
+    return this.http.post<StockResponse>(this.apiUrl, stock);
+  }
+
+  addToStock(stockData: StockRequest): Observable<StockResponse> {
+    return this.http.post<StockResponse>(this.apiUrl, stockData);
+  }
+
+  updateStock(
+    id: string,
+    stock: Partial<StockRequest>
+  ): Observable<StockResponse> {
+    return this.http.put<StockResponse>(`${this.apiUrl}/${id}`, stock);
+  }
+
+  updateStockItem(
+    id: string,
+    stockData: Partial<StockRequest>
+  ): Observable<StockResponse> {
+    return this.http.put<StockResponse>(`${this.apiUrl}/${id}`, stockData);
   }
 
   deleteStock(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
-  adjustStock(adjustmentData: any): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/adjust`, adjustmentData);
+  removeFromStock(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  adjustStock(adjustmentData: StockAdjustment): Observable<StockResponse> {
+    return this.http.post<StockResponse>(
+      `${this.apiUrl}/adjust`,
+      adjustmentData
+    );
   }
 }

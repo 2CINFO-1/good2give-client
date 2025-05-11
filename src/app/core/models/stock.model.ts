@@ -20,14 +20,13 @@ export interface Stock {
   updatedAt?: string;
 }
 
-export interface StockAdjustment {
+export interface StockItem {
   _id: string;
-  stock: Stock | string;
-  adjustmentType: 'increase' | 'decrease';
-  quantity: number;
-  reason: string;
-  performedBy: User | string;
-  createdAt: Date;
+  productId: string;
+  releasedAt?: string;
+  donatorId: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface StockRequest {
@@ -35,4 +34,27 @@ export interface StockRequest {
   quantity: number;
   source?: string;
   notes?: string;
+  releasedAt?: string;
+  donatorId?: string;
+}
+
+export interface StockResponse {
+  _id: string;
+  productId: string;
+  releasedAt?: string;
+  donatorId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface StockAdjustment {
+  _id?: string;
+  stock?: Stock | string;
+  productId?: string;
+  adjustmentType: 'increase' | 'decrease';
+  quantity: number;
+  reason: string;
+  performedBy?: User | string;
+  location?: string;
+  createdAt?: Date;
 }

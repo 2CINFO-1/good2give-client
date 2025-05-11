@@ -1,4 +1,4 @@
-import { User } from '../../models/user.model';
+import { User } from './user.model';
 
 export enum ProductCategory {
   GRAINS = 'Grains',
@@ -41,4 +41,16 @@ export interface ProductRequest {
   category: ProductCategory;
   description: string;
   status?: string;
+}
+
+export interface ProductResponse {
+  _id: string;
+  name: string;
+  productType: ProductType;
+  category: ProductCategory;
+  description: string;
+  donatorId: User;
+  status?: string;
+  createdAt: string;
+  updatedAt: string;
 }
