@@ -13,24 +13,24 @@ import {
   LogoutRequest,
 } from '../models/user.model';
 import { JwtHelperService } from '@auth0/angular-jwt';
+import { UserStateService } from './user-state.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   private apiUrl = `${environment.apiUrl}/auth`;
-  private currentUserSubject = new BehaviorSubject<User | null>(null);
-  public currentUser$ = this.currentUserSubject.asObservable();
 
   constructor(
     private http: HttpClient,
     private router: Router,
-    private jwtHelper: JwtHelperService
+    private jwtHelper: JwtHelperService,
+    private userState: UserStateService
   ) {
     this.loadCurrentUser();
   }
 
-  private loadCurrentUser(): void {
+  public loadCurrentUser(): void {
     try {
       // Try localStorage first, then sessionStorage as fallback
       let token = localStorage.getItem('access_token');
@@ -50,12 +50,14 @@ export class AuthService {
         console.log(
           'AuthService loadCurrentUser - No token found in either storage'
         );
+        this.userState.setAuthLoaded();
         return;
       }
 
       try {
         if (this.jwtHelper.isTokenExpired(token)) {
           console.log('AuthService loadCurrentUser - Token is expired');
+          this.userState.setAuthLoaded();
           return;
         }
 
@@ -90,7 +92,7 @@ export class AuthService {
         );
 
         if (user && user._id) {
-          this.currentUserSubject.next(user);
+          this.userState.setCurrentUser(user);
           console.log(
             `AuthService loadCurrentUser - User set successfully from ${storageType}`
           );
@@ -98,6 +100,7 @@ export class AuthService {
           console.error(
             'AuthService loadCurrentUser - Could not extract valid user from token'
           );
+          this.userState.setAuthLoaded();
         }
       } catch (tokenError) {
         console.error(
@@ -109,9 +112,11 @@ export class AuthService {
         localStorage.removeItem('refresh_token');
         sessionStorage.removeItem('access_token');
         sessionStorage.removeItem('refresh_token');
+        this.userState.setAuthLoaded();
       }
     } catch (error) {
       console.error('AuthService loadCurrentUser - Unexpected error:', error);
+      this.userState.setAuthLoaded();
     }
   }
 
@@ -249,55 +254,36 @@ export class AuthService {
           localStorage.removeItem('test_storage');
           localStorage.setItem('access_token', accessToken);
           localStorage.setItem('refresh_token', refreshToken);
-
-          // Verify tokens were saved correctly
-          const savedAccessToken = localStorage.getItem('access_token');
-          const savedRefreshToken = localStorage.getItem('refresh_token');
-
           console.log(
-            'AuthService handleAuthResponse - Saved access_token:',
-            savedAccessToken ? 'saved' : 'not saved'
+            'AuthService handleAuthResponse - Tokens saved to localStorage'
           );
-          console.log(
-            'AuthService handleAuthResponse - Saved refresh_token:',
-            savedRefreshToken ? 'saved' : 'not saved'
-          );
-
-          if (!savedAccessToken || !savedRefreshToken) {
-            console.error(
-              'AuthService handleAuthResponse - Tokens not saved correctly to localStorage'
-            );
-            alert(
-              'Warning: Unable to save authentication tokens to localStorage'
-            );
-          }
         }
-      } catch (storageError: any) {
+
+        // Set the user in the global state
+        this.userState.setCurrentUser(user);
+      } catch (storageError) {
         console.error(
-          'AuthService handleAuthResponse - Storage error:',
+          'AuthService handleAuthResponse - Error accessing localStorage:',
           storageError
         );
-        alert(
-          'Error: Unable to save authentication data. ' + storageError.message
-        );
 
-        // Try using sessionStorage as fallback
+        // Fallback to sessionStorage
         try {
           sessionStorage.setItem('access_token', accessToken);
           sessionStorage.setItem('refresh_token', refreshToken);
           console.log(
-            'AuthService handleAuthResponse - Using sessionStorage as fallback'
+            'AuthService handleAuthResponse - Tokens saved to sessionStorage (fallback)'
           );
-        } catch (sessionError) {
+
+          // Set the user in the global state
+          this.userState.setCurrentUser(user);
+        } catch (sessionStorageError) {
           console.error(
-            'AuthService handleAuthResponse - SessionStorage error:',
-            sessionError
+            'AuthService handleAuthResponse - Error accessing sessionStorage:',
+            sessionStorageError
           );
         }
       }
-
-      // Update the current user subject
-      this.currentUserSubject.next(user);
     } catch (error) {
       console.error(
         'AuthService handleAuthResponse - Unexpected error:',
@@ -306,77 +292,29 @@ export class AuthService {
     }
   }
 
-  private clearAuthData(): void {
-    // Clear tokens from both storage types
+  public clearAuthData(): void {
+    // Clear tokens from storage
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     sessionStorage.removeItem('access_token');
     sessionStorage.removeItem('refresh_token');
 
-    console.log(
-      'AuthService clearAuthData - Tokens cleared from both storages'
-    );
+    // Clear state
+    this.userState.clearState();
 
-    this.currentUserSubject.next(null);
-    this.router.navigate(['/auth/login']);
+    console.log('AuthService clearAuthData - Auth data cleared');
   }
 
   getCurrentUser(): User | null {
-    return this.currentUserSubject.value;
+    return this.userState.getCurrentUser();
   }
 
   isAuthenticated(): boolean {
-    try {
-      // Check localStorage first
-      let token = localStorage.getItem('access_token');
-      let storageType = 'localStorage';
-
-      // If not in localStorage, check sessionStorage
-      if (!token) {
-        token = sessionStorage.getItem('access_token');
-        storageType = 'sessionStorage';
-      }
-
-      console.log(
-        `AuthService isAuthenticated - Token from ${storageType}:`,
-        !!token
-      );
-
-      if (!token) {
-        return false;
-      }
-
-      try {
-        const isExpired = this.jwtHelper.isTokenExpired(token);
-        console.log(
-          `AuthService isAuthenticated - Token from ${storageType} expired:`,
-          isExpired
-        );
-        return !isExpired;
-      } catch (tokenError) {
-        console.error(
-          'AuthService isAuthenticated - Error validating token:',
-          tokenError
-        );
-        // Clean up invalid tokens from both storages
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        sessionStorage.removeItem('access_token');
-        sessionStorage.removeItem('refresh_token');
-        return false;
-      }
-    } catch (error) {
-      console.error('AuthService isAuthenticated - Unexpected error:', error);
-      return false;
-    }
+    return this.userState.isAuthenticated();
   }
 
   hasRole(requiredRoles: string[]): boolean {
-    const currentUser = this.getCurrentUser();
-    console.log('AuthService hasRole - Current user:', currentUser);
-    console.log('AuthService hasRole - Required roles:', requiredRoles);
-
-    return !!currentUser && requiredRoles.includes(currentUser.role);
+    return this.userState.hasRole(requiredRoles);
   }
 
   forgotPassword(email: string): Observable<{ message: string }> {

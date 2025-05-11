@@ -14,7 +14,6 @@ import { DashboardLayoutComponent } from './layouts/dashboard-layout/dashboard-l
 
 // Modules
 import { AuthModule } from './modules/auth/auth.module';
-import { SharedModule } from './shared/shared.module';
 
 // Interceptors
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
@@ -48,7 +47,6 @@ export function tokenGetter() {
     ReactiveFormsModule,
     FormsModule,
     AuthModule,
-    SharedModule,
 
     JwtModule.forRoot({
       config: {

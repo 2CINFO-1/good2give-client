@@ -10,6 +10,7 @@ import { Observable, throwError, BehaviorSubject } from 'rxjs';
 import { catchError, filter, switchMap, take, finalize } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../services/auth.service';
+import { Router } from '@angular/router';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
@@ -18,7 +19,7 @@ export class AuthInterceptor implements HttpInterceptor {
     null
   );
 
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService, private router: Router) {}
 
   intercept(
     request: HttpRequest<any>,
@@ -52,6 +53,21 @@ export class AuthInterceptor implements HttpInterceptor {
     return next.handle(request).pipe(
       catchError((error) => {
         if (error instanceof HttpErrorResponse && error.status === 401) {
+          // Navigate to login if refresh token is not available
+          let refreshToken = localStorage.getItem('refresh_token');
+          if (!refreshToken) {
+            refreshToken = sessionStorage.getItem('refresh_token');
+          }
+
+          if (!refreshToken) {
+            console.log(
+              'AuthInterceptor - No refresh token available, redirecting to login'
+            );
+            this.authService.clearAuthData();
+            this.router.navigate(['/auth/login']);
+            return throwError(() => error);
+          }
+
           return this.handle401Error(request, next);
         }
         return throwError(() => error);
@@ -67,6 +83,8 @@ export class AuthInterceptor implements HttpInterceptor {
       `${environment.apiUrl}/forgot-password`,
       `${environment.apiUrl}/reset-password`,
       `${environment.apiUrl}/verify-email`,
+      `${environment.apiUrl}/google`,
+      `${environment.apiUrl}/google/callback`,
     ];
     return authEndpoints.some((endpoint) => url.includes(endpoint));
   }
@@ -125,13 +143,21 @@ export class AuthInterceptor implements HttpInterceptor {
           }),
           catchError((error) => {
             this.isRefreshing = false;
-            this.authService.logout();
+            // Clear auth data and redirect to login on refresh failure
+            this.authService.clearAuthData();
+            this.router.navigate(['/auth/login']);
             return throwError(() => error);
           }),
           finalize(() => {
             this.isRefreshing = false;
           })
         );
+      } else {
+        // No refresh token available, redirect to login
+        this.isRefreshing = false;
+        this.authService.clearAuthData();
+        this.router.navigate(['/auth/login']);
+        return throwError(() => new Error('No refresh token available'));
       }
     }
 

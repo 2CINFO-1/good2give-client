@@ -12,7 +12,7 @@ import { NoAuthGuard } from '../../core/guards/no-auth.guard';
 const routes: Routes = [
   { path: '', component: LoginComponent, canActivate: [NoAuthGuard] },
   {
-    path: '',
+    path: 'forgot-password',
     component: ForgotPasswordComponent,
     canActivate: [NoAuthGuard],
   },

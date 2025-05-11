@@ -2,7 +2,6 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { DashboardLayoutComponent } from './layouts/dashboard-layout/dashboard-layout.component';
 import { RegisterComponent } from './modules/auth/register/register.component';
-import { ModulePlaceholderComponent } from './shared/components/module-placeholder/module-placeholder.component';
 
 // Guards
 import { AuthGuard } from './core/guards/auth.guard';
@@ -41,6 +40,13 @@ const routes: Routes = [
         path: 'reset-password',
         component: ResetPasswordComponent,
         canActivate: [NoAuthGuard],
+      },
+      {
+        path: 'callback',
+        loadChildren: () =>
+          import('./modules/auth/auth-callback/auth-callback.module').then(
+            (m) => m.AuthCallbackModule
+          ),
       },
     ],
   },
@@ -87,12 +93,14 @@ const routes: Routes = [
       },
       {
         path: 'products',
-        component: ModulePlaceholderComponent,
+        redirectTo: '',
+        pathMatch: 'full',
         canActivate: [AuthGuard],
       },
       {
         path: 'inspection',
-        component: ModulePlaceholderComponent,
+        redirectTo: '',
+        pathMatch: 'full',
         canActivate: [AuthGuard],
       },
       {
@@ -111,17 +119,20 @@ const routes: Routes = [
       },
       {
         path: 'collectes',
-        component: ModulePlaceholderComponent,
+        redirectTo: '',
+        pathMatch: 'full',
         canActivate: [AuthGuard],
       },
       {
         path: 'stocks',
-        component: ModulePlaceholderComponent,
+        redirectTo: '',
+        pathMatch: 'full',
         canActivate: [AuthGuard],
       },
       {
         path: 'scraps',
-        component: ModulePlaceholderComponent,
+        redirectTo: '',
+        pathMatch: 'full',
         canActivate: [AuthGuard],
       },
       {
