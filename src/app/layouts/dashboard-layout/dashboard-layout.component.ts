@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
 import { AuthService } from '../../core/services/auth.service';
 import { UserStateService } from '../../core/services/user-state.service';
 import { User, UserRole } from '../../core/models/user.model';
@@ -91,21 +92,70 @@ export class DashboardLayoutComponent implements OnInit, OnDestroy {
   ];
 
   constructor(
+    private router: Router,
+    private toastr: ToastrService,
     private authService: AuthService,
-    private userState: UserStateService,
-    private router: Router
+    private userState: UserStateService
   ) {}
 
   ngOnInit(): void {
-    this.currentUser = this.userState.getCurrentUser();
-    this.userSubscription = this.userState.currentUser$.subscribe((user) => {
-      this.currentUser = user;
-    });
+    try {
+      console.log('DashboardLayoutComponent - Initializing');
+
+      // First set currentUser from userState if available
+      try {
+        this.currentUser = this.userState.getCurrentUser();
+        console.log(
+          'DashboardLayoutComponent - Initial user state:',
+          this.currentUser ? 'exists' : 'null'
+        );
+      } catch (err) {
+        console.error(
+          'DashboardLayoutComponent - Error getting initial user state:',
+          err
+        );
+      }
+
+      // Subscribe to user updates
+      try {
+        this.userSubscription = this.userState.currentUser$.subscribe({
+          next: (user) => {
+            console.log(
+              'DashboardLayoutComponent - User state updated:',
+              user ? 'exists' : 'null'
+            );
+            this.currentUser = user;
+          },
+          error: (err) => {
+            console.error(
+              'DashboardLayoutComponent - Error in user subscription:',
+              err
+            );
+          },
+        });
+      } catch (err) {
+        console.error(
+          'DashboardLayoutComponent - Error setting up user subscription:',
+          err
+        );
+      }
+
+      // Check email verification after a short delay to ensure auth is loaded
+      setTimeout(() => {
+        this.checkEmailVerification();
+      }, 500);
+    } catch (error) {
+      console.error('DashboardLayoutComponent - Error in ngOnInit:', error);
+    }
   }
 
   ngOnDestroy(): void {
-    if (this.userSubscription) {
-      this.userSubscription.unsubscribe();
+    try {
+      if (this.userSubscription) {
+        this.userSubscription.unsubscribe();
+      }
+    } catch (error) {
+      console.error('DashboardLayoutComponent - Error unsubscribing:', error);
     }
   }
 
@@ -114,16 +164,22 @@ export class DashboardLayoutComponent implements OnInit, OnDestroy {
   }
 
   logout(): void {
-    this.authService.logout().subscribe({
-      next: () => {
-        this.router.navigate(['/auth/login']);
-      },
-      error: (error) => {
-        console.error('Logout error', error);
-        // Force navigation even if API call fails
-        this.router.navigate(['/auth/login']);
-      },
-    });
+    try {
+      this.authService.logout().subscribe({
+        next: () => {
+          this.router.navigate(['/auth/login']);
+        },
+        error: (error) => {
+          console.error('Logout error', error);
+          // Force navigation even if API call fails
+          this.router.navigate(['/auth/login']);
+        },
+      });
+    } catch (error) {
+      console.error('Error during logout:', error);
+      // Force navigation even if the method fails
+      this.router.navigate(['/auth/login']);
+    }
   }
 
   canShowMenuItem(item: any): boolean {
@@ -131,5 +187,74 @@ export class DashboardLayoutComponent implements OnInit, OnDestroy {
     return true;
     // When user authentication is properly working, use this:
     // return this.currentUser && item.roles.includes(this.currentUser.role);
+  }
+
+  private checkEmailVerification(): void {
+    try {
+      console.log('DashboardLayoutComponent - Checking email verification');
+
+      // Try to get user from both services for reliability
+      let user = null;
+      try {
+        user = this.authService.getCurrentUser();
+        console.log(
+          'DashboardLayoutComponent - User from authService:',
+          user ? 'exists' : 'null'
+        );
+      } catch (err) {
+        console.error(
+          'DashboardLayoutComponent - Error getting user from authService:',
+          err
+        );
+      }
+
+      if (!user) {
+        try {
+          user = this.userState.getCurrentUser();
+          console.log(
+            'DashboardLayoutComponent - User from userState:',
+            user ? 'exists' : 'null'
+          );
+        } catch (err) {
+          console.error(
+            'DashboardLayoutComponent - Error getting user from userState:',
+            err
+          );
+        }
+      }
+
+      if (!user) {
+        console.log(
+          'DashboardLayoutComponent - No user found, redirecting to login'
+        );
+        this.router.navigate(['/auth/login']);
+        return;
+      }
+
+      if (user.isEmailVerified === false) {
+        console.log(
+          'DashboardLayoutComponent - Email not verified, redirecting'
+        );
+        try {
+          this.toastr.warning('Please verify your email address', '', {
+            timeOut: 5000,
+            positionClass: 'toast-top-center',
+          });
+        } catch (err) {
+          console.error('DashboardLayoutComponent - Error showing toast:', err);
+        }
+        this.router.navigate(['/auth/verify-email']);
+      } else {
+        console.log(
+          'DashboardLayoutComponent - Email verification check passed'
+        );
+      }
+    } catch (error) {
+      console.error(
+        'DashboardLayoutComponent - Error checking email verification:',
+        error
+      );
+      // Don't redirect on error to prevent infinite redirection loops
+    }
   }
 }

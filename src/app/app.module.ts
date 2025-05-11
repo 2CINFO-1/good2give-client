@@ -17,6 +17,7 @@ import { AuthModule } from './modules/auth/auth.module';
 
 // Interceptors
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
+import { EmailVerificationInterceptor } from './core/interceptors/email-verification.interceptor';
 
 // Environment
 import { environment } from '../environments/environment';
@@ -65,6 +66,11 @@ export function tokenGetter() {
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: EmailVerificationInterceptor,
+      multi: true,
+    },
   ],
   bootstrap: [AppComponent],
 })

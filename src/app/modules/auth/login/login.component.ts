@@ -103,8 +103,21 @@ export class LoginComponent implements OnInit {
         this.isSubmitting = false;
         this.toastr.success('Login successful');
 
-        console.log('LoginComponent onSubmit - Navigating to:', this.returnUrl);
-        this.router.navigateByUrl(this.returnUrl);
+        // Check if email verification is required
+        const currentUser = this.authService.getCurrentUser();
+        if (currentUser && !currentUser.isEmailVerified) {
+          console.log(
+            'LoginComponent onSubmit - Email not verified, redirecting to verification page'
+          );
+          this.toastr.warning('Please verify your email address to continue');
+          this.router.navigate(['/auth/verify-email']);
+        } else {
+          console.log(
+            'LoginComponent onSubmit - Navigating to:',
+            this.returnUrl
+          );
+          this.router.navigateByUrl(this.returnUrl);
+        }
       },
       error: (error) => {
         console.error('LoginComponent onSubmit - Login error:', error);

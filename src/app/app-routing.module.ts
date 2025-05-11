@@ -7,9 +7,10 @@ import { RegisterComponent } from './modules/auth/register/register.component';
 import { AuthGuard } from './core/guards/auth.guard';
 import { NoAuthGuard } from './core/guards/no-auth.guard';
 import { RoleGuard } from './core/guards/role.guard';
-import { UserRole } from './core/models/user.model';
+import { EmailVerificationGuard } from './core/guards/email-verification.guard';
 import { ForgotPasswordComponent } from './modules/auth/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './modules/auth/reset-password/reset-password.component';
+import { VerifyEmailComponent } from './modules/auth/verify-email/verify-email.component';
 
 const routes: Routes = [
   {
@@ -40,6 +41,11 @@ const routes: Routes = [
         path: 'reset-password',
         component: ResetPasswordComponent,
         canActivate: [NoAuthGuard],
+      },
+      {
+        path: 'verify-email',
+        component: VerifyEmailComponent,
+        // No AuthGuard here to prevent redirection loops
       },
       {
         path: 'callback',
@@ -74,7 +80,7 @@ const routes: Routes = [
   {
     path: 'dashboard',
     component: DashboardLayoutComponent,
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard, EmailVerificationGuard],
     children: [
       {
         path: '',
@@ -82,6 +88,7 @@ const routes: Routes = [
           import('./modules/dashboard-home/dashboard-home.module').then(
             (m) => m.DashboardHomeModule
           ),
+        canActivate: [EmailVerificationGuard],
       },
       {
         path: 'collecte',
@@ -89,7 +96,7 @@ const routes: Routes = [
           import('./modules/collecte/collecte.module').then(
             (m) => m.CollecteModule
           ),
-        canActivate: [AuthGuard, RoleGuard],
+        canActivate: [AuthGuard, RoleGuard, EmailVerificationGuard],
         data: { roles: ['ADMIN', 'TRANSPORTER'] },
       },
       {
@@ -98,7 +105,7 @@ const routes: Routes = [
           import('./modules/collectes/collectes.module').then(
             (m) => m.CollectesModule
           ),
-        canActivate: [AuthGuard, RoleGuard],
+        canActivate: [AuthGuard, RoleGuard, EmailVerificationGuard],
         data: { roles: ['ADMIN', 'TRANSPORTER'] },
       },
       {
@@ -107,7 +114,7 @@ const routes: Routes = [
           import('./modules/reclamations/reclamations.module').then(
             (m) => m.ReclamationsModule
           ),
-        canActivate: [AuthGuard],
+        canActivate: [AuthGuard, EmailVerificationGuard],
       },
       {
         path: 'products',
@@ -115,7 +122,7 @@ const routes: Routes = [
           import('./modules/products/products.module').then(
             (m) => m.ProductsModule
           ),
-        canActivate: [AuthGuard, RoleGuard],
+        canActivate: [AuthGuard, RoleGuard, EmailVerificationGuard],
         data: { roles: ['ADMIN', 'INSPECTOR'] },
       },
       {
@@ -124,14 +131,14 @@ const routes: Routes = [
           import('./modules/inspection/inspection.module').then(
             (m) => m.InspectionModule
           ),
-        canActivate: [AuthGuard, RoleGuard],
+        canActivate: [AuthGuard, RoleGuard, EmailVerificationGuard],
         data: { roles: ['ADMIN', 'INSPECTOR'] },
       },
       {
         path: 'events',
         loadChildren: () =>
           import('./modules/events/events.module').then((m) => m.EventsModule),
-        canActivate: [AuthGuard],
+        canActivate: [AuthGuard, EmailVerificationGuard],
       },
       {
         path: 'deliveries',
@@ -139,20 +146,20 @@ const routes: Routes = [
           import('./modules/deliveries/deliveries.module').then(
             (m) => m.DeliveriesModule
           ),
-        canActivate: [AuthGuard],
+        canActivate: [AuthGuard, EmailVerificationGuard],
       },
       {
         path: 'stocks',
         loadChildren: () =>
           import('./modules/stocks/stocks.module').then((m) => m.StocksModule),
-        canActivate: [AuthGuard, RoleGuard],
+        canActivate: [AuthGuard, RoleGuard, EmailVerificationGuard],
         data: { roles: ['ADMIN', 'INSPECTOR', 'WAREHOUSE'] },
       },
       {
         path: 'scraps',
         loadChildren: () =>
           import('./modules/scraps/scraps.module').then((m) => m.ScrapsModule),
-        canActivate: [AuthGuard, RoleGuard],
+        canActivate: [AuthGuard, RoleGuard, EmailVerificationGuard],
         data: { roles: ['ADMIN', 'INSPECTOR', 'WAREHOUSE'] },
       },
       {
@@ -161,7 +168,7 @@ const routes: Routes = [
           import('./modules/settings/settings.module').then(
             (m) => m.SettingsModule
           ),
-        canActivate: [AuthGuard],
+        canActivate: [AuthGuard, EmailVerificationGuard],
       },
     ],
   },
