@@ -28,6 +28,10 @@ export class EmailVerificationGuard implements CanActivate {
     | Promise<boolean | UrlTree>
     | boolean
     | UrlTree {
+    console.log('EmailVerificationGuard - GUARD CALLED');
+    console.log('EmailVerificationGuard - Route:', route);
+    console.log('EmailVerificationGuard - State:', state);
+
     try {
       // Always allow access to auth routes
       const url = state.url;
@@ -49,6 +53,7 @@ export class EmailVerificationGuard implements CanActivate {
 
       // Get current user safely
       const currentUser = this.authService.getCurrentUser();
+      console.log('EmailVerificationGuard - Current user:', currentUser);
 
       // If no user is logged in, let the auth guard handle redirection
       if (!currentUser) {
@@ -67,6 +72,44 @@ export class EmailVerificationGuard implements CanActivate {
       );
 
       const isVerified = !!currentUser.isEmailVerified;
+
+      // Force redirect for dashboard route
+      if (!isVerified && (url === '/dashboard' || url === '/dashboard/home')) {
+        console.log(
+          'EmailVerificationGuard - Exact dashboard route with unverified email, FORCING REDIRECT'
+        );
+
+        try {
+          this.toastr.warning(
+            'Please verify your email address to access the dashboard'
+          );
+        } catch (error) {
+          console.error('EmailVerificationGuard - Error showing toast:', error);
+        }
+
+        // Return the URL tree directly
+        return this.router.parseUrl('/auth/verify-email');
+      }
+
+      // For any dashboard routes
+      if (
+        !isVerified &&
+        (url === '/dashboard' || url.startsWith('/dashboard/'))
+      ) {
+        console.log(
+          `EmailVerificationGuard - Dashboard route (${url}) accessed with unverified email, redirecting`
+        );
+
+        try {
+          this.toastr.warning(
+            'Please verify your email address to access the dashboard'
+          );
+        } catch (error) {
+          console.error('EmailVerificationGuard - Error showing toast:', error);
+        }
+
+        return this.router.createUrlTree(['/auth/verify-email']);
+      }
 
       if (!isVerified) {
         console.log('EmailVerificationGuard - Email not verified, redirecting');
@@ -89,9 +132,11 @@ export class EmailVerificationGuard implements CanActivate {
       console.log('EmailVerificationGuard - Email verified, allowing access');
       return true;
     } catch (error) {
-      // Log the error but don't block navigation
-      console.error('EmailVerificationGuard - Unexpected error:', error);
-      return true;
+      console.error(
+        'EmailVerificationGuard - Unexpected error in guard:',
+        error
+      );
+      return true; // Allow navigation on error to prevent being locked out
     }
   }
 }

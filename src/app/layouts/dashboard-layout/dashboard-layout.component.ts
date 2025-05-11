@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { AuthService } from '../../core/services/auth.service';
 import { UserStateService } from '../../core/services/user-state.service';
+import { NavigationService } from '../../core/services/navigation.service';
 import { User, UserRole } from '../../core/models/user.model';
 import { Subscription } from 'rxjs';
 
@@ -20,7 +21,7 @@ export class DashboardLayoutComponent implements OnInit, OnDestroy {
     {
       name: 'Dashboard',
       icon: 'dashboard',
-      route: '/dashboard',
+      route: '/dashboard/home',
       roles: [
         UserRole.ADMIN,
         UserRole.DONATOR,
@@ -95,12 +96,29 @@ export class DashboardLayoutComponent implements OnInit, OnDestroy {
     private router: Router,
     private toastr: ToastrService,
     private authService: AuthService,
-    private userState: UserStateService
+    private userState: UserStateService,
+    private navigationService: NavigationService
   ) {}
 
   ngOnInit(): void {
     try {
       console.log('DashboardLayoutComponent - Initializing');
+
+      // Use the NavigationService to check email verification
+      // with both improved logging and better handling
+      console.log(
+        'DashboardLayoutComponent - Running immediate email verification check using NavigationService'
+      );
+      if (
+        !this.navigationService.checkEmailVerificationForRoute(
+          '/dashboard/home'
+        )
+      ) {
+        console.log(
+          'DashboardLayoutComponent - Email verification check failed, redirect handled by NavigationService'
+        );
+        return;
+      }
 
       // First set currentUser from userState if available
       try {
@@ -139,11 +157,6 @@ export class DashboardLayoutComponent implements OnInit, OnDestroy {
           err
         );
       }
-
-      // Check email verification after a short delay to ensure auth is loaded
-      setTimeout(() => {
-        this.checkEmailVerification();
-      }, 500);
     } catch (error) {
       console.error('DashboardLayoutComponent - Error in ngOnInit:', error);
     }
@@ -187,74 +200,5 @@ export class DashboardLayoutComponent implements OnInit, OnDestroy {
     return true;
     // When user authentication is properly working, use this:
     // return this.currentUser && item.roles.includes(this.currentUser.role);
-  }
-
-  private checkEmailVerification(): void {
-    try {
-      console.log('DashboardLayoutComponent - Checking email verification');
-
-      // Try to get user from both services for reliability
-      let user = null;
-      try {
-        user = this.authService.getCurrentUser();
-        console.log(
-          'DashboardLayoutComponent - User from authService:',
-          user ? 'exists' : 'null'
-        );
-      } catch (err) {
-        console.error(
-          'DashboardLayoutComponent - Error getting user from authService:',
-          err
-        );
-      }
-
-      if (!user) {
-        try {
-          user = this.userState.getCurrentUser();
-          console.log(
-            'DashboardLayoutComponent - User from userState:',
-            user ? 'exists' : 'null'
-          );
-        } catch (err) {
-          console.error(
-            'DashboardLayoutComponent - Error getting user from userState:',
-            err
-          );
-        }
-      }
-
-      if (!user) {
-        console.log(
-          'DashboardLayoutComponent - No user found, redirecting to login'
-        );
-        this.router.navigate(['/auth/login']);
-        return;
-      }
-
-      if (user.isEmailVerified === false) {
-        console.log(
-          'DashboardLayoutComponent - Email not verified, redirecting'
-        );
-        try {
-          this.toastr.warning('Please verify your email address', '', {
-            timeOut: 5000,
-            positionClass: 'toast-top-center',
-          });
-        } catch (err) {
-          console.error('DashboardLayoutComponent - Error showing toast:', err);
-        }
-        this.router.navigate(['/auth/verify-email']);
-      } else {
-        console.log(
-          'DashboardLayoutComponent - Email verification check passed'
-        );
-      }
-    } catch (error) {
-      console.error(
-        'DashboardLayoutComponent - Error checking email verification:',
-        error
-      );
-      // Don't redirect on error to prevent infinite redirection loops
-    }
   }
 }

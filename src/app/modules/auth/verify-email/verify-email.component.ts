@@ -50,7 +50,7 @@ export class VerifyEmailComponent implements OnInit {
 
     if (currentUser) {
       if (currentUser.isEmailVerified) {
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/dashboard/home']);
         return;
       }
 
@@ -68,7 +68,7 @@ export class VerifyEmailComponent implements OnInit {
           this.userEmail = user.email;
 
           if (user.isEmailVerified) {
-            this.router.navigate(['/dashboard']);
+            this.router.navigate(['/dashboard/home']);
           }
         } else {
           // If still no email, the user might not be authenticated
@@ -120,7 +120,7 @@ export class VerifyEmailComponent implements OnInit {
 
         // Redirect to dashboard after a short delay
         setTimeout(() => {
-          this.router.navigate(['/dashboard']);
+          this.router.navigate(['/dashboard/home']);
         }, 2000);
       },
       error: (error) => {
@@ -131,11 +131,9 @@ export class VerifyEmailComponent implements OnInit {
     });
   }
 
-  requestNewCode(): void {
-    // If we don't have a user email, we can't request a new code
+  resendCode(): void {
     if (!this.userEmail) {
-      this.errorMessage =
-        'Unable to resend verification code. Please log in again.';
+      this.errorMessage = 'Email address not found. Please login again.';
       return;
     }
 
@@ -148,13 +146,13 @@ export class VerifyEmailComponent implements OnInit {
         this.isSubmitting = false;
         this.verificationSent = true;
         this.successMessage =
-          response.message ||
-          'A new verification code has been sent to your email';
+          response.message || 'Verification code sent successfully!';
       },
       error: (error) => {
         this.isSubmitting = false;
         this.errorMessage =
-          error?.error?.message || 'Failed to send verification email';
+          error?.error?.message ||
+          'Failed to send verification code. Please try again.';
       },
     });
   }

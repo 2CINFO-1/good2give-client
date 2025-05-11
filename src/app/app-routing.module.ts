@@ -77,18 +77,30 @@ const routes: Routes = [
     redirectTo: 'auth/reset-password',
     pathMatch: 'full',
   },
+  // Redirect from /dashboard to /dashboard/home
+  {
+    path: 'dashboard',
+    redirectTo: 'dashboard/home',
+    pathMatch: 'full',
+  },
   {
     path: 'dashboard',
     component: DashboardLayoutComponent,
-    canActivate: [AuthGuard, EmailVerificationGuard],
+    // Important: EmailVerificationGuard first, then AuthGuard
+    canActivate: [EmailVerificationGuard, AuthGuard],
     children: [
       {
-        path: '',
+        path: 'home',
         loadChildren: () =>
           import('./modules/dashboard-home/dashboard-home.module').then(
             (m) => m.DashboardHomeModule
           ),
-        canActivate: [EmailVerificationGuard, AuthGuard],
+        canActivate: [AuthGuard],
+      },
+      {
+        path: '',
+        redirectTo: 'home',
+        pathMatch: 'full',
       },
       {
         path: 'collecte',
@@ -96,7 +108,7 @@ const routes: Routes = [
           import('./modules/collecte/collecte.module').then(
             (m) => m.CollecteModule
           ),
-        canActivate: [AuthGuard, RoleGuard, EmailVerificationGuard],
+        canActivate: [AuthGuard, RoleGuard],
         data: { roles: ['ADMIN', 'TRANSPORTER'] },
       },
       {
@@ -105,7 +117,7 @@ const routes: Routes = [
           import('./modules/collectes/collectes.module').then(
             (m) => m.CollectesModule
           ),
-        canActivate: [AuthGuard, RoleGuard, EmailVerificationGuard],
+        canActivate: [AuthGuard, RoleGuard],
         data: { roles: ['ADMIN', 'TRANSPORTER'] },
       },
       {
@@ -114,7 +126,7 @@ const routes: Routes = [
           import('./modules/reclamations/reclamations.module').then(
             (m) => m.ReclamationsModule
           ),
-        canActivate: [AuthGuard, EmailVerificationGuard],
+        canActivate: [AuthGuard],
       },
       {
         path: 'products',
@@ -122,7 +134,7 @@ const routes: Routes = [
           import('./modules/products/products.module').then(
             (m) => m.ProductsModule
           ),
-        canActivate: [AuthGuard, RoleGuard, EmailVerificationGuard],
+        canActivate: [AuthGuard, RoleGuard],
         data: { roles: ['ADMIN', 'INSPECTOR'] },
       },
       {
@@ -131,14 +143,14 @@ const routes: Routes = [
           import('./modules/inspection/inspection.module').then(
             (m) => m.InspectionModule
           ),
-        canActivate: [AuthGuard, RoleGuard, EmailVerificationGuard],
+        canActivate: [AuthGuard, RoleGuard],
         data: { roles: ['ADMIN', 'INSPECTOR'] },
       },
       {
         path: 'events',
         loadChildren: () =>
           import('./modules/events/events.module').then((m) => m.EventsModule),
-        canActivate: [AuthGuard, EmailVerificationGuard],
+        canActivate: [AuthGuard],
       },
       {
         path: 'deliveries',
@@ -146,20 +158,20 @@ const routes: Routes = [
           import('./modules/deliveries/deliveries.module').then(
             (m) => m.DeliveriesModule
           ),
-        canActivate: [AuthGuard, EmailVerificationGuard],
+        canActivate: [AuthGuard],
       },
       {
         path: 'stocks',
         loadChildren: () =>
           import('./modules/stocks/stocks.module').then((m) => m.StocksModule),
-        canActivate: [AuthGuard, RoleGuard, EmailVerificationGuard],
+        canActivate: [AuthGuard, RoleGuard],
         data: { roles: ['ADMIN', 'INSPECTOR', 'WAREHOUSE'] },
       },
       {
         path: 'scraps',
         loadChildren: () =>
           import('./modules/scraps/scraps.module').then((m) => m.ScrapsModule),
-        canActivate: [AuthGuard, RoleGuard, EmailVerificationGuard],
+        canActivate: [AuthGuard, RoleGuard],
         data: { roles: ['ADMIN', 'INSPECTOR', 'WAREHOUSE'] },
       },
       {
@@ -168,7 +180,7 @@ const routes: Routes = [
           import('./modules/settings/settings.module').then(
             (m) => m.SettingsModule
           ),
-        canActivate: [AuthGuard, EmailVerificationGuard],
+        canActivate: [AuthGuard],
       },
     ],
   },
