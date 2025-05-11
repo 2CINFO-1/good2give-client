@@ -7,9 +7,10 @@ import { RegisterComponent } from './modules/auth/register/register.component';
 import { AuthGuard } from './core/guards/auth.guard';
 import { NoAuthGuard } from './core/guards/no-auth.guard';
 import { RoleGuard } from './core/guards/role.guard';
-import { UserRole } from './core/models/user.model';
+import { EmailVerificationGuard } from './core/guards/email-verification.guard';
 import { ForgotPasswordComponent } from './modules/auth/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './modules/auth/reset-password/reset-password.component';
+import { VerifyEmailComponent } from './modules/auth/verify-email/verify-email.component';
 
 const routes: Routes = [
   {
@@ -42,6 +43,11 @@ const routes: Routes = [
         canActivate: [NoAuthGuard],
       },
       {
+        path: 'verify-email',
+        component: VerifyEmailComponent,
+        // No AuthGuard here to prevent redirection loops
+      },
+      {
         path: 'callback',
         loadChildren: () =>
           import('./modules/auth/auth-callback/auth-callback.module').then(
@@ -71,17 +77,30 @@ const routes: Routes = [
     redirectTo: 'auth/reset-password',
     pathMatch: 'full',
   },
+  // Redirect from /dashboard to /dashboard/home
+  {
+    path: 'dashboard',
+    redirectTo: 'dashboard/home',
+    pathMatch: 'full',
+  },
   {
     path: 'dashboard',
     component: DashboardLayoutComponent,
-    canActivate: [AuthGuard],
+    // Important: EmailVerificationGuard first, then AuthGuard
+    canActivate: [EmailVerificationGuard, AuthGuard],
     children: [
       {
-        path: '',
+        path: 'home',
         loadChildren: () =>
           import('./modules/dashboard-home/dashboard-home.module').then(
             (m) => m.DashboardHomeModule
           ),
+        canActivate: [AuthGuard],
+      },
+      {
+        path: '',
+        redirectTo: 'home',
+        pathMatch: 'full',
       },
       {
         path: 'collecte',

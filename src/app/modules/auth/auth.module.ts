@@ -21,6 +21,14 @@ const routes: Routes = [
     component: ResetPasswordComponent,
     canActivate: [NoAuthGuard],
   },
+  {
+    path: 'verify-email',
+    loadChildren: () =>
+      import('./verify-email/verify-email.module').then(
+        (m) => m.VerifyEmailModule
+      ),
+    canActivate: [NoAuthGuard],
+  },
 ];
 
 @NgModule({

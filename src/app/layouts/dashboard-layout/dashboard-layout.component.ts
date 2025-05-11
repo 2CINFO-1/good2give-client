@@ -1,7 +1,9 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
 import { AuthService } from '../../core/services/auth.service';
 import { UserStateService } from '../../core/services/user-state.service';
+import { NavigationService } from '../../core/services/navigation.service';
 import { User, UserRole } from '../../core/models/user.model';
 import { Subscription } from 'rxjs';
 
@@ -19,7 +21,7 @@ export class DashboardLayoutComponent implements OnInit, OnDestroy {
     {
       name: 'Dashboard',
       icon: 'dashboard',
-      route: '/dashboard',
+      route: '/dashboard/home',
       roles: [
         UserRole.ADMIN,
         UserRole.DONATOR,
@@ -91,21 +93,82 @@ export class DashboardLayoutComponent implements OnInit, OnDestroy {
   ];
 
   constructor(
+    private router: Router,
+    private toastr: ToastrService,
     private authService: AuthService,
     private userState: UserStateService,
-    private router: Router
+    private navigationService: NavigationService
   ) {}
 
   ngOnInit(): void {
-    this.currentUser = this.userState.getCurrentUser();
-    this.userSubscription = this.userState.currentUser$.subscribe((user) => {
-      this.currentUser = user;
-    });
+    try {
+      console.log('DashboardLayoutComponent - Initializing');
+
+      // Use the NavigationService to check email verification
+      // with both improved logging and better handling
+      console.log(
+        'DashboardLayoutComponent - Running immediate email verification check using NavigationService'
+      );
+      if (
+        !this.navigationService.checkEmailVerificationForRoute(
+          '/dashboard/home'
+        )
+      ) {
+        console.log(
+          'DashboardLayoutComponent - Email verification check failed, redirect handled by NavigationService'
+        );
+        return;
+      }
+
+      // First set currentUser from userState if available
+      try {
+        this.currentUser = this.userState.getCurrentUser();
+        console.log(
+          'DashboardLayoutComponent - Initial user state:',
+          this.currentUser ? 'exists' : 'null'
+        );
+      } catch (err) {
+        console.error(
+          'DashboardLayoutComponent - Error getting initial user state:',
+          err
+        );
+      }
+
+      // Subscribe to user updates
+      try {
+        this.userSubscription = this.userState.currentUser$.subscribe({
+          next: (user) => {
+            console.log(
+              'DashboardLayoutComponent - User state updated:',
+              user ? 'exists' : 'null'
+            );
+            this.currentUser = user;
+          },
+          error: (err) => {
+            console.error(
+              'DashboardLayoutComponent - Error in user subscription:',
+              err
+            );
+          },
+        });
+      } catch (err) {
+        console.error(
+          'DashboardLayoutComponent - Error setting up user subscription:',
+          err
+        );
+      }
+    } catch (error) {
+      console.error('DashboardLayoutComponent - Error in ngOnInit:', error);
+    }
   }
 
   ngOnDestroy(): void {
-    if (this.userSubscription) {
-      this.userSubscription.unsubscribe();
+    try {
+      if (this.userSubscription) {
+        this.userSubscription.unsubscribe();
+      }
+    } catch (error) {
+      console.error('DashboardLayoutComponent - Error unsubscribing:', error);
     }
   }
 
@@ -114,16 +177,22 @@ export class DashboardLayoutComponent implements OnInit, OnDestroy {
   }
 
   logout(): void {
-    this.authService.logout().subscribe({
-      next: () => {
-        this.router.navigate(['/auth/login']);
-      },
-      error: (error) => {
-        console.error('Logout error', error);
-        // Force navigation even if API call fails
-        this.router.navigate(['/auth/login']);
-      },
-    });
+    try {
+      this.authService.logout().subscribe({
+        next: () => {
+          this.router.navigate(['/auth/login']);
+        },
+        error: (error) => {
+          console.error('Logout error', error);
+          // Force navigation even if API call fails
+          this.router.navigate(['/auth/login']);
+        },
+      });
+    } catch (error) {
+      console.error('Error during logout:', error);
+      // Force navigation even if the method fails
+      this.router.navigate(['/auth/login']);
+    }
   }
 
   canShowMenuItem(item: any): boolean {

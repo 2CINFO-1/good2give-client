@@ -41,6 +41,12 @@ export class LoginComponent implements OnInit {
       this.errorMessage = 'Authentication failed. Please try again.';
       this.toastr.error(this.errorMessage);
     }
+
+    // Check if there's a message from other components
+    const message = this.route.snapshot.queryParams['message'];
+    if (message) {
+      this.toastr.info(message);
+    }
   }
 
   // Getter methods for form validation
@@ -103,8 +109,24 @@ export class LoginComponent implements OnInit {
         this.isSubmitting = false;
         this.toastr.success('Login successful');
 
-        console.log('LoginComponent onSubmit - Navigating to:', this.returnUrl);
-        this.router.navigateByUrl(this.returnUrl);
+        // Check if email verification is required
+        const currentUser = this.authService.getCurrentUser();
+        if (currentUser && !currentUser.isEmailVerified) {
+          console.log(
+            'LoginComponent onSubmit - Email not verified, redirecting to verification page'
+          );
+          this.toastr.warning('Please verify your email address to continue');
+          // Forward the email to the verification page
+          this.router.navigate(['/auth/verify-email'], {
+            queryParams: { email: currentUser.email },
+          });
+        } else {
+          console.log(
+            'LoginComponent onSubmit - Navigating to:',
+            this.returnUrl
+          );
+          this.router.navigateByUrl(this.returnUrl);
+        }
       },
       error: (error) => {
         console.error('LoginComponent onSubmit - Login error:', error);

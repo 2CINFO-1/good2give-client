@@ -2,12 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { InspectionService } from '../../../core/services/inspection.service';
-import { Inspection } from '../../../core/models/inspection.model';
 
 @Component({
   selector: 'app-inspection-create',
   templateUrl: './inspection-create.component.html',
-  styleUrls: ['./inspection-create.component.scss'],
 })
 export class InspectionCreateComponent implements OnInit {
   inspectionForm: FormGroup;
