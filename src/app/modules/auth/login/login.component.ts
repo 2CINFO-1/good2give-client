@@ -7,7 +7,6 @@ import { ToastrService } from 'ngx-toastr';
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css'],
 })
 export class LoginComponent implements OnInit {
   loginForm: FormGroup;
@@ -38,6 +37,17 @@ export class LoginComponent implements OnInit {
   // Getter methods for form validation
   get f() {
     return this.loginForm.controls;
+  }
+
+  // Method to handle Google sign-in
+  signInWithGoogle(): void {
+    this.isSubmitting = true;
+    this.errorMessage = '';
+
+    console.log('Redirecting to Google authentication');
+
+    // Redirect to the backend's Google auth endpoint
+    window.location.href = `${this.authService['apiUrl']}/google`;
   }
 
   onSubmit(): void {

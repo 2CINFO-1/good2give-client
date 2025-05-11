@@ -145,6 +145,24 @@ export class AuthService {
       );
   }
 
+  // Google Sign-in method
+  googleSignIn(token: string): Observable<AuthResponse> {
+    console.log('AuthService googleSignIn - Token received');
+
+    return this.http
+      .post<AuthResponse>(`${this.apiUrl}/google-auth`, { token })
+      .pipe(
+        tap((response) => {
+          console.log('AuthService googleSignIn - Success response:', response);
+          this.handleAuthResponse(response);
+        }),
+        catchError((error) => {
+          console.error('AuthService googleSignIn - Error:', error);
+          return throwError(() => error);
+        })
+      );
+  }
+
   refreshToken(
     refreshTokenRequest: RefreshTokenRequest
   ): Observable<AuthResponse> {
@@ -300,7 +318,7 @@ export class AuthService {
     );
 
     this.currentUserSubject.next(null);
-    this.router.navigate(['/login']);
+    this.router.navigate(['/auth/login']);
   }
 
   getCurrentUser(): User | null {

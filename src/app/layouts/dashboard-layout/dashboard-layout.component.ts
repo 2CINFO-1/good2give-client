@@ -104,12 +104,12 @@ export class DashboardLayoutComponent implements OnInit {
   logout(): void {
     this.authService.logout().subscribe({
       next: () => {
-        this.router.navigate(['/login']);
+        this.router.navigate(['/auth/login']);
       },
       error: (error) => {
         console.error('Logout error', error);
         // Force navigation even if API call fails
-        this.router.navigate(['/login']);
+        this.router.navigate(['/auth/login']);
       },
     });
   }

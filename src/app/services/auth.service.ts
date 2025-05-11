@@ -41,6 +41,13 @@ export class AuthService {
       .pipe(tap((response) => this.handleAuthentication(response)));
   }
 
+  // Google Sign-in method
+  googleSignIn(token: string): Observable<AuthResponse> {
+    return this.http
+      .post<AuthResponse>(`${this.apiUrl}/google-auth`, { token })
+      .pipe(tap((response) => this.handleAuthentication(response)));
+  }
+
   refreshToken(
     refreshTokenData: RefreshTokenRequest
   ): Observable<AuthResponse> {

@@ -9,6 +9,8 @@ import { AuthGuard } from './core/guards/auth.guard';
 import { NoAuthGuard } from './core/guards/no-auth.guard';
 import { RoleGuard } from './core/guards/role.guard';
 import { UserRole } from './core/models/user.model';
+import { ForgotPasswordComponent } from './modules/auth/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './modules/auth/reset-password/reset-password.component';
 
 const routes: Routes = [
   {
@@ -17,15 +19,51 @@ const routes: Routes = [
       import('./modules/home/home.module').then((m) => m.HomeModule),
   },
   {
+    path: 'auth',
+    children: [
+      {
+        path: 'login',
+        loadChildren: () =>
+          import('./modules/auth/auth.module').then((m) => m.AuthModule),
+        canActivate: [NoAuthGuard],
+      },
+      {
+        path: 'register',
+        component: RegisterComponent,
+        canActivate: [NoAuthGuard],
+      },
+      {
+        path: 'forgot-password',
+        component: ForgotPasswordComponent,
+        canActivate: [NoAuthGuard],
+      },
+      {
+        path: 'reset-password',
+        component: ResetPasswordComponent,
+        canActivate: [NoAuthGuard],
+      },
+    ],
+  },
+  // Keep old routes temporarily for backward compatibility
+  {
     path: 'login',
-    loadChildren: () =>
-      import('./modules/auth/auth.module').then((m) => m.AuthModule),
-    canActivate: [NoAuthGuard],
+    redirectTo: 'auth/login',
+    pathMatch: 'full',
   },
   {
     path: 'register',
-    component: RegisterComponent,
-    canActivate: [NoAuthGuard],
+    redirectTo: 'auth/register',
+    pathMatch: 'full',
+  },
+  {
+    path: 'forgot-password',
+    redirectTo: 'auth/forgot-password',
+    pathMatch: 'full',
+  },
+  {
+    path: 'reset-password',
+    redirectTo: 'auth/reset-password',
+    pathMatch: 'full',
   },
   {
     path: 'dashboard',

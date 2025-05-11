@@ -77,12 +77,12 @@ export class DashboardHeaderComponent implements OnInit {
     this.authService.logout().subscribe({
       next: () => {
         this.toastr.success('You have been logged out successfully');
-        this.router.navigate(['/login']);
+        this.router.navigate(['/auth/login']);
       },
       error: (error) => {
         // Still navigate to login even if there's an error with the logout API
         this.toastr.error('Logout failed, but session has been cleared');
-        this.router.navigate(['/login']);
+        this.router.navigate(['/auth/login']);
       },
     });
   }
