@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { HomeComponent } from './modules/home/home.component';
 import { DashboardLayoutComponent } from './layouts/dashboard-layout/dashboard-layout.component';
 import { RegisterComponent } from './modules/auth/register/register.component';
 import { ModulePlaceholderComponent } from './shared/components/module-placeholder/module-placeholder.component';
@@ -14,7 +13,8 @@ import { UserRole } from './core/models/user.model';
 const routes: Routes = [
   {
     path: '',
-    component: HomeComponent,
+    loadChildren: () =>
+      import('./modules/home/home.module').then((m) => m.HomeModule),
   },
   {
     path: 'login',
