@@ -1,0 +1,155 @@
+<div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-md">
+        <div class="flex justify-center">
+            <!-- You can add your logo here -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-auto text-green-600" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+        </div>
+        <h2 class="mt-4 text-center text-3xl font-extrabold text-gray-900">Verify Your Email</h2>
+    </div>
+
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+            <!-- Loading state when no email is available yet -->
+            <div *ngIf="!userEmail" class="flex flex-col items-center justify-center py-6">
+                <svg class="animate-spin h-10 w-10 text-green-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none"
+                    viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                    </path>
+                </svg>
+                <p class="text-gray-600 text-sm">Loading user information...</p>
+                <p class="text-gray-500 text-xs mt-2">You'll be redirected to login if needed</p>
+            </div>
+
+            <!-- Main content when email is available -->
+            <div *ngIf="userEmail">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <p class="text-sm font-medium text-gray-700">Verifying email for:</p>
+                        <p class="text-md font-light text-green-600">{{ userEmail }}</p>
+                    </div>
+                    <button (click)="logout()"
+                        class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        Logout
+                    </button>
+                </div>
+
+                <div *ngIf="successMessage" class="mb-4 rounded-md bg-green-50 p-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-green-800">{{ successMessage }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div *ngIf="errorMessage" class="mb-4 rounded-md bg-red-50 p-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-red-800">{{ errorMessage }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rounded-md bg-blue-50 p-4 mb-6">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-blue-700">
+                                We've sent a verification code to your email address. Please enter the 6-digit code
+                                below.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <form [formGroup]="verificationForm" (ngSubmit)="onSubmit()">
+                    <div class="mb-4">
+                        <label for="code" class="block text-sm font-medium text-gray-700">Verification Code</label>
+                        <div class="mt-1">
+                            <input type="text" id="code" formControlName="code"
+                                class="appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                                [ngClass]="{'border-red-500': verificationForm.get('code')?.invalid && verificationForm.get('code')?.touched, 'border-gray-300': !(verificationForm.get('code')?.invalid && verificationForm.get('code')?.touched)}"
+                                placeholder="Enter 6-digit code" maxlength="6">
+                            <div class="text-red-500 text-sm mt-1"
+                                *ngIf="verificationForm.get('code')?.errors?.['required'] && verificationForm.get('code')?.touched">
+                                Verification code is required
+                            </div>
+                            <div class="text-red-500 text-sm mt-1"
+                                *ngIf="(verificationForm.get('code')?.errors?.['minlength'] || verificationForm.get('code')?.errors?.['maxlength']) && verificationForm.get('code')?.touched">
+                                Verification code must be 6 digits
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <button type="submit"
+                            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                            [disabled]="verificationForm.invalid || isSubmitting">
+                            <span *ngIf="isSubmitting"
+                                class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-r-transparent align-[-0.125em] mr-2"></span>
+                            Verify Email
+                        </button>
+
+                        <button type="button"
+                            class="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                            (click)="requestNewCode()" [disabled]="isSubmitting">
+                            <span *ngIf="isSubmitting"
+                                class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-r-transparent align-[-0.125em] mr-2"></span>
+                            Resend Verification Code
+                        </button>
+                    </div>
+                </form>
+
+                <div class="mt-6">
+                    <div class="relative">
+                        <div class="absolute inset-0 flex items-center">
+                            <div class="w-full border-t border-gray-300"></div>
+                        </div>
+                        <div class="relative flex justify-center text-sm">
+                            <span class="px-2 bg-white text-gray-500">Verification instructions</span>
+                        </div>
+                    </div>
+                    <div class="mt-6">
+                        <p class="text-xs text-gray-500 text-center">
+                            The verification code expires in 1 hour.<br>
+                            Please check your inbox and spam folder.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

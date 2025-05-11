@@ -470,8 +470,12 @@ export class AuthService {
     return this.userState.getCurrentUser();
   }
 
+  updateCurrentUser(user: User): void {
+    this.userState.setCurrentUser(user);
+  }
+
   isAuthenticated(): boolean {
-    return this.userState.isAuthenticated();
+    return !!this.userState.getCurrentUser();
   }
 
   hasRole(requiredRoles: string[]): boolean {
