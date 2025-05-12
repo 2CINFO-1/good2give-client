@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { InspectionService } from '../../../core/services/inspection.service';
-import { Inspection } from '../../../core/models/inspection.model';
+import { InspectionReportService } from '../inspection-report.service';
+import { InspectionReport } from 'src/app/core/models/inspection.model';
+import { Observable, of } from 'rxjs';
+import { catchError, finalize, tap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-inspection-list',
@@ -9,13 +11,13 @@ import { Inspection } from '../../../core/models/inspection.model';
   styleUrls: ['./inspection-list.component.css'],
 })
 export class InspectionListComponent implements OnInit {
-  inspections: Inspection[] = [];
+  inspections: InspectionReport[] = [];
   loading = false;
   error: string | null = null;
 
   constructor(
     private router: Router,
-    private inspectionService: InspectionService
+    private inspectionService: InspectionReportService
   ) {}
 
   ngOnInit(): void {
@@ -25,21 +27,26 @@ export class InspectionListComponent implements OnInit {
   loadInspections(): void {
     this.loading = true;
     this.error = null;
-
-    this.inspectionService.getInspections().subscribe({
-      next: (data: Inspection[]) => {
-        this.inspections = data;
-        this.loading = false;
-      },
-      error: (err: any) => {
-        this.error = 'Failed to load inspections';
-        this.loading = false;
-        console.error('Error loading inspections:', err);
-      },
-    });
+    this.inspectionService
+      .getAll()
+      .pipe(
+        tap((inspections) => {
+          console.log('Raw API response for inspections:', JSON.stringify(inspections, null, 2));
+        }),
+        catchError((err) => {
+          this.error = err.status === 401 ? 'Authentication failed. Please log in.' : 'Failed to load inspections. Please try again.';
+          console.error('Error fetching inspections:', err);
+          return of([]);
+        }),
+        finalize(() => (this.loading = false))
+      )
+      .subscribe((inspections) => {
+        this.inspections = inspections;
+        console.log('Inspections loaded:', JSON.stringify(this.inspections, null, 2));
+      });
   }
 
-  viewInspection(id: string): void {
+  viewDetails(id: string): void {
     this.router.navigate(['/dashboard/inspection', id]);
   }
 
@@ -47,52 +54,35 @@ export class InspectionListComponent implements OnInit {
     this.router.navigate(['/dashboard/inspection/create']);
   }
 
-  // Format date string to local date and time
-  formatDate(date: string | Date | undefined): string {
-    if (!date) return 'N/A';
-    return new Date(date).toLocaleString();
-  }
-
-  // Get appropriate CSS class for status badges
-  getStatusClass(status: string): string {
-    switch (status) {
-      case 'PASSED':
-        return 'badge-success';
-      case 'FAILED':
-        return 'badge-danger';
-      case 'PENDING':
-        return 'badge-warning';
-      case 'COMPLETED':
-        return 'badge-info';
-      default:
-        return 'badge-secondary';
+  deleteInspection(id: string): void {
+    if (confirm('Are you sure you want to delete this inspection report?')) {
+      this.inspectionService.delete(id).subscribe({
+        next: () => {
+          this.inspections = this.inspections.filter((inspection) => inspection._id !== id);
+          this.error = null;
+        },
+        error: (err) => {
+          this.error = 'Failed to delete inspection report.';
+          console.error('Error deleting inspection:', err);
+        },
+      });
     }
   }
 
-  // Check if results array exists
-  hasResults(inspection: Inspection): boolean {
-    return Array.isArray(inspection.results) && inspection.results.length > 0;
+  getStatusClass(status: string): string {
+    switch (status) {
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'approved':
+        return 'bg-green-100 text-green-800';
+      case 'rejected':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
   }
 
-  // Count failed results
-  countFailedResults(inspection: Inspection): number {
-    if (!inspection.results) return 0;
-    return inspection.results.filter((r) => r.status === 'fail').length;
-  }
-
-  // Check if issues array exists
-  hasIssues(inspection: Inspection): boolean {
-    return Array.isArray(inspection.issues) && inspection.issues.length > 0;
-  }
-
-  // Get issues count
-  getIssuesCount(inspection: Inspection): number {
-    if (!inspection.issues) return 0;
-    return inspection.issues.length;
-  }
-
-  // Add this method to get the results count
-  getResultsCount(inspection: Inspection): number {
-    return inspection.results?.length || 0;
+  formatDate(date: string): string {
+    return date ? new Date(date).toLocaleDateString() : '-';
   }
 }

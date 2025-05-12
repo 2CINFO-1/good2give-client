@@ -1,65 +1,142 @@
-<div class="container mx-auto px-4 py-6">
-    <div class="max-w-lg mx-auto bg-white p-6 rounded-lg shadow-lg">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-semibold text-gray-800">Create New Collection</h1>
-            <button (click)="cancel()" class="text-gray-500 hover:text-gray-700">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-lg mx-auto bg-white p-8 rounded-xl shadow-2xl">
+      <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Create New Collection</h1>
+        <button
+          (click)="cancel()"
+          class="text-gray-500 hover:text-gray-700 transition-colors duration-200"
+          aria-label="Cancel and return to collections list"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-7 w-7"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+      </div>
+  
+      <div
+        *ngIf="error"
+        class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-lg mb-6 animate-fade-in"
+        role="alert"
+      >
+        {{ error }}
+      </div>
+  
+      <form [formGroup]="collecteForm" (ngSubmit)="onSubmit()" class="space-y-6">
+        <!-- Title -->
+        <div>
+          <label
+            for="title"
+            class="block text-sm font-medium text-gray-700 mb-1"
+          >
+            Title <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            id="title"
+            formControlName="title"
+            class="block w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+            [ngClass]="{
+              'border-red-500': formControls['title'].touched && formControls['title'].errors?.['required']
+            }"
+            aria-describedby="title-error"
+          />
+          <div
+            *ngIf="formControls['title'].touched && formControls['title'].errors?.['required']"
+            id="title-error"
+            class="text-red-500 text-sm mt-1 animate-fade-in"
+          >
+            Title is required
+          </div>
         </div>
-
-        <div *ngIf="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            {{ error }}
+  
+        <!-- Description -->
+        <div>
+          <label
+            for="description"
+            class="block text-sm font-medium text-gray-700 mb-1"
+          >
+            Description <span class="text-red-500">*</span>
+          </label>
+          <textarea
+            id="description"
+            formControlName="description"
+            rows="4"
+            class="block w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 resize-y"
+            [ngClass]="{
+              'border-red-500': formControls['description'].touched && formControls['description'].errors?.['required']
+            }"
+            aria-describedby="description-error"
+          ></textarea>
+          <div
+            *ngIf="formControls['description'].touched && formControls['description'].errors?.['required']"
+            id="description-error"
+            class="text-red-500 text-sm mt-1 animate-fade-in"
+          >
+            Description is required
+          </div>
         </div>
-
-        <form [formGroup]="collecteForm" (ngSubmit)="onSubmit()">
-            <!-- Title -->
-            <div class="mb-6">
-                <label for="title" class="block text-gray-700 text-sm font-medium mb-2">Title*</label>
-                <input type="text" id="title" formControlName="title"
-                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                <div *ngIf="formControls['title'].touched && formControls['title'].errors?.['required']"
-                    class="text-red-500 text-sm mt-1">
-                    Title is required
-                </div>
-            </div>
-
-            <!-- Description -->
-            <div class="mb-6">
-                <label for="description" class="block text-gray-700 text-sm font-medium mb-2">Description*</label>
-                <textarea id="description" formControlName="description" rows="3"
-                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
-                <div *ngIf="formControls['description'].touched && formControls['description'].errors?.['required']"
-                    class="text-red-500 text-sm mt-1">
-                    Description is required
-                </div>
-            </div>
-
-            <!-- Location -->
-            <div class="mb-6">
-                <label for="location" class="block text-gray-700 text-sm font-medium mb-2">Location*</label>
-                <input type="text" id="location" formControlName="location"
-                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                <div *ngIf="formControls['location'].touched && formControls['location'].errors?.['required']"
-                    class="text-red-500 text-sm mt-1">
-                    Location is required
-                </div>
-            </div>
-
-            <!-- Submit Button -->
-            <div class="flex justify-end">
-                <button type="submit" [disabled]="collecteForm.invalid || submitting"
-                    class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50">
-                    <span *ngIf="submitting" class="flex items-center">
-                        <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2">
-                        </div>
-                        Creating...
-                    </span>
-                    <span *ngIf="!submitting">Create Collection</span>
-                </button>
-            </div>
-        </form>
+  
+        <!-- Location -->
+        <div>
+          <label
+            for="location"
+            class="block text-sm font-medium text-gray-700 mb-1"
+          >
+            Location <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            id="location"
+            formControlName="location"
+            class="block w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+            [ngClass]="{
+              'border-red-500': formControls['location'].touched && formControls['location'].errors?.['required']
+            }"
+            aria-describedby="location-error"
+          />
+          <div
+            *ngIf="formControls['location'].touched && formControls['location'].errors?.['required']"
+            id="location-error"
+            class="text-red-500 text-sm mt-1 animate-fade-in"
+          >
+            Location is required
+          </div>
+        </div>
+  
+        <!-- Buttons -->
+        <div class="flex justify-end space-x-4">
+          <button
+            type="button"
+            (click)="cancel()"
+            class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors duration-200"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            [disabled]="collecteForm.invalid || submitting"
+            class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 transition-colors duration-200"
+          >
+            <span *ngIf="submitting" class="flex items-center">
+              <div
+                class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"
+              ></div>
+              Creating...
+            </span>
+            <span *ngIf="!submitting">Create Collection</span>
+          </button>
+        </div>
+      </form>
     </div>
-</div>
+  </div>

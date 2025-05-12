@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { DeliveryService } from '../../../core/services/delivery.service';
-import { DeliveryRequest } from '../../../core/models/delivery.model';
+import { DeliveryRequest, Delivery } from '../../../core/models/delivery.model';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-delivery-create',
@@ -18,42 +19,18 @@ export class DeliveryCreateComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private deliveryService: DeliveryService,
+    private authService: AuthService,
     private router: Router
   ) {
     this.deliveryForm = this.fb.group({
-      scheduledDate: ['', [Validators.required]],
-      address: ['', [Validators.required, Validators.minLength(10)]],
-      recipientId: ['', [Validators.required]],
-      notes: [''],
-      items: this.fb.array([this.createItem()]),
+      pickupDate: ['', [Validators.required]],
+      expectedDeliveryDate: [''],
+      beneficiaryId: ['', [Validators.required]],
+      transporterId: [''],
     });
   }
 
-  ngOnInit(): void {
-    // Any initialization logic
-  }
-
-  createItem(): FormGroup {
-    return this.fb.group({
-      name: ['', [Validators.required]],
-      quantity: [1, [Validators.required, Validators.min(1)]],
-      unit: ['', [Validators.required]],
-    });
-  }
-
-  get items() {
-    return this.deliveryForm.get('items') as FormArray;
-  }
-
-  addItem(): void {
-    this.items.push(this.createItem());
-  }
-
-  removeItem(index: number): void {
-    if (this.items.length > 1) {
-      this.items.removeAt(index);
-    }
-  }
+  ngOnInit(): void {}
 
   onSubmit(): void {
     if (this.deliveryForm.invalid) {
@@ -64,25 +41,25 @@ export class DeliveryCreateComponent implements OnInit {
     this.loading = true;
     this.error = false;
 
-    // Adapt form values to match the API expected structure
     const deliveryRequest: DeliveryRequest = {
-      donorId: 'defaultDonorId', // Placeholder, should come from auth or form
-      beneficiaryId: this.deliveryForm.value.recipientId,
-      foodItemId: 'defaultFoodItemId', // Placeholder
-      pickupDate: new Date(this.deliveryForm.value.scheduledDate),
-      // Note: items array from form is not used since it doesn't match the API model
+      donorId: this.authService.getCurrentUser()?._id || 'defaultDonorId', // Get from auth
+      beneficiaryId: this.deliveryForm.value.beneficiaryId,
+      pickupDate: new Date(this.deliveryForm.value.pickupDate),
+      expectedDeliveryDate: this.deliveryForm.value.expectedDeliveryDate
+        ? new Date(this.deliveryForm.value.expectedDeliveryDate)
+        : undefined,
+      transporterId: this.deliveryForm.value.transporterId || undefined,
     };
 
     this.deliveryService.createDelivery(deliveryRequest).subscribe({
-      next: (data) => {
+      next: (data: Delivery) => {
         this.loading = false;
         this.router.navigate(['/dashboard/deliveries', data._id]);
       },
       error: (err) => {
         this.loading = false;
         this.error = true;
-        this.errorMessage =
-          err.message || 'Failed to create delivery. Please try again.';
+        this.errorMessage = err.message || 'Failed to create delivery.';
       },
     });
   }
@@ -91,7 +68,6 @@ export class DeliveryCreateComponent implements OnInit {
     Object.keys(formGroup.controls).forEach((key) => {
       const control = formGroup.get(key);
       control?.markAsTouched();
-
       if (control instanceof FormGroup) {
         this.markFormGroupTouched(control);
       }

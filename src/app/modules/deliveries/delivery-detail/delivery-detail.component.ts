@@ -2,8 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DeliveryService } from '../../../core/services/delivery.service';
 import { Delivery, DeliveryStatus } from '../../../core/models/delivery.model';
-import { ProductService } from '../../../core/services/product.service';
-import { Product } from '../../../core/models/product.model';
 import { Location } from '@angular/common';
 
 @Component({
@@ -14,13 +12,11 @@ import { Location } from '@angular/common';
 export class DeliveryDetailComponent implements OnInit {
   deliveryId: string | null = null;
   delivery: Delivery | null = null;
-  products: Product[] = [];
   loading = true;
   error = false;
   errorMessage = '';
   DeliveryStatus = DeliveryStatus;
 
-  // Create a variable to match the enum values used in the template
   readonly DELIVERY_STATUS = {
     PENDING: DeliveryStatus.PENDING,
     IN_PROGRESS: DeliveryStatus.IN_PROGRESS,
@@ -32,31 +28,18 @@ export class DeliveryDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private deliveryService: DeliveryService,
-    private productService: ProductService,
     private location: Location
   ) {}
 
   ngOnInit(): void {
     this.deliveryId = this.route.snapshot.paramMap.get('id');
     if (this.deliveryId) {
-      this.loadProducts();
       this.loadDelivery();
     } else {
       this.error = true;
       this.errorMessage = 'Delivery ID is missing';
       this.loading = false;
     }
-  }
-
-  loadProducts(): void {
-    this.productService.getAllProducts().subscribe({
-      next: (data) => {
-        this.products = data;
-      },
-      error: (err) => {
-        console.error('Error loading products:', err);
-      },
-    });
   }
 
   loadDelivery(): void {
@@ -79,17 +62,7 @@ export class DeliveryDetailComponent implements OnInit {
     });
   }
 
-  getProductName(productId: string): string {
-    const product = this.products.find((p) => p._id === productId);
-    return product?.name || '';
-  }
-
-  getProductType(productId: string): string {
-    const product = this.products.find((p) => p._id === productId);
-    return product?.productType || '';
-  }
-
-  formatDate(date: Date | string): string {
+  formatDate(date: Date | string | undefined): string {
     if (!date) return 'N/A';
     return new Date(date).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -122,34 +95,31 @@ export class DeliveryDetailComponent implements OnInit {
       });
   }
 
-  // Getter methods to safely access properties that don't exist in the model
-  // These methods will be used in the template
   getDeliveryPersonName(): string {
-    if (!this.delivery) return 'Not assigned';
+    if (!this.delivery || !this.delivery.transporter) return 'Not assigned';
     return typeof this.delivery.transporter === 'object'
       ? this.delivery.transporter.name || 'Unknown'
       : 'Unknown';
   }
 
   getDeliveryPersonId(): string {
-    if (!this.delivery?.transporter) return 'N/A';
-    return this.delivery.transporter.toString();
+    if (!this.delivery || !this.delivery.transporter) return 'N/A';
+    return typeof this.delivery.transporter === 'string'
+      ? this.delivery.transporter
+      : this.delivery.transporter._id || 'N/A';
   }
 
-  getScheduledDate(): Date {
-    if (!this.delivery?.pickupDate) return new Date();
-    return new Date(this.delivery.pickupDate);
+  getDonatorName(): string {
+    if (!this.delivery || !this.delivery.donator) return 'Unknown';
+    return typeof this.delivery.donator === 'object'
+      ? this.delivery.donator.name || 'Unknown'
+      : 'Unknown';
   }
 
-  getAddress(): string {
-    return 'Address not available in data model';
-  }
-
-  getNotes(): string {
-    return 'Notes not available in data model';
-  }
-
-  getItems(): Array<{ name: string; quantity: number; unit: string }> {
-    return [{ name: 'Mock Food Item', quantity: 1, unit: 'package' }];
+  getBeneficiaryName(): string {
+    if (!this.delivery || !this.delivery.beneficiary) return 'Unknown';
+    return typeof this.delivery.beneficiary === 'object'
+      ? this.delivery.beneficiary.name || 'Unknown'
+      : 'Unknown';
   }
 }

@@ -1,16 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  FormBuilder,
-  FormGroup,
-  Validators,
-  ReactiveFormsModule,
-} from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import {
-  CollecteStatus,
-  CollecteRequest,
-} from '../../../core/models/collecte.model';
+import { CollecteStatus, CollecteRequest } from '../../../core/models/collecte.model';
 import { CollecteService } from '../../../core/services/collecte.service';
 
 @Component({
@@ -38,9 +30,7 @@ export class CollecteCreateComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {
-    // No initialization required
-  }
+  ngOnInit(): void {}
 
   get formControls() {
     return this.collecteForm.controls;
@@ -48,16 +38,15 @@ export class CollecteCreateComponent implements OnInit {
 
   onSubmit(): void {
     if (this.collecteForm.invalid) {
-      // Mark all fields as touched to trigger validation
       this.collecteForm.markAllAsTouched();
+      this.error = 'Please fill out all required fields.';
       return;
     }
 
     this.submitting = true;
-    this.error = null;
     this.isLoading = true;
+    this.error = null;
 
-    // Only include properties that exist in the CollecteRequest model
     const collecteData: CollecteRequest = {
       title: this.collecteForm.get('title')?.value,
       description: this.collecteForm.get('description')?.value,
@@ -70,15 +59,26 @@ export class CollecteCreateComponent implements OnInit {
         this.router.navigate(['/dashboard/collectes']);
       },
       error: (err) => {
-        this.error = 'Failed to create collection. Please try again.';
+        this.error = err.status === 400
+          ? 'Invalid data provided. Please check your inputs.'
+          : 'Failed to create collection. Please try again later.';
         this.submitting = false;
         this.isLoading = false;
-        console.error(err);
+        console.error('Error creating collecte:', err);
       },
     });
   }
 
   cancel(): void {
     this.router.navigate(['/dashboard/collectes']);
+  }
+}
+import { Injectable } from '@angular/core';
+
+@Injectable({ providedIn: 'root' })
+export class FormatService {
+  formatDate(date: Date | string | undefined): string {
+    if (!date) return 'N/A';
+    return new Date(date).toLocaleDateString();
   }
 }

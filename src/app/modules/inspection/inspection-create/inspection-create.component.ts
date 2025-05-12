@@ -1,170 +1,82 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray } from '@angular/forms';
 import { Router } from '@angular/router';
-import { InspectionService } from '../../../core/services/inspection.service';
+import { InspectionReportService } from '../inspection-report.service';
+import { InspectionReportFormBuilder } from '../inspection-report-form.builder';
 
 @Component({
   selector: 'app-inspection-create',
   templateUrl: './inspection-create.component.html',
+  styleUrls: ['./inspection-create.component.css'],
 })
 export class InspectionCreateComponent implements OnInit {
-  inspectionForm: FormGroup;
-  loading = false;
-  submitting = false;
-  stockId = '';
+  form!: FormGroup;
   error: string | null = null;
-
-  // Define enums locally to avoid import issues
-  FindingType = {
-    DOCUMENTATION: 'DOCUMENTATION',
-    PHYSICAL: 'PHYSICAL',
-    PROCEDURE: 'PROCEDURE',
-  };
-
-  FindingSeverity = {
-    CRITICAL: 'CRITICAL',
-    MAJOR: 'MAJOR',
-    MINOR: 'MINOR',
-    OBSERVATION: 'OBSERVATION',
-  };
-
-  // Arrays for dropdown options in template
-  findingTypes = [
-    { value: 'DOCUMENTATION', label: 'Documentation' },
-    { value: 'PHYSICAL', label: 'Physical' },
-    { value: 'PROCEDURE', label: 'Procedure' },
-  ];
-
-  findingSeverities = [
-    { value: 'CRITICAL', label: 'Critical' },
-    { value: 'MAJOR', label: 'Major' },
-    { value: 'MINOR', label: 'Minor' },
-    { value: 'OBSERVATION', label: 'Observation' },
-  ];
 
   constructor(
     private fb: FormBuilder,
-    private router: Router,
-    private inspectionService: InspectionService
-  ) {
-    this.inspectionForm = this.fb.group({
-      inspectorId: ['', Validators.required],
-      facilityId: ['', Validators.required],
-      inspectionDate: ['', Validators.required],
-      checklistId: ['', Validators.required],
-      inspectorNotes: [''],
-      results: this.fb.array([]),
-      issues: this.fb.array([]),
-    });
+    private reportService: InspectionReportService,
+    private router: Router
+  ) {}
+
+  ngOnInit(): void {
+    this.form = InspectionReportFormBuilder.buildForm(this.fb);
   }
 
-  ngOnInit(): void {}
-
-  // Convenience getters for form controls
-  get resultsArray() {
-    return this.inspectionForm.get('results') as FormArray;
+  get issues(): FormArray {
+    return this.form.get('issues') as FormArray;
   }
 
-  get issuesArray() {
-    return this.inspectionForm.get('issues') as FormArray;
-  }
-
-  // Create a new result form group
-  createResultFormGroup(): FormGroup {
-    return this.fb.group({
-      item: ['', Validators.required],
-      status: ['pass', Validators.required],
-      comment: [''],
-    });
-  }
-
-  // Add a new result to the form array
-  addResult(): void {
-    this.resultsArray.push(this.createResultFormGroup());
-  }
-
-  // Remove a result from the form array
-  removeResult(index: number): void {
-    this.resultsArray.removeAt(index);
-  }
-
-  // Add a new issue
   addIssue(): void {
-    this.issuesArray.push(this.fb.control('', Validators.required));
+    this.issues.push(InspectionReportFormBuilder.buildIssueForm(this.fb));
   }
 
-  // Remove an issue
   removeIssue(index: number): void {
-    this.issuesArray.removeAt(index);
+    this.issues.removeAt(index);
   }
 
-  // Submit the form
   onSubmit(): void {
-    if (this.inspectionForm.invalid) {
-      // Mark all fields as touched to trigger validation messages
-      this.markFormGroupTouched(this.inspectionForm);
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      this.error = 'Please fill out all required fields.';
       return;
     }
 
-    this.submitting = true;
-    this.error = null;
+    // Transform form data to match backend expectations
+    const formData = this.form.value;
+    const inspectionData = {
+      deliveryId: formData.deliveryId || null,
+      depotId: formData.depotId || null,
+      inspectionDate: formData.inspectionDate ? `${formData.inspectionDate}T00:00:00.000Z` : undefined,
+      issues: formData.issues.map((issue: any) => ({
+        type: issue.type,
+        description: issue.description,
+        severity: issue.severity,
+        status: issue.status,
+      })),
+      status: formData.status,
+      inspectorNotes: formData.inspectorNotes || undefined,
+    };
 
-    const inspectionData = this.inspectionForm.value;
+    console.log('Submitting inspection data:', JSON.stringify(inspectionData, null, 2));
 
-    this.inspectionService.createInspection(inspectionData).subscribe(
-      (response) => {
-        this.submitting = false;
-        this.router.navigate(['/inspections']);
+    this.reportService.create(inspectionData).subscribe({
+      next: (response) => {
+        console.log('Inspection created successfully:', response);
+        this.form.reset();
+        this.issues.clear();
+        this.error = null;
+        this.router.navigate(['/dashboard/inspection']);
       },
-      (error) => {
-        this.submitting = false;
-        this.error =
-          error.message ||
-          'An error occurred while creating the inspection. Please try again.';
-      }
-    );
-  }
-
-  // Cancel and return to the list view
-  cancel(): void {
-    this.router.navigate(['/inspections']);
-  }
-
-  // Helper method to mark all controls in a form group as touched
-  private markFormGroupTouched(formGroup: FormGroup): void {
-    Object.values(formGroup.controls).forEach((control) => {
-      control.markAsTouched();
-
-      if (control instanceof FormGroup) {
-        this.markFormGroupTouched(control);
-      } else if (control instanceof FormArray) {
-        for (const ctrl of control.controls) {
-          if (ctrl instanceof FormGroup) {
-            this.markFormGroupTouched(ctrl);
-          } else {
-            ctrl.markAsTouched();
-          }
-        }
-      }
+      error: (err) => {
+        console.error('Failed to create inspection:', {
+          status: err.status,
+          statusText: err.statusText,
+          error: err.error,
+          message: err.message,
+        });
+        this.error = err.error?.message || err.message || 'Failed to create inspection. Check console for details.';
+      },
     });
-  }
-
-  // Get form control validation status
-  isInvalid(controlName: string): boolean {
-    const control = this.inspectionForm.get(controlName);
-    return !!control && control.invalid && control.touched;
-  }
-
-  // Get form array control validation status
-  isArrayControlInvalid(
-    arrayName: string,
-    index: number,
-    controlName: string
-  ): boolean {
-    const array = this.inspectionForm.get(arrayName) as FormArray;
-    if (!array) return false;
-
-    const control = array.at(index)?.get(controlName);
-    return !!control && control.invalid && control.touched;
   }
 }
