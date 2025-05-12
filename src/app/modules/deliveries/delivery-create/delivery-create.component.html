@@ -1,135 +1,138 @@
 <div class="p-6 max-w-7xl mx-auto">
     <h1 class="text-2xl font-bold mb-6">Create New Delivery</h1>
-
+  
     <!-- Error Alert -->
     <div *ngIf="error" class="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
-        <div class="flex items-center">
-            <div class="flex-shrink-0">
-                <svg class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                        clip-rule="evenodd"></path>
-                </svg>
-            </div>
-            <div class="ml-3">
-                <p class="text-sm text-red-700">{{ errorMessage }}</p>
-            </div>
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              fill-rule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+              clip-rule="evenodd"
+            ></path>
+          </svg>
         </div>
+        <div class="ml-3">
+          <p class="text-sm text-red-700">{{ errorMessage }}</p>
+        </div>
+      </div>
     </div>
-
-    <form [formGroup]="deliveryForm" (ngSubmit)="onSubmit()" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-        <!-- Delivery Items Section -->
-        <div class="mb-6">
-            <label class="block text-gray-700 text-sm font-bold mb-2">Delivery Items*</label>
-            <div formArrayName="items">
-                <div *ngFor="let item of items.controls; let i = index" [formGroupName]="i"
-                    class="mb-4 p-4 border rounded-lg">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label [for]="'item-name-' + i" class="block text-gray-700 text-sm font-bold mb-2">Item
-                                Name*</label>
-                            <input [id]="'item-name-' + i" formControlName="name" type="text"
-                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                placeholder="Enter item name">
-                            <div *ngIf="item.get('name')?.touched && item.get('name')?.invalid"
-                                class="text-red-500 text-xs mt-1">
-                                <div *ngIf="item.get('name')?.errors?.['required']">Item name is required.</div>
-                            </div>
-                        </div>
-                        <div>
-                            <label [for]="'item-quantity-' + i"
-                                class="block text-gray-700 text-sm font-bold mb-2">Quantity*</label>
-                            <input [id]="'item-quantity-' + i" formControlName="quantity" type="number" min="1"
-                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                placeholder="Enter quantity">
-                            <div *ngIf="item.get('quantity')?.touched && item.get('quantity')?.invalid"
-                                class="text-red-500 text-xs mt-1">
-                                <div *ngIf="item.get('quantity')?.errors?.['required']">Quantity is required.</div>
-                                <div *ngIf="item.get('quantity')?.errors?.['min']">Quantity must be at least 1.</div>
-                            </div>
-                        </div>
-                        <div>
-                            <label [for]="'item-unit-' + i"
-                                class="block text-gray-700 text-sm font-bold mb-2">Unit*</label>
-                            <input [id]="'item-unit-' + i" formControlName="unit" type="text"
-                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                placeholder="e.g., kg, boxes, pieces">
-                            <div *ngIf="item.get('unit')?.touched && item.get('unit')?.invalid"
-                                class="text-red-500 text-xs mt-1">
-                                <div *ngIf="item.get('unit')?.errors?.['required']">Unit is required.</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex justify-end mt-2">
-                        <button type="button" (click)="removeItem(i)" *ngIf="items.length > 1"
-                            class="text-red-600 hover:text-red-800">
-                            Remove
-                        </button>
-                    </div>
-                </div>
-                <button type="button" (click)="addItem()"
-                    class="mt-2 px-3 py-1 bg-blue-100 text-blue-700 text-sm font-medium rounded hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-300">
-                    + Add Item
-                </button>
-            </div>
+  
+    <form
+      [formGroup]="deliveryForm"
+      (ngSubmit)="onSubmit()"
+      class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
+    >
+      <div class="mb-6">
+        <label
+          for="pickupDate"
+          class="block text-gray-700 text-sm font-bold mb-2"
+          >Pickup Date*</label
+        >
+        <input
+          type="date"
+          id="pickupDate"
+          formControlName="pickupDate"
+          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        />
+        <div
+          *ngIf="f['pickupDate'].touched && f['pickupDate'].invalid"
+          class="text-red-500 text-xs mt-1"
+        >
+          <div *ngIf="f['pickupDate'].errors?.['required']">
+            Pickup date is required.
+          </div>
         </div>
-
-        <div class="mb-6">
-            <label for="scheduledDate" class="block text-gray-700 text-sm font-bold mb-2">Scheduled Date*</label>
-            <input type="date" id="scheduledDate" formControlName="scheduledDate"
-                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-            <div *ngIf="f['scheduledDate'].touched && f['scheduledDate'].invalid" class="text-red-500 text-xs mt-1">
-                <div *ngIf="f['scheduledDate'].errors?.['required']">Scheduled date is required.</div>
-            </div>
+      </div>
+  
+      <div class="mb-6">
+        <label
+          for="expectedDeliveryDate"
+          class="block text-gray-700 text-sm font-bold mb-2"
+          >Expected Delivery Date</label
+        >
+        <input
+          type="date"
+          id="expectedDeliveryDate"
+          formControlName="expectedDeliveryDate"
+          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        />
+      </div>
+  
+      <div class="mb-6">
+        <label
+          for="beneficiaryId"
+          class="block text-gray-700 text-sm font-bold mb-2"
+          >Beneficiary ID*</label
+        >
+        <input
+          type="text"
+          id="beneficiaryId"
+          formControlName="beneficiaryId"
+          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          placeholder="Enter beneficiary ID"
+        />
+        <div
+          *ngIf="f['beneficiaryId'].touched && f['beneficiaryId'].invalid"
+          class="text-red-500 text-xs mt-1"
+        >
+          <div *ngIf="f['beneficiaryId'].errors?.['required']">
+            Beneficiary ID is required.
+          </div>
         </div>
-
-        <div class="mb-6">
-            <label for="address" class="block text-gray-700 text-sm font-bold mb-2">Delivery Address*</label>
-            <textarea id="address" formControlName="address" rows="3"
-                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                placeholder="Enter delivery address"></textarea>
-            <div *ngIf="f['address'].touched && f['address'].invalid" class="text-red-500 text-xs mt-1">
-                <div *ngIf="f['address'].errors?.['required']">Address is required.</div>
-                <div *ngIf="f['address'].errors?.['minlength']">Address must be at least 10 characters long.</div>
-            </div>
-        </div>
-
-        <div class="mb-6">
-            <label for="recipientId" class="block text-gray-700 text-sm font-bold mb-2">Recipient ID*</label>
-            <input type="text" id="recipientId" formControlName="recipientId"
-                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                placeholder="Enter recipient ID">
-            <div *ngIf="f['recipientId'].touched && f['recipientId'].invalid" class="text-red-500 text-xs mt-1">
-                <div *ngIf="f['recipientId'].errors?.['required']">Recipient ID is required.</div>
-            </div>
-        </div>
-
-        <div class="mb-6">
-            <label for="notes" class="block text-gray-700 text-sm font-bold mb-2">Notes</label>
-            <textarea id="notes" formControlName="notes" rows="3"
-                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                placeholder="Additional delivery instructions or notes"></textarea>
-        </div>
-
-        <div class="flex items-center justify-between">
-            <button type="button" routerLink="/dashboard/deliveries"
-                class="px-4 py-2 bg-gray-300 text-gray-800 text-sm font-medium rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                Cancel
-            </button>
-            <button type="submit"
-                class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                [disabled]="loading">
-                <span *ngIf="loading" class="inline-block mr-2">
-                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
-                        </circle>
-                        <path class="opacity-75" fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                        </path>
-                    </svg>
-                </span>
-                Create Delivery
-            </button>
-        </div>
+      </div>
+  
+      <div class="mb-6">
+        <label
+          for="transporterId"
+          class="block text-gray-700 text-sm font-bold mb-2"
+          >Transporter ID</label>
+        <input
+          type="text"
+          id="transporterId"
+          formControlName="transporterId"
+          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          placeholder="Enter transporter ID"
+        />
+      </div>
+  
+      <div class="flex items-center justify-between">
+        <button
+          type="button"
+          routerLink="/dashboard/deliveries"
+          class="px-4 py-2 bg-gray-300 text-gray-800 text-sm font-medium rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          [disabled]="loading"
+        >
+          <span *ngIf="loading" class="inline-block mr-2">
+            <svg
+              class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+          </span>
+          Create Delivery
+        </button>
+      </div>
     </form>
-</div>
+  </div>

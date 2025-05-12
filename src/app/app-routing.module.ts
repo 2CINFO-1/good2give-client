@@ -6,7 +6,7 @@ import { RegisterComponent } from './modules/auth/register/register.component';
 // Guards
 import { AuthGuard } from './core/guards/auth.guard';
 import { NoAuthGuard } from './core/guards/no-auth.guard';
-import { RoleGuard } from './core/guards/role.guard';
+import {  } from './core/guards/role.guard';
 import { EmailVerificationGuard } from './core/guards/email-verification.guard';
 import { ForgotPasswordComponent } from './modules/auth/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './modules/auth/reset-password/reset-password.component';
@@ -108,7 +108,7 @@ const routes: Routes = [
           import('./modules/collectes/collectes.module').then(
             (m) => m.CollectesModule
           ),
-        canActivate: [AuthGuard, RoleGuard],
+        canActivate: [AuthGuard, ],
         data: { roles: ['ADMIN', 'TRANSPORTER'] },
       },
       {
@@ -125,7 +125,7 @@ const routes: Routes = [
           import('./modules/products/products.module').then(
             (m) => m.ProductsModule
           ),
-        canActivate: [AuthGuard, RoleGuard],
+        canActivate: [AuthGuard, ],
         data: { roles: ['ADMIN', 'INSPECTOR'] },
       },
       {
@@ -154,14 +154,14 @@ const routes: Routes = [
         path: 'stocks',
         loadChildren: () =>
           import('./modules/stocks/stocks.module').then((m) => m.StocksModule),
-        canActivate: [AuthGuard, RoleGuard],
+        canActivate: [AuthGuard, ],
         data: { roles: ['ADMIN', 'INSPECTOR', 'WAREHOUSE'] },
       },
       {
         path: 'scraps',
         loadChildren: () =>
           import('./modules/scraps/scraps.module').then((m) => m.ScrapsModule),
-        canActivate: [AuthGuard, RoleGuard],
+        canActivate: [AuthGuard, ],
         data: { roles: ['ADMIN', 'INSPECTOR', 'WAREHOUSE'] },
       },
       {

@@ -19,7 +19,7 @@ export class CollectesListComponent implements OnInit {
   isLoading = false;
   error: string | null = null;
   searchTerm = '';
-  statusFilter: string = '';
+  statusFilter = '';
   CollecteStatus = CollecteStatus;
 
   constructor(
@@ -98,6 +98,20 @@ export class CollectesListComponent implements OnInit {
 
   // Helper method to format dates consistently
   formatDate(date: Date | string): string {
+    if (!date) return 'N/A';
+    return new Date(date).toLocaleDateString();
+  }
+}
+export const STATUS_CLASSES: Record<CollecteStatus, string> = {
+  [CollecteStatus.PENDING]: 'bg-yellow-100 text-yellow-800',
+  [CollecteStatus.IN_PROGRESS]: 'bg-purple-100 text-purple-800',
+  [CollecteStatus.COMPLETED]: 'bg-green-100 text-green-800',
+};
+import { Injectable } from '@angular/core';
+
+@Injectable({ providedIn: 'root' })
+export class FormatService {
+  formatDate(date: Date | string | undefined): string {
     if (!date) return 'N/A';
     return new Date(date).toLocaleDateString();
   }
