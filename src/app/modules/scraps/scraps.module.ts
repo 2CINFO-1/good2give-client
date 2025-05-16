@@ -12,8 +12,8 @@ const routes: Routes = [
   {
     path: 'create',
     loadComponent: () =>
-      import('./scrap-create-new/scrap-create-new.component').then(
-        (c) => c.ScrapCreateNewComponent
+      import('./scrap-create/scrap-create.component').then(
+        (c) => c.ScrapCreateComponent
       ),
   },
   {

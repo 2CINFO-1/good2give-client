@@ -1,43 +1,93 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  ReactiveFormsModule,
+} from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
+import { ScrapService } from '../../../core/services/scrap.service';
+import { FoodScrapRequest } from '../../../core/models/scrap.model';
+import { UserStateService } from '../../../core/services/user-state.service';
 
 @Component({
   selector: 'app-scrap-create',
   templateUrl: './scrap-create.component.html',
   styleUrls: ['./scrap-create.component.css'],
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
 })
 export class ScrapCreateComponent implements OnInit {
   scrapForm: FormGroup;
   isSubmitting = false;
+  error: string | null = null;
 
-  constructor(private fb: FormBuilder, private router: Router) {
+  constructor(
+    private fb: FormBuilder,
+    private router: Router,
+    private scrapService: ScrapService,
+    private userStateService: UserStateService
+  ) {
     this.scrapForm = this.fb.group({
-      name: ['', Validators.required],
-      description: [''],
-      quantity: ['', [Validators.required, Validators.min(1)]],
+      title: ['', Validators.required],
+      objective: ['', Validators.required],
       location: ['', Validators.required],
-      notes: [''],
+      foodItems: ['', Validators.required],
+      dateOfScrapping: ['', Validators.required],
     });
   }
 
   ngOnInit(): void {
     // Initialize component
-    console.log('ScrapCreateComponent initialized');
   }
 
   onSubmit(): void {
     if (this.scrapForm.valid) {
       this.isSubmitting = true;
 
-      // Simulate API call
-      setTimeout(() => {
+      const currentUser = this.userStateService.getCurrentUser();
+      if (!currentUser || !currentUser._id) {
+        this.error = 'User information not available';
         this.isSubmitting = false;
-        this.router.navigate(['/scraps']);
-      }, 1000);
+        return;
+      }
+
+      const formValue = this.scrapForm.value;
+
+      // Process food items from comma-separated string to array
+      const foodItems = formValue.foodItems
+        .split(',')
+        .map((item: string) => item.trim())
+        .filter((item: string) => item.length > 0);
+
+      const scrapData: FoodScrapRequest = {
+        beneficiaryid: currentUser._id,
+        title: formValue.title,
+        objective: formValue.objective,
+        location: formValue.location,
+        foodItems: foodItems,
+        dateOfScrapping: formValue.dateOfScrapping,
+      };
+
+      this.scrapService.createScrap(scrapData).subscribe({
+        next: () => {
+          this.isSubmitting = false;
+          this.router.navigate(['/dashboard/scraps']);
+        },
+        error: (err) => {
+          this.error = 'Failed to create scrap. Please try again.';
+          this.isSubmitting = false;
+          console.error('Error creating scrap:', err);
+        },
+      });
     } else {
       // Mark all fields as touched to trigger validation display
       this.scrapForm.markAllAsTouched();
     }
   }
-}
+
+  cancel(): void {
+    this.router.navigate(['/dashboard/scraps']);
+  }
+} 
