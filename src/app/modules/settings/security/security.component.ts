@@ -1,5 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { UserService } from '../../../core/services/user.service';
+import { ToastrService } from 'ngx-toastr';
+import { UpdatePasswordRequest } from '../../../core/models/user.model';
+import { finalize } from 'rxjs/operators';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-security',
@@ -12,7 +17,12 @@ export class SecurityComponent implements OnInit {
   successMessage = '';
   errorMessage = '';
 
-  constructor(private fb: FormBuilder) {
+  constructor(
+    private fb: FormBuilder,
+    private userService: UserService,
+    private authService: AuthService,
+    private toastr: ToastrService
+  ) {
     this.passwordForm = this.fb.group(
       {
         currentPassword: ['', Validators.required],
@@ -33,7 +43,7 @@ export class SecurityComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Init
+    // Nothing to initialize
   }
 
   passwordMatchValidator(form: FormGroup) {
@@ -54,12 +64,28 @@ export class SecurityComponent implements OnInit {
       this.successMessage = '';
       this.errorMessage = '';
 
-      // Simulate API call
-      setTimeout(() => {
-        this.isSubmitting = false;
-        this.successMessage = 'Password updated successfully!';
-        this.passwordForm.reset();
-      }, 1000);
+      const passwordData: UpdatePasswordRequest = {
+        oldPassword: this.passwordForm.value.currentPassword,
+        newPassword: this.passwordForm.value.newPassword,
+      };
+
+      this.userService
+        .updatePassword(passwordData)
+        .pipe(finalize(() => (this.isSubmitting = false)))
+        .subscribe({
+          next: (response) => {
+            this.successMessage = 'Password updated successfully!';
+            this.toastr.success('Password updated successfully!');
+            this.passwordForm.reset();
+          },
+          error: (error) => {
+            this.errorMessage =
+              error?.error?.message ||
+              'Failed to update password. Please try again.';
+            this.toastr.error(this.errorMessage);
+            console.error('Error updating password:', error);
+          },
+        });
     } else {
       this.passwordForm.markAllAsTouched();
     }

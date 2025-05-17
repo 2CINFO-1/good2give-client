@@ -3,6 +3,32 @@
         <!-- Settings Navigation -->
         <div class="w-full lg:w-1/4">
             <div class="bg-white rounded-lg shadow p-4">
+                <!-- User Info Preview -->
+                <div *ngIf="currentUser" class="mb-6 pb-4 border-b border-gray-200">
+                    <div class="flex items-center">
+                        <div
+                            class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden mr-3">
+                            <img *ngIf="currentUser.avatar" [src]="currentUser.avatar" alt="User avatar"
+                                class="w-full h-full object-cover">
+                            <span *ngIf="!currentUser.avatar"
+                                class="material-icons text-gray-400 text-2xl">person</span>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-800">{{ currentUser.name }}</p>
+                            <p class="text-xs text-gray-500">{{ currentUser.email }}</p>
+                            <div class="mt-1 text-xs px-2 py-0.5 rounded-full capitalize inline-block" [ngClass]="{
+                                    'bg-blue-100 text-blue-800': currentUser.role === 'donator',
+                                    'bg-green-100 text-green-800': currentUser.role === 'beneficiary',
+                                    'bg-purple-100 text-purple-800': currentUser.role === 'transporter',
+                                    'bg-yellow-100 text-yellow-800': currentUser.role === 'inspector',
+                                    'bg-red-100 text-red-800': currentUser.role === 'admin'
+                                }">
+                                {{ currentUser.role }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <h2 class="text-xl font-semibold text-gray-800 mb-4">Settings</h2>
                 <nav class="space-y-1">
                     <a *ngFor="let item of navItems" [routerLink]="item.path"
