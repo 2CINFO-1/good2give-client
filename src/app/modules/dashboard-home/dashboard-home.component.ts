@@ -30,41 +30,24 @@ export class DashboardHomeComponent implements OnInit {
 
   ngOnInit(): void {
     try {
-      console.log('DashboardHomeComponent - Initializing');
-
-      // Use NavigationService to check email verification with improved logging
-      console.log(
-        'DashboardHomeComponent - Explicitly checking email verification using NavigationService'
-      );
+      // Check email verification first
       if (
         !this.navigationService.checkEmailVerificationForRoute(
           '/dashboard/home'
         )
       ) {
-        console.log(
-          'DashboardHomeComponent - Email verification check failed, redirect handled by NavigationService'
-        );
-        return;
+        return; // Stop initialization if email verification failed
       }
-
-      console.log(
-        'DashboardHomeComponent - Email verification check passed, continuing initialization'
-      );
 
       // Simulate loading dashboard statistics
       setTimeout(() => {
-        try {
-          this.stats = {
-            deliveries: 24,
-            collections: 18,
-            products: 156,
-            events: 12,
-          };
-          this.isLoading = false;
-        } catch (error) {
-          console.error('DashboardHomeComponent - Error loading stats:', error);
-          this.isLoading = false;
-        }
+        this.stats = {
+          deliveries: 24,
+          collections: 18,
+          products: 156,
+          events: 12,
+        };
+        this.isLoading = false;
       }, 1000);
     } catch (error) {
       console.error('DashboardHomeComponent - Error in ngOnInit:', error);
