@@ -82,8 +82,52 @@ export class AuthInterceptor implements HttpInterceptor {
                 return this.handle401Error(request, next);
               }
 
-              // Note: We're deliberately not handling 403 errors related to email verification here
-              // These are handled by the EmailVerificationInterceptor
+              // Handle 403 errors related to email verification at the interceptor level
+              // Check for both the exact message and partial matches for robustness
+              if (
+                error.status === 403 &&
+                (error.error?.message?.includes(
+                  'Email verification required'
+                ) ||
+                  error.error?.message?.includes('verify your email') ||
+                  error.error?.message?.includes('email verification'))
+              ) {
+                console.log(
+                  'AuthInterceptor - Email verification required error detected:',
+                  error.error?.message
+                );
+
+                // Get current user and update verification status
+                const currentUser = this.userState.getCurrentUser();
+                if (currentUser) {
+                  try {
+                    // Update user with verified status set to false
+                    const updatedUser = { ...currentUser };
+                    updatedUser.isEmailVerified = false;
+                    this.userState.setCurrentUser(updatedUser);
+
+                    console.log(
+                      'AuthInterceptor - Updated user state with isEmailVerified = false'
+                    );
+                  } catch (userUpdateError) {
+                    console.error(
+                      'AuthInterceptor - Error updating user state:',
+                      userUpdateError
+                    );
+                  }
+                }
+
+                // Notify user and redirect - ensure this always happens
+                this.toastr.warning('Please verify your email address');
+
+                // Force timeout to ensure the navigation happens after current execution
+                setTimeout(() => {
+                  this.router.navigate(['/auth/verify-email']);
+                }, 0);
+
+                // Return error but prevent further handling
+                return throwError(() => error);
+              }
             }
           } catch (interceptorError) {
             console.error('Error in AuthInterceptor:', interceptorError);
@@ -100,14 +144,14 @@ export class AuthInterceptor implements HttpInterceptor {
 
   private isAuthEndpoint(url: string): boolean {
     const authEndpoints = [
-      `${environment.apiUrl}/login`,
-      `${environment.apiUrl}/register`,
-      `${environment.apiUrl}/refresh-tokens`,
-      `${environment.apiUrl}/forgot-password`,
-      `${environment.apiUrl}/reset-password`,
-      `${environment.apiUrl}/verify-email`,
-      `${environment.apiUrl}/google`,
-      `${environment.apiUrl}/google/callback`,
+      `${environment.apiUrl}/auth/login`,
+      `${environment.apiUrl}/auth/register`,
+      `${environment.apiUrl}/auth/refresh-tokens`,
+      `${environment.apiUrl}/auth/forgot-password`,
+      `${environment.apiUrl}/auth/reset-password`,
+      `${environment.apiUrl}/auth/verify-email`,
+      `${environment.apiUrl}/auth/google-auth`,
+      `${environment.apiUrl}/auth/google/callback`,
     ];
     return authEndpoints.some((endpoint) => url.includes(endpoint));
   }

@@ -1,5 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpParams,
+  HttpErrorResponse,
+} from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
@@ -12,6 +16,9 @@ import {
   RequestPasswordResetRequest,
   ResetPasswordRequest,
 } from '../models/user.model';
+import { Router } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
+import { UserStateService } from './user-state.service';
 
 @Injectable({
   providedIn: 'root',
@@ -19,7 +26,12 @@ import {
 export class UserService {
   private apiUrl = `${environment.apiUrl}/users`;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private toastr: ToastrService,
+    private userState: UserStateService
+  ) {}
 
   /**
    * Get all users with optional pagination
@@ -99,6 +111,34 @@ export class UserService {
     return this.http.get<User>(`${this.apiUrl}/profile`).pipe(
       catchError((error) => {
         console.error('Error fetching user profile', error);
+
+        // Check specifically for 403 errors related to email verification
+        if (
+          error instanceof HttpErrorResponse &&
+          error.status === 403 &&
+          error.error?.message?.includes('Email verification required')
+        ) {
+          // Get current user and update verification status
+          const currentUser = this.userState.getCurrentUser();
+          if (currentUser) {
+            try {
+              // Update user with verified status set to false
+              const updatedUser = { ...currentUser };
+              updatedUser.isEmailVerified = false;
+              this.userState.setCurrentUser(updatedUser);
+
+              // Notify user and redirect
+              this.toastr.warning('Please verify your email address');
+              this.router.navigate(['/auth/verify-email']);
+            } catch (userUpdateError) {
+              console.error('Error updating user state:', userUpdateError);
+            }
+          } else {
+            // If no user in state, just redirect
+            this.router.navigate(['/auth/verify-email']);
+          }
+        }
+
         return throwError(() => error);
       })
     );
@@ -112,6 +152,34 @@ export class UserService {
     return this.http.put<User>(`${this.apiUrl}/profile`, profileData).pipe(
       catchError((error) => {
         console.error('Error updating user profile', error);
+
+        // Check specifically for 403 errors related to email verification
+        if (
+          error instanceof HttpErrorResponse &&
+          error.status === 403 &&
+          error.error?.message?.includes('Email verification required')
+        ) {
+          // Get current user and update verification status
+          const currentUser = this.userState.getCurrentUser();
+          if (currentUser) {
+            try {
+              // Update user with verified status set to false
+              const updatedUser = { ...currentUser };
+              updatedUser.isEmailVerified = false;
+              this.userState.setCurrentUser(updatedUser);
+
+              // Notify user and redirect
+              this.toastr.warning('Please verify your email address');
+              this.router.navigate(['/auth/verify-email']);
+            } catch (userUpdateError) {
+              console.error('Error updating user state:', userUpdateError);
+            }
+          } else {
+            // If no user in state, just redirect
+            this.router.navigate(['/auth/verify-email']);
+          }
+        }
+
         return throwError(() => error);
       })
     );
@@ -129,6 +197,34 @@ export class UserService {
       .pipe(
         catchError((error) => {
           console.error('Error updating password', error);
+
+          // Check specifically for 403 errors related to email verification
+          if (
+            error instanceof HttpErrorResponse &&
+            error.status === 403 &&
+            error.error?.message?.includes('Email verification required')
+          ) {
+            // Get current user and update verification status
+            const currentUser = this.userState.getCurrentUser();
+            if (currentUser) {
+              try {
+                // Update user with verified status set to false
+                const updatedUser = { ...currentUser };
+                updatedUser.isEmailVerified = false;
+                this.userState.setCurrentUser(updatedUser);
+
+                // Notify user and redirect
+                this.toastr.warning('Please verify your email address');
+                this.router.navigate(['/auth/verify-email']);
+              } catch (userUpdateError) {
+                console.error('Error updating user state:', userUpdateError);
+              }
+            } else {
+              // If no user in state, just redirect
+              this.router.navigate(['/auth/verify-email']);
+            }
+          }
+
           return throwError(() => error);
         })
       );

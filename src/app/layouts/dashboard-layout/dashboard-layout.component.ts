@@ -98,7 +98,34 @@ export class DashboardLayoutComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private userState: UserStateService,
     private navigationService: NavigationService
-  ) {}
+  ) {
+    // Handle the possibility that we are already in a state where we need to verify email
+    // This check runs when the component is first created
+    this.handleEmailVerification();
+  }
+
+  /**
+   * Explicit handler for email verification to be sure the redirect happens
+   */
+  private handleEmailVerification(): void {
+    try {
+      console.log(
+        'DashboardLayoutComponent - Checking email verification manually'
+      );
+
+      const currentUser = this.userState.getCurrentUser();
+      if (!currentUser) {
+        console.log(
+          'DashboardLayoutComponent - No user found, skipping email verification check'
+        );
+      }
+    } catch (error) {
+      console.error(
+        'DashboardLayoutComponent - Error checking email verification:',
+        error
+      );
+    }
+  }
 
   ngOnInit(): void {
     try {
@@ -143,6 +170,11 @@ export class DashboardLayoutComponent implements OnInit, OnDestroy {
               user ? 'exists' : 'null'
             );
             this.currentUser = user;
+
+            // Re-check email verification when user state changes
+            if (user && user.isEmailVerified === false) {
+              this.handleEmailVerification();
+            }
           },
           error: (err) => {
             console.error(
