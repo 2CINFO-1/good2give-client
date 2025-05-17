@@ -48,10 +48,8 @@ export class ProductFormComponent implements OnInit {
   initForm(): void {
     this.productForm = this.formBuilder.group({
       name: ['', [Validators.required]],
-      description: [''],
       category: ['', [Validators.required]],
       productType: ['', [Validators.required]],
-      status: ['Active', [Validators.required]],
     });
   }
 
@@ -63,10 +61,9 @@ export class ProductFormComponent implements OnInit {
       next: (product: Product) => {
         this.productForm.patchValue({
           name: product.name,
-          description: product.description,
           category: product.category,
           productType: product.productType,
-          status: product.status,
+
         });
         this.loading = false;
       },
@@ -86,8 +83,7 @@ export class ProductFormComponent implements OnInit {
     this.loading = true;
     this.error = null;
     this.successMessage = null;
-    const productData = this.productForm.value;
-
+const productData=this.productForm.value
     if (this.isEditMode && this.productId) {
       this.productService
         .updateProduct(this.productId, productData)
