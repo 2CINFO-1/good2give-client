@@ -98,65 +98,58 @@ export class DashboardLayoutComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private userState: UserStateService,
     private navigationService: NavigationService
-  ) {}
+  ) {
+    // Handle the possibility that we are already in a state where we need to verify email
+    // This check runs when the component is first created
+    this.handleEmailVerification();
+  }
+
+  /**
+   * Explicit handler for email verification to be sure the redirect happens
+   */
+  private handleEmailVerification(): void {
+    try {
+      // Use the NavigationService to check email verification status and handle redirects
+      this.navigationService.checkEmailVerificationForRoute('/dashboard/home');
+    } catch (error) {
+      console.error(
+        'DashboardLayoutComponent - Error checking email verification:',
+        error
+      );
+    }
+  }
 
   ngOnInit(): void {
     try {
-      console.log('DashboardLayoutComponent - Initializing');
-
       // Use the NavigationService to check email verification
-      // with both improved logging and better handling
-      console.log(
-        'DashboardLayoutComponent - Running immediate email verification check using NavigationService'
-      );
       if (
         !this.navigationService.checkEmailVerificationForRoute(
           '/dashboard/home'
         )
       ) {
-        console.log(
-          'DashboardLayoutComponent - Email verification check failed, redirect handled by NavigationService'
-        );
-        return;
+        return; // Stop initialization if email verification failed
       }
 
       // First set currentUser from userState if available
-      try {
-        this.currentUser = this.userState.getCurrentUser();
-        console.log(
-          'DashboardLayoutComponent - Initial user state:',
-          this.currentUser ? 'exists' : 'null'
-        );
-      } catch (err) {
-        console.error(
-          'DashboardLayoutComponent - Error getting initial user state:',
-          err
-        );
-      }
+      this.currentUser = this.userState.getCurrentUser();
 
       // Subscribe to user updates
-      try {
-        this.userSubscription = this.userState.currentUser$.subscribe({
-          next: (user) => {
-            console.log(
-              'DashboardLayoutComponent - User state updated:',
-              user ? 'exists' : 'null'
-            );
-            this.currentUser = user;
-          },
-          error: (err) => {
-            console.error(
-              'DashboardLayoutComponent - Error in user subscription:',
-              err
-            );
-          },
-        });
-      } catch (err) {
-        console.error(
-          'DashboardLayoutComponent - Error setting up user subscription:',
-          err
-        );
-      }
+      this.userSubscription = this.userState.currentUser$.subscribe({
+        next: (user) => {
+          this.currentUser = user;
+
+          // Re-check email verification when user state changes
+          if (user && user.isEmailVerified === false) {
+            this.handleEmailVerification();
+          }
+        },
+        error: (err) => {
+          console.error(
+            'DashboardLayoutComponent - Error in user subscription:',
+            err
+          );
+        },
+      });
     } catch (error) {
       console.error('DashboardLayoutComponent - Error in ngOnInit:', error);
     }

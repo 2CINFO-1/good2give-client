@@ -19,7 +19,6 @@ export class UserStateService {
    * @param user The user object or null if logging out
    */
   setCurrentUser(user: User | null): void {
-    console.log('UserStateService - Setting current user:', user);
     this.currentUserSubject.next(user);
     this.authLoadedSubject.next(true);
   }

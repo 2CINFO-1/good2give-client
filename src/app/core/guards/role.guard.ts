@@ -22,13 +22,11 @@ export class RoleGuard implements CanActivate {
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): boolean {
-    const token = localStorage.getItem('access_token');
-
-    console.log('RoleGuard: Checking route', state.url);
-    console.log('RoleGuard: Required roles', route.data['roles']);
+    const token =
+      localStorage.getItem('access_token') ||
+      sessionStorage.getItem('access_token');
 
     if (!token || this.jwtHelper.isTokenExpired(token)) {
-      console.log('RoleGuard: No token or expired token');
       this.toastr.error('Please log in to access this page');
       this.router.navigate(['/auth/login'], {
         queryParams: { returnUrl: state.url },
@@ -40,15 +38,10 @@ export class RoleGuard implements CanActivate {
     const decodedToken = this.jwtHelper.decodeToken(token);
     const userRole = decodedToken?.user?.role;
 
-    console.log('RoleGuard: User role', userRole);
-    console.log('RoleGuard: Token data', decodedToken);
-
     if (!allowedRoles || allowedRoles.includes(userRole)) {
-      console.log('RoleGuard: Access granted');
       return true;
     }
 
-    console.log('RoleGuard: Access denied - role not in allowed roles');
     this.toastr.error('You do not have permission to access this page');
     this.router.navigate(['/dashboard']);
     return false;

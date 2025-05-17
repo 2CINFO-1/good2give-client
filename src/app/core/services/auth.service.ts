@@ -1,5 +1,9 @@
 import { Injectable, Injector } from '@angular/core';
-import { HttpClient, HttpBackend } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpBackend,
+  HttpErrorResponse,
+} from '@angular/common/http';
 import { Observable, throwError, BehaviorSubject, of, map } from 'rxjs';
 import { tap, catchError, switchMap } from 'rxjs/operators';
 import { Router } from '@angular/router';
@@ -14,6 +18,7 @@ import {
 } from '../models/user.model';
 import { JwtHelperService } from '@auth0/angular-jwt';
 import { UserStateService } from './user-state.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Injectable({
   providedIn: 'root',
@@ -30,7 +35,8 @@ export class AuthService {
     private router: Router,
     private jwtHelper: JwtHelperService,
     private userState: UserStateService,
-    private httpBackend: HttpBackend
+    private httpBackend: HttpBackend,
+    private toastr: ToastrService
   ) {
     // Create an HttpClient that bypasses all interceptors to avoid circular dependencies
     this.httpWithoutInterceptors = new HttpClient(httpBackend);
@@ -82,7 +88,30 @@ export class AuthService {
             catchError((error) => {
               console.error('Error fetching user profile:', error);
 
-              // Clear invalid tokens if fetch fails
+              // Check specifically for 403 errors related to email verification
+              if (
+                error instanceof HttpErrorResponse &&
+                error.status === 403 &&
+                error.error?.message?.includes('Email verification required')
+              ) {
+                // Try to get current user from state first
+                const currentUser = this.userState.getCurrentUser();
+                if (currentUser) {
+                  // Update user with verified status set to false
+                  const updatedUser = { ...currentUser };
+                  updatedUser.isEmailVerified = false;
+                  this.userState.setCurrentUser(updatedUser);
+                }
+
+                // Redirect to email verification
+                this.toastr.warning('Please verify your email address');
+                this.router.navigate(['/auth/verify-email']);
+
+                // Don't clear tokens in this case
+                return of(null);
+              }
+
+              // Clear invalid tokens if fetch fails with other errors
               localStorage.removeItem('access_token');
               localStorage.removeItem('refresh_token');
               sessionStorage.removeItem('access_token');
@@ -167,6 +196,31 @@ export class AuthService {
                   'AuthService login - Error fetching profile:',
                   profileError
                 );
+                // Check specifically for 403 errors related to email verification
+                if (
+                  profileError instanceof HttpErrorResponse &&
+                  profileError.status === 403 &&
+                  profileError.error?.message?.includes(
+                    'Email verification required'
+                  )
+                ) {
+                  // Get user from login response if possible
+                  if (response.user) {
+                    // Create a user with isEmailVerified set to false
+                    const updatedUser = {
+                      ...response.user,
+                      isEmailVerified: false,
+                    };
+                    this.userState.setCurrentUser(updatedUser);
+                  }
+
+                  // Redirect to email verification
+                  this.toastr.warning('Please verify your email address');
+                  this.router.navigate(['/auth/verify-email']);
+
+                  // Return original response
+                  return of(response);
+                }
                 return of(response);
               })
             );
@@ -216,6 +270,31 @@ export class AuthService {
                   'AuthService register - Error fetching profile:',
                   profileError
                 );
+                // Check specifically for 403 errors related to email verification
+                if (
+                  profileError instanceof HttpErrorResponse &&
+                  profileError.status === 403 &&
+                  profileError.error?.message?.includes(
+                    'Email verification required'
+                  )
+                ) {
+                  // Get user from register response if possible
+                  if (response.user) {
+                    // Create a user with isEmailVerified set to false
+                    const updatedUser = {
+                      ...response.user,
+                      isEmailVerified: false,
+                    };
+                    this.userState.setCurrentUser(updatedUser);
+                  }
+
+                  // Redirect to email verification
+                  this.toastr.warning('Please verify your email address');
+                  this.router.navigate(['/auth/verify-email']);
+
+                  // Return original response
+                  return of(response);
+                }
                 return of(response);
               })
             );
@@ -268,6 +347,31 @@ export class AuthService {
                   'AuthService googleSignIn - Error fetching profile:',
                   profileError
                 );
+                // Check specifically for 403 errors related to email verification
+                if (
+                  profileError instanceof HttpErrorResponse &&
+                  profileError.status === 403 &&
+                  profileError.error?.message?.includes(
+                    'Email verification required'
+                  )
+                ) {
+                  // Get user from googleSignIn response if possible
+                  if (response.user) {
+                    // Create a user with isEmailVerified set to false
+                    const updatedUser = {
+                      ...response.user,
+                      isEmailVerified: false,
+                    };
+                    this.userState.setCurrentUser(updatedUser);
+                  }
+
+                  // Redirect to email verification
+                  this.toastr.warning('Please verify your email address');
+                  this.router.navigate(['/auth/verify-email']);
+
+                  // Return original response
+                  return of(response);
+                }
                 return of(response);
               })
             );
@@ -309,7 +413,33 @@ export class AuthService {
                 }
               }),
               map(() => response),
-              catchError(() => of(response))
+              catchError((error) => {
+                // Check specifically for 403 errors related to email verification
+                if (
+                  error instanceof HttpErrorResponse &&
+                  error.status === 403 &&
+                  error.error?.message?.includes('Email verification required')
+                ) {
+                  // Try to get current user from state first
+                  const currentUser = this.userState.getCurrentUser();
+                  if (currentUser) {
+                    // Update user with verified status set to false
+                    const updatedUser = { ...currentUser };
+                    updatedUser.isEmailVerified = false;
+                    this.userState.setCurrentUser(updatedUser);
+                  }
+
+                  // Redirect to email verification
+                  this.toastr.warning('Please verify your email address');
+                  this.router.navigate(['/auth/verify-email']);
+
+                  // Return the original response but don't clear tokens
+                  return of(response);
+                }
+
+                // For other errors, continue with normal flow
+                return of(response);
+              })
             );
         }),
         catchError((error) => throwError(() => error))

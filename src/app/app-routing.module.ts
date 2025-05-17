@@ -6,8 +6,7 @@ import { RegisterComponent } from './modules/auth/register/register.component';
 // Guards
 import { AuthGuard } from './core/guards/auth.guard';
 import { NoAuthGuard } from './core/guards/no-auth.guard';
-import {  } from './core/guards/role.guard';
-import { EmailVerificationGuard } from './core/guards/email-verification.guard';
+import {} from './core/guards/role.guard';
 import { ForgotPasswordComponent } from './modules/auth/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './modules/auth/reset-password/reset-password.component';
 import { VerifyEmailComponent } from './modules/auth/verify-email/verify-email.component';
@@ -86,8 +85,7 @@ const routes: Routes = [
   {
     path: 'dashboard',
     component: DashboardLayoutComponent,
-    // Important: EmailVerificationGuard first, then AuthGuard
-    canActivate: [EmailVerificationGuard, AuthGuard],
+    canActivate: [AuthGuard],
     children: [
       {
         path: 'home',
@@ -108,7 +106,7 @@ const routes: Routes = [
           import('./modules/collectes/collectes.module').then(
             (m) => m.CollectesModule
           ),
-        canActivate: [AuthGuard, ],
+        canActivate: [AuthGuard],
         data: { roles: ['ADMIN', 'TRANSPORTER'] },
       },
       {
@@ -155,7 +153,7 @@ const routes: Routes = [
       {
         path: 'stocks',
         loadChildren: () =>
-
+          import('./modules/stocks/stocks.module').then((m) => m.StocksModule),
         canActivate: [AuthGuard],
 
         data: { roles: ['ADMIN', 'INSPECTOR', 'WAREHOUSE'] },
@@ -164,7 +162,7 @@ const routes: Routes = [
         path: 'scraps',
         loadChildren: () =>
           import('./modules/scraps/scraps.module').then((m) => m.ScrapsModule),
-        canActivate: [AuthGuard, ],
+        canActivate: [AuthGuard],
         data: { roles: ['ADMIN', 'INSPECTOR', 'WAREHOUSE'] },
       },
       {
