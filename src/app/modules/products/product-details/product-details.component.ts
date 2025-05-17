@@ -1,20 +1,23 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { ProductsService } from '../../../services/products.service';
-import { StocksService } from '../../../services/stocks.service';
-import { Product } from '../../../models/product.model';
-import { StockItem } from '../../../models/stock.model';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { ProductService } from '../../../core/services/product.service';
+import { StockService } from '../../../core/services/stock.service';
+import { Product } from '../../../core/models/product.model';
+import { Stock } from '../../../core/models/stock.model';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-product-details',
   templateUrl: './product-details.component.html',
   styleUrls: ['./product-details.component.css'],
+  standalone: true,
+  imports: [CommonModule, RouterModule],
 })
 export class ProductDetailsComponent implements OnInit {
   productId: string = '';
   product: Product | null = null;
-  stockItems: StockItem[] = [];
+  stockItems: Stock[] = [];
   loading: boolean = true;
   error: string | null = null;
   canEdit: boolean = false;
@@ -22,8 +25,8 @@ export class ProductDetailsComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private productsService: ProductsService,
-    private stocksService: StocksService,
+    private productService: ProductService,
+    private stockService: StockService,
     private authService: AuthService
   ) {}
 
@@ -43,8 +46,8 @@ export class ProductDetailsComponent implements OnInit {
     this.loading = true;
     this.error = null;
 
-    this.productsService.getProductById(this.productId).subscribe({
-      next: (product) => {
+    this.productService.getProductById(this.productId).subscribe({
+      next: (product: Product) => {
         this.product = product;
         this.loadStockItems();
       },
@@ -59,8 +62,8 @@ export class ProductDetailsComponent implements OnInit {
   loadStockItems(): void {
     if (!this.productId) return;
 
-    this.stocksService.getStockItemsByProduct(this.productId).subscribe({
-      next: (items: StockItem[]) => {
+    this.stockService.getStocksByProduct(this.productId).subscribe({
+      next: (items: Stock[]) => {
         this.stockItems = items;
         this.loading = false;
       },
@@ -87,6 +90,17 @@ export class ProductDetailsComponent implements OnInit {
     if (this.productId) {
       this.router.navigate(['/dashboard/products/edit', this.productId]);
     }
+  }
+
+  getDonatorName(donatorId: any): string {
+    if (donatorId && typeof donatorId !== 'string' && donatorId.name) {
+      return donatorId.name;
+    }
+    return 'Unknown';
+  }
+
+  getStockStatus(stock: Stock): string {
+    return stock.releasedAt ? 'Released' : 'Available';
   }
 
   isExpired(dateString: string): boolean {
