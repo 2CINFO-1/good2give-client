@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Routes } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
+import { ToastrModule } from 'ngx-toastr';
 
 import { ProfileComponent } from './profile/profile.component';
 import { SecurityComponent } from './security/security.component';
@@ -28,6 +29,11 @@ const routes: Routes = [
     NotificationsComponent,
     SettingsLayoutComponent,
   ],
-  imports: [CommonModule, ReactiveFormsModule, RouterModule.forChild(routes)],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterModule.forChild(routes),
+    ToastrModule,
+  ],
 })
 export class SettingsModule {}
