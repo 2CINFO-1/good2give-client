@@ -1,86 +1,95 @@
-<div class="container mx-auto px-4 py-6">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold text-gray-800">Create New Event</h1>
-        <button (click)="cancel()" class="flex items-center text-blue-600 hover:text-blue-800 transition-colors">
-            <svg class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Back to Events
-        </button>
-    </div>
+<div class="min-h-screen bg-gray-50 pt-8">
+    <div class="container mx-auto px-4">
+        <!-- Header Section -->
+        <div class="text-center mb-12">
+            <h1 class="text-3xl font-bold mb-4">Create New Event</h1>
+            <div class="h-1 w-24 bg-primary-600 mx-auto mb-6"></div>
+            <button (click)="cancel()" class="flex items-center text-primary-600 hover:text-primary-800 transition-colors mx-auto">
+                <svg class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Back to Events
+            </button>
+        </div>
 
-    <!-- Error Message -->
-    <div *ngIf="error" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
-        <p>{{ error }}</p>
-    </div>
+        <!-- Error Message -->
+        <div *ngIf="error" class="max-w-2xl mx-auto mb-8">
+            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4" role="alert">
+                <p class="font-medium">Error</p>
+                <p>{{ error }}</p>
+            </div>
+        </div>
 
-    <!-- Form -->
-    <div class="bg-white rounded-lg shadow-lg p-6">
-        <form [formGroup]="eventForm" (ngSubmit)="onSubmit()">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Title -->
-                <div class="col-span-2">
-                    <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Event Title *</label>
-                    <input type="text" id="title" formControlName="title"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Enter event title">
-                    <div *ngIf="f['title'].touched && f['title'].invalid" class="mt-1 text-sm text-red-600">
-                        <div *ngIf="f['title'].errors?.['required']">Title is required.</div>
-                        <div *ngIf="f['title'].errors?.['minlength']">Title must be at least 3 characters.</div>
-                    </div>
-                </div>
+        <!-- Form -->
+        <div class="max-w-4xl mx-auto">
+            <div class="bg-white rounded-lg shadow-lg p-8">
+                <form [formGroup]="eventForm" (ngSubmit)="onSubmit()">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <!-- Title -->
+                        <div class="col-span-2">
+                            <label for="title" class="block text-sm font-medium text-gray-700 mb-2">Event Title *</label>
+                            <input type="text" id="title" formControlName="title"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                placeholder="Enter event title">
+                            <div *ngIf="f['title'].touched && f['title'].invalid" class="mt-2 text-sm text-red-600">
+                                <div *ngIf="f['title'].errors?.['required']">Title is required.</div>
+                                <div *ngIf="f['title'].errors?.['minlength']">Title must be at least 3 characters.</div>
+                            </div>
+                        </div>
 
-                <!-- Objective -->
-                <div class="col-span-2">
-                    <label for="objective" class="block text-sm font-medium text-gray-700 mb-1">Objective *</label>
-                    <textarea id="objective" formControlName="objective" rows="4"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Enter event objective"></textarea>
-                    <div *ngIf="f['objective'].touched && f['objective'].invalid" class="mt-1 text-sm text-red-600">
-                        <div *ngIf="f['objective'].errors?.['required']">Objective is required.</div>
-                        <div *ngIf="f['objective'].errors?.['minlength']">Objective must be at least 10 characters.
+                        <!-- Objective -->
+                        <div class="col-span-2">
+                            <label for="objective" class="block text-sm font-medium text-gray-700 mb-2">Objective *</label>
+                            <textarea id="objective" formControlName="objective" rows="4"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                placeholder="Enter event objective"></textarea>
+                            <div *ngIf="f['objective'].touched && f['objective'].invalid" class="mt-2 text-sm text-red-600">
+                                <div *ngIf="f['objective'].errors?.['required']">Objective is required.</div>
+                                <div *ngIf="f['objective'].errors?.['minlength']">Objective must be at least 10 characters.</div>
+                            </div>
+                        </div>
+
+                        <!-- Date -->
+                        <div>
+                            <label for="date" class="block text-sm font-medium text-gray-700 mb-2">Date *</label>
+                            <div class="relative">
+                                <input type="date" id="date" formControlName="date"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
+                            </div>
+                            <div *ngIf="f['date'].touched && f['date'].invalid" class="mt-2 text-sm text-red-600">
+                                <div *ngIf="f['date'].errors?.['required']">Date is required.</div>
+                            </div>
+                        </div>
+
+                        <!-- Number of Participants -->
+                        <div>
+                            <label for="numbre" class="block text-sm font-medium text-gray-700 mb-2">Number of Participants *</label>
+                            <input type="number" id="numbre" formControlName="numbre" min="1"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                placeholder="Enter number of participants">
+                            <div *ngIf="f['numbre'].touched && f['numbre'].invalid" class="mt-2 text-sm text-red-600">
+                                <div *ngIf="f['numbre'].errors?.['required']">Number of participants is required.</div>
+                                <div *ngIf="f['numbre'].errors?.['min']">Number must be at least 1.</div>
+                            </div>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="col-span-2 flex justify-end space-x-4 mt-8">
+                            <button type="button" (click)="cancel()"
+                                class="px-6 py-3 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-all duration-300 font-medium">
+                                Cancel
+                            </button>
+                            <button type="submit" [disabled]="submitting"
+                                class="px-6 py-3 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center font-medium">
+                                <span *ngIf="submitting" class="mr-2">
+                                    <div class="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
+                                </span>
+                                {{ submitting ? 'Creating...' : 'Create Event' }}
+                            </button>
                         </div>
                     </div>
-                </div>
-
-                <!-- Date -->
-                <div>
-                    <label for="date" class="block text-sm font-medium text-gray-700 mb-1">Date *</label>
-                    <input type="date" id="date" formControlName="date"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <div *ngIf="f['date'].touched && f['date'].invalid" class="mt-1 text-sm text-red-600">
-                        <div *ngIf="f['date'].errors?.['required']">Date is required.</div>
-                    </div>
-                </div>
-
-                <!-- Number of Participants -->
-                <div>
-                    <label for="numbre" class="block text-sm font-medium text-gray-700 mb-1">Number of Participants
-                        *</label>
-                    <input type="number" id="numbre" formControlName="numbre" min="1"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Enter number of participants">
-                    <div *ngIf="f['numbre'].touched && f['numbre'].invalid" class="mt-1 text-sm text-red-600">
-                        <div *ngIf="f['numbre'].errors?.['required']">Number of participants is required.</div>
-                        <div *ngIf="f['numbre'].errors?.['min']">Number must be at least 1.</div>
-                    </div>
-                </div>
-
-                <!-- Buttons -->
-                <div class="col-span-2 flex justify-end space-x-4 mt-6">
-                    <button type="button" (click)="cancel()"
-                        class="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors">
-                        Cancel
-                    </button>
-                    <button type="submit" [disabled]="submitting"
-                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center">
-                        <span *ngIf="submitting" class="mr-2">
-                            <div class="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
-                        </span>
-                        {{ submitting ? 'Creating...' : 'Create Event' }}
-                    </button>
-                </div>
+                </form>
             </div>
-        </form>
+        </div>
     </div>
 </div>
