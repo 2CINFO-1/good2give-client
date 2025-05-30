@@ -14,22 +14,24 @@ import { UserStateService } from '../../../core/services/user-state.service';
 @Component({
   selector: 'app-scrap-create',
   templateUrl: './scrap-create.component.html',
-  styleUrls: ['./scrap-create.component.css'],
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterModule],
 })
 export class ScrapCreateComponent implements OnInit {
-  scrapForm: FormGroup;
-  isSubmitting = false;
-  error: string | null = null;
+  scrapForm!: FormGroup;
+  loading = false;
+  submitted = false;
+  error = '';
 
   constructor(
-    private fb: FormBuilder,
+    private formBuilder: FormBuilder,
     private router: Router,
     private scrapService: ScrapService,
     private userStateService: UserStateService
-  ) {
-    this.scrapForm = this.fb.group({
+  ) { }
+
+  ngOnInit(): void {
+    this.scrapForm = this.formBuilder.group({
       title: ['', Validators.required],
       objective: ['', Validators.required],
       location: ['', Validators.required],
@@ -38,56 +40,60 @@ export class ScrapCreateComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {
-    // Initialize component
-  }
+  // Convenience getter for easy access to form fields
+  get f() { return this.scrapForm.controls; }
 
   onSubmit(): void {
-    if (this.scrapForm.valid) {
-      this.isSubmitting = true;
+    this.submitted = true;
+    this.error = '';
 
-      const currentUser = this.userStateService.getCurrentUser();
-      if (!currentUser || !currentUser._id) {
-        this.error = 'User information not available';
-        this.isSubmitting = false;
-        return;
-      }
-
-      const formValue = this.scrapForm.value;
-
-      // Process food items from comma-separated string to array
-      const foodItems = formValue.foodItems
-        .split(',')
-        .map((item: string) => item.trim())
-        .filter((item: string) => item.length > 0);
-
-      const scrapData: FoodScrapRequest = {
-        beneficiaryid: currentUser._id,
-        title: formValue.title,
-        objective: formValue.objective,
-        location: formValue.location,
-        foodItems: foodItems,
-        dateOfScrapping: formValue.dateOfScrapping,
-      };
-
-      this.scrapService.createScrap(scrapData).subscribe({
-        next: () => {
-          this.isSubmitting = false;
-          this.router.navigate(['/dashboard/scraps']);
-        },
-        error: (err) => {
-          this.error = 'Failed to create scrap. Please try again.';
-          this.isSubmitting = false;
-          console.error('Error creating scrap:', err);
-        },
-      });
-    } else {
-      // Mark all fields as touched to trigger validation display
-      this.scrapForm.markAllAsTouched();
+    // Stop here if form is invalid
+    if (this.scrapForm.invalid) {
+      return;
     }
+
+    this.loading = true;
+    
+    const currentUser = this.userStateService.getCurrentUser();
+    if (!currentUser || !currentUser._id) {
+      this.error = 'User information not available';
+      this.loading = false;
+      return;
+    }
+
+    const formValue = this.scrapForm.value;
+
+    // Process food items from comma-separated string to array
+    const foodItems = formValue.foodItems
+      .split(',')
+      .map((item: string) => item.trim())
+      .filter((item: string) => item.length > 0);
+
+    const scrapData: FoodScrapRequest = {
+      beneficiaryid: currentUser._id,
+      title: formValue.title,
+      objective: formValue.objective,
+      location: formValue.location,
+      foodItems: foodItems,
+      dateOfScrapping: formValue.dateOfScrapping,
+    };
+
+    this.scrapService.createScrap(scrapData)
+      .subscribe({
+        next: (response) => {
+          console.log('Scrap created successfully', response);
+          this.router.navigate(['/dashboard/scraps']); // Navigate to scraps list after creation
+        },
+        error: (error) => {
+          this.error = 'Failed to create scrap. Please try again.';
+          this.loading = false;
+          console.error('Error creating scrap:', error);
+        }
+      });
   }
 
-  cancel(): void {
+  // Optional: Add a method to navigate back
+  goBackToList(): void {
     this.router.navigate(['/dashboard/scraps']);
   }
 } 

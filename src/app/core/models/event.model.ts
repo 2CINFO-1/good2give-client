@@ -7,6 +7,8 @@ export interface Event {
   objective: string;
   numbre: number;
   date: Date;
+  location: string;
+  foodSuggestions?: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -17,6 +19,7 @@ export interface CreateEventDto {
   objective: string;
   numbre: number;
   date: string;
+  location: string;
 }
 
 export interface UpdateEventDto {
@@ -24,6 +27,7 @@ export interface UpdateEventDto {
   objective?: string;
   numbre?: number;
   date?: string;
+  location?: string;
 }
 
 export interface EventSerializer {
@@ -33,6 +37,8 @@ export interface EventSerializer {
   objective: string;
   numbre: number;
   date: Date;
+  location: string;
+  foodSuggestions?: string[];
   createdAt: Date;
   updatedAt: Date;
 }

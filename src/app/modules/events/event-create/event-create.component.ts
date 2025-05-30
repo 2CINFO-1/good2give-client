@@ -24,6 +24,7 @@ export class EventCreateComponent implements OnInit {
       objective: ['', [Validators.required, Validators.minLength(10)]],
       date: ['', Validators.required],
       numbre: [1, [Validators.required, Validators.min(1)]],
+      location: ['', [Validators.required, Validators.minLength(3)]],
     });
   }
 

@@ -1,14 +1,21 @@
+<!-- Use a similar structure to your event edit form -->
 <div class="container mx-auto px-4 py-8">
     <div class="max-w-md mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
         <div class="p-6">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">Create New Scrap</h2>
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Edit Scrap</h2>
+
+            <!-- Loading State -->
+            <div *ngIf="loading && !scrap" class="flex justify-center items-center h-40">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
+            </div>
 
             <!-- Error Message -->
             <div *ngIf="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
                 {{ error }}
             </div>
 
-            <form [formGroup]="scrapForm" (ngSubmit)="onSubmit()">
+            <!-- Edit Form -->
+            <form *ngIf="scrap && !loading" [formGroup]="scrapForm" (ngSubmit)="onSubmit()">
                 <!-- Title -->
                 <div class="mb-4">
                     <label for="title" class="block text-gray-700 font-medium mb-2">Title</label>
@@ -78,11 +85,11 @@
                                 </path>
                             </svg>
                         </span>
-                        {{ loading ? 'Creating...' : 'Create Scrap' }}
+                        {{ loading ? 'Saving...' : 'Save Changes' }}
                     </button>
 
-                    <!-- Cancel Button (Optional) -->
-                    <button type="button" (click)="goBackToList()"
+                    <!-- Cancel Button -->
+                    <button type="button" (click)="goBackToDetail()"
                         class="text-gray-600 hover:text-gray-800 focus:outline-none">
                         Cancel
                     </button>
