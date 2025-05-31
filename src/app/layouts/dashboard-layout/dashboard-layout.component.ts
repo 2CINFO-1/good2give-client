@@ -31,6 +31,12 @@ export class DashboardLayoutComponent implements OnInit, OnDestroy {
       ],
     },
     {
+      name: 'User Management',
+      icon: 'people',
+      route: '/dashboard/users',
+      roles: [UserRole.ADMIN],
+    },
+    {
       name: 'Collections',
       icon: 'local_shipping',
       route: '/dashboard/collectes',

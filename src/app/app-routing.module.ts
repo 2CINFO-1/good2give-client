@@ -106,6 +106,15 @@ const routes: Routes = [
         pathMatch: 'full',
       },
       {
+        path: 'users',
+        loadChildren: () =>
+          import('./modules/user-management/user-management.module').then(
+            (m) => m.UserManagementModule
+          ),
+        canActivate: [AuthGuard],
+        data: { roles: ['ADMIN'] },
+      },
+      {
         path: 'collectes',
         loadChildren: () =>
           import('./modules/collectes/collectes.module').then(
@@ -157,7 +166,8 @@ const routes: Routes = [
       },
       {
         path: 'stocks',
-        loadChildren: () => import('./modules/stocks/stocks.module').then((m) => m.StocksModule),
+        loadChildren: () =>
+          import('./modules/stocks/stocks.module').then((m) => m.StocksModule),
         canActivate: [AuthGuard],
         data: { roles: ['ADMIN', 'INSPECTOR', 'WAREHOUSE'] },
       },

@@ -50,15 +50,8 @@ export class UserService {
     return throwError(() => error);
   }
 
-  /**
-   * Get all users with optional pagination
-   * @param page Page number
-   * @param limit Items per page
-   */
-  getUsers(page: number = 1, limit: number = 10): Observable<User[]> {
-    let params = new HttpParams()
-      .set('page', page.toString())
-      .set('limit', limit.toString());
+  getUsers(): Observable<User[]> {
+    let params = new HttpParams();
 
     return this.http.get<User[]>(this.apiUrl, { params }).pipe(
       catchError((error) => {
