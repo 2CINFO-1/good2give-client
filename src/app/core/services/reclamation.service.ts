@@ -6,11 +6,16 @@ import { environment } from '../../../environments/environment';
 import {
   Reclamation,
   ReclamationRequest,
+  ReclamationUpdateRequest,
   ReclamationResponse,
+  ReclamationRES,
+  ReclamationRESRequest,
+  ReclamationRESResponse,
+  ReclamationStatus,
+  // Backward compatibility aliases
   ReclamationResolution,
   ReclamationResolutionRequest,
   ReclamationResolutionResponse,
-  ReclamationStatus,
 } from '../models/reclamation.model';
 
 @Injectable({
@@ -18,7 +23,7 @@ import {
 })
 export class ReclamationService {
   private apiUrl = `${environment.apiUrl}/reclamations`;
-  private resolutionUrl = `${environment.apiUrl}/reclamation-res`;
+  private resolutionUrl = `${environment.apiUrl}/reclamationRES`;
 
   constructor(private http: HttpClient) {}
 
@@ -71,7 +76,7 @@ export class ReclamationService {
    */
   updateReclamation(
     id: string,
-    data: Partial<ReclamationRequest>
+    data: ReclamationUpdateRequest
   ): Observable<ReclamationResponse> {
     return this.http
       .put<ReclamationResponse>(`${this.apiUrl}/${id}`, data)
@@ -86,10 +91,10 @@ export class ReclamationService {
   /**
    * Delete a reclamation
    * @param id Reclamation ID
-   * @returns Observable of boolean indicating success
+   * @returns Observable of success message
    */
-  deleteReclamation(id: string): Observable<boolean> {
-    return this.http.delete<boolean>(`${this.apiUrl}/${id}`).pipe(
+  deleteReclamation(id: string): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}`).pipe(
       catchError((error) => {
         console.error(`Error deleting reclamation with ID ${id}`, error);
         return throwError(() => error);
@@ -97,68 +102,13 @@ export class ReclamationService {
     );
   }
 
-  /**
-   * Get reclamations for the current user
-   * @returns Observable of reclamation array
-   */
-  getMyReclamations(): Observable<Reclamation[]> {
-    return this.http.get<Reclamation[]>(`${this.apiUrl}/my-reclamations`).pipe(
-      catchError((error) => {
-        console.error('Error fetching user reclamations', error);
-        return throwError(() => error);
-      })
-    );
-  }
-
-  /**
-   * Get reclamations by status
-   * @param status Reclamation status
-   * @returns Observable of reclamation array filtered by status
-   */
-  getReclamationsByStatus(
-    status: ReclamationStatus
-  ): Observable<Reclamation[]> {
-    const params = new HttpParams().set('status', status);
-    return this.http.get<Reclamation[]>(this.apiUrl, { params }).pipe(
-      catchError((error) => {
-        console.error(`Error fetching reclamations by status ${status}`, error);
-        return throwError(() => error);
-      })
-    );
-  }
-
-  /**
-   * Update reclamation status
-   * @param id Reclamation ID
-   * @param status New status
-   * @returns Observable of updated reclamation
-   */
-  updateReclamationStatus(
-    id: string,
-    status: ReclamationStatus
-  ): Observable<ReclamationResponse> {
-    return this.http
-      .patch<ReclamationResponse>(`${this.apiUrl}/${id}/status`, {
-        status,
-      })
-      .pipe(
-        catchError((error) => {
-          console.error(
-            `Error updating status for reclamation with ID ${id}`,
-            error
-          );
-          return throwError(() => error);
-        })
-      );
-  }
-
-  // Reclamation Resolution endpoints
+  // ReclamationRES endpoints
   /**
    * Get all resolutions
    * @returns Observable of resolution array
    */
-  getAllResolutions(): Observable<ReclamationResolution[]> {
-    return this.http.get<ReclamationResolution[]>(this.resolutionUrl).pipe(
+  getAllResolutions(): Observable<ReclamationRES[]> {
+    return this.http.get<ReclamationRES[]>(this.resolutionUrl).pipe(
       catchError((error) => {
         console.error('Error fetching reclamation resolutions', error);
         return throwError(() => error);
@@ -171,15 +121,13 @@ export class ReclamationService {
    * @param id Resolution ID
    * @returns Observable of a single resolution
    */
-  getResolutionById(id: string): Observable<ReclamationResolution> {
-    return this.http
-      .get<ReclamationResolution>(`${this.resolutionUrl}/${id}`)
-      .pipe(
-        catchError((error) => {
-          console.error(`Error fetching resolution with ID ${id}`, error);
-          return throwError(() => error);
-        })
-      );
+  getResolutionById(id: string): Observable<ReclamationRES> {
+    return this.http.get<ReclamationRES>(`${this.resolutionUrl}/${id}`).pipe(
+      catchError((error) => {
+        console.error(`Error fetching resolution with ID ${id}`, error);
+        return throwError(() => error);
+      })
+    );
   }
 
   /**
@@ -188,10 +136,10 @@ export class ReclamationService {
    * @returns Observable of created resolution
    */
   createResolution(
-    data: ReclamationResolutionRequest
-  ): Observable<ReclamationResolutionResponse> {
+    data: ReclamationRESRequest
+  ): Observable<ReclamationRESResponse> {
     return this.http
-      .post<ReclamationResolutionResponse>(this.resolutionUrl, data)
+      .post<ReclamationRESResponse>(this.resolutionUrl, data)
       .pipe(
         catchError((error) => {
           console.error('Error creating resolution', error);
@@ -208,10 +156,10 @@ export class ReclamationService {
    */
   updateResolution(
     id: string,
-    data: Partial<ReclamationResolutionRequest>
-  ): Observable<ReclamationResolutionResponse> {
+    data: Partial<ReclamationRESRequest>
+  ): Observable<ReclamationRESResponse> {
     return this.http
-      .put<ReclamationResolutionResponse>(`${this.resolutionUrl}/${id}`, data)
+      .put<ReclamationRESResponse>(`${this.resolutionUrl}/${id}`, data)
       .pipe(
         catchError((error) => {
           console.error(`Error updating resolution with ID ${id}`, error);
@@ -223,28 +171,53 @@ export class ReclamationService {
   /**
    * Delete a resolution
    * @param id Resolution ID
-   * @returns Observable of boolean indicating success
+   * @returns Observable of success message
    */
-  deleteResolution(id: string): Observable<boolean> {
-    return this.http.delete<boolean>(`${this.resolutionUrl}/${id}`).pipe(
-      catchError((error) => {
-        console.error(`Error deleting resolution with ID ${id}`, error);
-        return throwError(() => error);
-      })
-    );
+  deleteResolution(id: string): Observable<{ message: string }> {
+    return this.http
+      .delete<{ message: string }>(`${this.resolutionUrl}/${id}`)
+      .pipe(
+        catchError((error) => {
+          console.error(`Error deleting resolution with ID ${id}`, error);
+          return throwError(() => error);
+        })
+      );
+  }
+
+  /**
+   * Get suggestions for a reclamation
+   * @param reclamationId Reclamation ID
+   * @returns Observable of suggestions
+   */
+  getSuggestions(
+    reclamationId: string
+  ): Observable<{ suggestion: string; confidence: number; reasoning: string }> {
+    return this.http
+      .get<{ suggestion: string; confidence: number; reasoning: string }>(
+        `${this.resolutionUrl}/suggestions/${reclamationId}`
+      )
+      .pipe(
+        catchError((error) => {
+          console.error(
+            `Error fetching suggestions for reclamation ${reclamationId}`,
+            error
+          );
+          return throwError(() => error);
+        })
+      );
   }
 
   /**
    * Get resolutions for a specific reclamation
    * @param reclamationId Reclamation ID
-   * @returns Observable of resolution array
+   * @returns Observable of resolutions array
    */
   getResolutionsForReclamation(
     reclamationId: string
-  ): Observable<ReclamationResolution[]> {
+  ): Observable<ReclamationRES[]> {
     return this.http
-      .get<ReclamationResolution[]>(
-        `${this.resolutionUrl}?reclamid=${reclamationId}`
+      .get<ReclamationRES[]>(
+        `${this.resolutionUrl}/reclamation/${reclamationId}`
       )
       .pipe(
         catchError((error) => {
@@ -257,28 +230,29 @@ export class ReclamationService {
       );
   }
 
-  // Add photo to reclamation
-  addReclamationPhoto(
-    id: string,
-    photo: File
-  ): Observable<ReclamationResponse> {
-    const formData = new FormData();
-    formData.append('photo', photo);
-
-    return this.http.post<ReclamationResponse>(
-      `${this.apiUrl}/${id}/photos`,
-      formData
-    );
+  // Backward compatibility methods
+  getAllReclamationResolutions(): Observable<ReclamationResolution[]> {
+    return this.getAllResolutions();
   }
 
-  // Delete photo from reclamation
-  deleteReclamationPhoto(
+  getReclamationResolutionById(id: string): Observable<ReclamationResolution> {
+    return this.getResolutionById(id);
+  }
+
+  createReclamationResolution(
+    data: ReclamationResolutionRequest
+  ): Observable<ReclamationResolutionResponse> {
+    return this.createResolution(data);
+  }
+
+  updateReclamationResolution(
     id: string,
-    photoUrl: string
-  ): Observable<ReclamationResponse> {
-    return this.http.delete<ReclamationResponse>(
-      `${this.apiUrl}/${id}/photos`,
-      { body: { photoUrl } }
-    );
+    data: Partial<ReclamationResolutionRequest>
+  ): Observable<ReclamationResolutionResponse> {
+    return this.updateResolution(id, data);
+  }
+
+  deleteReclamationResolution(id: string): Observable<{ message: string }> {
+    return this.deleteResolution(id);
   }
 }

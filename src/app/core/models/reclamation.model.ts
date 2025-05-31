@@ -16,7 +16,7 @@ export enum ReclamationCategory {
 
 export interface Reclamation {
   _id: string;
-  userid: User | string;
+  userid: User;
   title: string;
   subject: string;
   status: ReclamationStatus;
@@ -32,26 +32,39 @@ export interface ReclamationRequest {
   date: string | Date;
 }
 
+export interface ReclamationUpdateRequest {
+  userid?: string;
+  title?: string;
+  subject?: string;
+  status?: ReclamationStatus;
+  date?: string | Date;
+}
+
 export interface ReclamationResponse extends Reclamation {
   // Any additional fields that might be returned by the API
 }
 
 // ReclamationRES models (resolution models)
-export interface ReclamationResolution {
+export interface ReclamationRES {
   _id: string;
   reclamid: string;
   resolnote: string;
-  picid: User | string;
+  picid: User;
   createdAt?: Date | string;
   updatedAt?: Date | string;
 }
 
-export interface ReclamationResolutionRequest {
+export interface ReclamationRESRequest {
   reclamid: string;
   resolnote: string;
   picid: string;
 }
 
-export interface ReclamationResolutionResponse extends ReclamationResolution {
+export interface ReclamationRESResponse extends ReclamationRES {
   // Any additional fields that might be returned by the API
 }
+
+// Keep backward compatibility aliases
+export interface ReclamationResolution extends ReclamationRES {}
+export interface ReclamationResolutionRequest extends ReclamationRESRequest {}
+export interface ReclamationResolutionResponse extends ReclamationRESResponse {}

@@ -79,6 +79,12 @@ export class DashboardLayoutComponent implements OnInit, OnDestroy {
       roles: [UserRole.ADMIN, UserRole.BENEFICIARY],
     },
     {
+      name: 'Reclamation Resolutions',
+      icon: 'check_circle',
+      route: '/dashboard/reclamation-res',
+      roles: [UserRole.ADMIN],
+    },
+    {
       name: 'Inspection',
       icon: 'fact_check',
       route: '/dashboard/inspection',

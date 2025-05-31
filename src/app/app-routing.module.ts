@@ -132,6 +132,15 @@ const routes: Routes = [
         canActivate: [AuthGuard],
       },
       {
+        path: 'reclamation-res',
+        loadChildren: () =>
+          import('./modules/reclamation-res/reclamation-res.module').then(
+            (m) => m.ReclamationResModule
+          ),
+        canActivate: [AuthGuard],
+        data: { roles: ['ADMIN'] },
+      },
+      {
         path: 'products',
         loadChildren: () =>
           import('./modules/products/products.module').then(
