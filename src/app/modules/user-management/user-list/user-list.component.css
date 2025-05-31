@@ -1,0 +1,69 @@
+/* Additional custom styles for user-list component */
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Custom hover effects for action buttons */
+.action-button {
+  transition: all 0.2s ease-in-out;
+}
+
+.action-button:hover {
+  transform: scale(1.05);
+}
+
+/* Custom scrollbar for table overflow */
+.overflow-x-auto::-webkit-scrollbar {
+  height: 6px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
+}
+
+/* Role dropdown styling */
+.role-dropdown {
+  min-width: 140px;
+}
+
+/* Edit mode row highlighting */
+.editing-row {
+  background-color: #f0fdf4;
+  border-left: 3px solid #10b981;
+}
+
+/* Loading overlay for role updates */
+.role-loading-overlay {
+  backdrop-filter: blur(1px);
+}
+
+/* Enhanced button states */
+.btn-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Smooth transitions for role badge changes */
+.role-badge {
+  transition: all 0.3s ease-in-out;
+}
