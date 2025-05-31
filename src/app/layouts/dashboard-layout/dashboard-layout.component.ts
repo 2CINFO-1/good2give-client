@@ -250,9 +250,7 @@ export class DashboardLayoutComponent implements OnInit, OnDestroy {
   }
 
   canShowMenuItem(item: any): boolean {
-    // Temporarily show all menu items while debugging user role issues
-    return true;
-    // When user authentication is properly working, use this:
-    // return this.currentUser && item.roles.includes(this.currentUser.role);
+    // Check if user is logged in and has the required role for this menu item
+    return this.currentUser && item.roles.includes(this.currentUser.role);
   }
 }

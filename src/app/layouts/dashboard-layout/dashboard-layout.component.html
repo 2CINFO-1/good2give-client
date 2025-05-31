@@ -25,14 +25,16 @@
         <!-- Menu items -->
         <nav class="mt-5">
             <ul>
-                <li *ngFor="let item of menuItems">
-                    <a [routerLink]="item.route" routerLinkActive="bg-gray-900 text-emerald-500"
-                        [routerLinkActiveOptions]="{exact: item.route === '/dashboard'}"
-                        class="flex items-center py-3 px-4 hover:bg-gray-700 transition-colors">
-                        <span class="material-icons">{{item.icon}}</span>
-                        <span *ngIf="isSidebarOpen" class="ml-3">{{item.name}}</span>
-                    </a>
-                </li>
+                <ng-container *ngFor="let item of menuItems">
+                    <li *ngIf="canShowMenuItem(item)">
+                        <a [routerLink]="item.route" routerLinkActive="bg-gray-900 text-emerald-500"
+                            [routerLinkActiveOptions]="{exact: item.route === '/dashboard'}"
+                            class="flex items-center py-3 px-4 hover:bg-gray-700 transition-colors">
+                            <span class="material-icons">{{item.icon}}</span>
+                            <span *ngIf="isSidebarOpen" class="ml-3">{{item.name}}</span>
+                        </a>
+                    </li>
+                </ng-container>
             </ul>
         </nav>
     </aside>
