@@ -1,15 +1,21 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { DeliveryService } from 'src/app/core/services/delivery.service';
 import { Delivery, DeliveryStatus } from 'src/app/core/models/delivery.model';
+import { CommonModule } from '@angular/common';
+import { User } from 'src/app/core/models/user.model';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-deliveries-list',
   templateUrl: './deliveries-list.component.html',
   styleUrls: ['./deliveries-list.component.css'],
+  standalone: true,
+  imports: [CommonModule, RouterModule, FormsModule],
 })
 export class DeliveriesListComponent implements OnInit {
   deliveries: Delivery[] = [];
+  filteredDeliveries: Delivery[] = [];
   loading = true;
   error = '';
   currentPage = 1;
@@ -17,6 +23,8 @@ export class DeliveriesListComponent implements OnInit {
   totalItems = 0;
   Math = Math;
   DeliveryStatus = DeliveryStatus;
+  searchTerm = '';
+  statusFilter = '';
 
   constructor(
     private deliveryService: DeliveryService,
@@ -35,6 +43,7 @@ export class DeliveriesListComponent implements OnInit {
       next: (data) => {
         console.log('Deliveries loaded:', data);
         this.deliveries = data;
+        this.applyFilters();
         this.totalItems = data.length;
         this.loading = false;
       },
@@ -44,6 +53,44 @@ export class DeliveriesListComponent implements OnInit {
         console.error('Error loading deliveries:', err);
       },
     });
+  }
+
+  applyFilters(): void {
+    this.filteredDeliveries = this.deliveries.filter((delivery) => {
+      // Status filter
+      const statusMatch =
+        !this.statusFilter ||
+        delivery.status.toLowerCase() === this.statusFilter.toLowerCase();
+
+      // Search term filter
+      const searchMatch =
+        !this.searchTerm ||
+        this.getCustomerName(delivery).toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        delivery._id.toLowerCase().includes(this.searchTerm.toLowerCase());
+
+      return statusMatch && searchMatch;
+    });
+  }
+
+  onSearchChange(): void {
+    this.applyFilters();
+  }
+
+  onStatusFilterChange(status: string): void {
+    this.statusFilter = status;
+    this.applyFilters();
+  }
+
+  clearFilters(): void {
+    this.statusFilter = '';
+    this.searchTerm = '';
+    this.applyFilters();
+  }
+
+  getCustomerName(delivery: Delivery): string {
+    if (!delivery.beneficiary) return 'N/A';
+    if (typeof delivery.beneficiary === 'string') return 'N/A';
+    return (delivery.beneficiary as User).name || 'N/A';
   }
 
   onPageChange(page: number): void {
@@ -58,5 +105,14 @@ export class DeliveriesListComponent implements OnInit {
 
   assignDelivery(id: string): void {
     this.router.navigate(['/dashboard/deliveries/assign', id]);
+  }
+
+  createDelivery(): void {
+    this.router.navigate(['/dashboard/deliveries/create']);
+  }
+
+  formatDate(date: Date | string): string {
+    if (!date) return 'N/A';
+    return new Date(date).toLocaleDateString();
   }
 }
