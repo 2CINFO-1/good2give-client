@@ -1,0 +1,257 @@
+<div class="min-h-screen bg-gray-50 p-6">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header Section -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900">Inspection Dashboard</h1>
+      <p class="mt-2 text-sm text-gray-600">Manage and track food quality inspections</p>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <!-- Unassigned Stats -->
+      <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-600">Unassigned</p>
+            <p class="text-2xl font-bold text-gray-900">{{unassignedReports.length}}</p>
+          </div>
+          <div class="bg-blue-50 p-3 rounded-lg">
+            <mat-icon class="text-blue-600">assignment</mat-icon>
+          </div>
+        </div>
+      </div>
+
+      <!-- Current Inspections Stats -->
+      <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-600">My Inspections</p>
+            <p class="text-2xl font-bold text-gray-900">{{myInspections.length}}</p>
+          </div>
+          <div class="bg-green-50 p-3 rounded-lg">
+            <mat-icon class="text-green-600">fact_check</mat-icon>
+          </div>
+        </div>
+      </div>
+
+      <!-- History Stats -->
+      <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-gray-600">Completed</p>
+            <p class="text-2xl font-bold text-gray-900">{{myHistory.length}}</p>
+          </div>
+          <div class="bg-purple-50 p-3 rounded-lg">
+            <mat-icon class="text-purple-600">history</mat-icon>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100">
+      <mat-tab-group class="inspection-tabs">
+        <!-- Unassigned Inspections Tab -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <div class="flex items-center space-x-2">
+              <mat-icon class="text-gray-600">assignment</mat-icon>
+              <span>Unassigned</span>
+            </div>
+          </ng-template>
+
+          <div class="p-6">
+            <!-- Loading State -->
+            <div *ngIf="loading.unassigned" class="flex justify-center py-12">
+              <mat-spinner diameter="40"></mat-spinner>
+            </div>
+
+            <!-- Empty State -->
+            <div *ngIf="!loading.unassigned && unassignedReports.length === 0" 
+                 class="text-center py-12 bg-gray-50 rounded-lg">
+              <mat-icon class="text-gray-400 text-5xl mb-4">assignment_late</mat-icon>
+              <p class="text-gray-600">No unassigned inspections available</p>
+            </div>
+
+            <!-- Content -->
+            <div *ngIf="!loading.unassigned && unassignedReports.length > 0" 
+                 class="grid grid-cols-1 gap-4">
+              <div *ngFor="let report of unassignedReports" 
+                   class="bg-white rounded-lg border border-gray-100 p-4 hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between">
+                  <div class="flex-1">
+                    <div class="flex items-center space-x-4">
+                      <div class="bg-blue-50 p-2 rounded-lg">
+                        <mat-icon class="text-blue-600">assignment</mat-icon>
+                      </div>
+                      <div>
+                        <h3 class="text-lg font-semibold text-gray-900">
+                          {{report.inspectorNotes}}
+                        </h3>
+                        <p class="text-sm text-gray-600">
+                          ID: {{getReportId(report)}}
+                        </p>
+                        <div class="flex items-center space-x-4 mt-1">
+                          <p class="text-sm text-gray-600">
+                            <mat-icon class="align-middle text-gray-400 text-base mr-1">event</mat-icon>
+                            {{report.createdAt | date}}
+                          </p>
+                          <p *ngIf="report.scheduledDate" class="text-sm text-gray-600">
+                            <mat-icon class="align-middle text-gray-400 text-base mr-1">schedule</mat-icon>
+                            {{report.scheduledDate | date}}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <button mat-flat-button color="primary" 
+                          class="ml-4"
+                          (click)="assignToMe(getReportId(report))">
+                    <mat-icon class="mr-2">person_add</mat-icon>
+                    Assign to Me
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- My Current Inspections Tab -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <div class="flex items-center space-x-2">
+              <mat-icon class="text-gray-600">fact_check</mat-icon>
+              <span>My Inspections</span>
+            </div>
+          </ng-template>
+
+          <div class="p-6">
+            <!-- Loading State -->
+            <div *ngIf="loading.current" class="flex justify-center py-12">
+              <mat-spinner diameter="40"></mat-spinner>
+            </div>
+
+            <!-- Empty State -->
+            <div *ngIf="!loading.current && myInspections.length === 0" 
+                 class="text-center py-12 bg-gray-50 rounded-lg">
+              <mat-icon class="text-gray-400 text-5xl mb-4">fact_check</mat-icon>
+              <p class="text-gray-600">No current inspections assigned to you</p>
+            </div>
+
+            <!-- Content -->
+            <div *ngIf="!loading.current && myInspections.length > 0" 
+                 class="grid grid-cols-1 gap-4">
+              <div *ngFor="let inspection of myInspections" 
+                   class="bg-white rounded-lg border border-gray-100 p-4 hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between">
+                  <div class="flex-1">
+                    <div class="flex items-center space-x-4">
+                      <div class="bg-green-50 p-2 rounded-lg">
+                        <mat-icon class="text-green-600">fact_check</mat-icon>
+                      </div>
+                      <div>
+                        <h3 class="text-lg font-semibold text-gray-900">
+                          {{inspection.inspectorNotes}}
+                        </h3>
+                        <p class="text-sm text-gray-600">
+                          ID: {{getReportId(inspection)}}
+                        </p>
+                        <div class="flex items-center space-x-4 mt-1">
+                          <p class="text-sm text-gray-600">
+                            <mat-icon class="align-middle text-gray-400 text-base mr-1">event</mat-icon>
+                            {{inspection.createdAt | date}}
+                          </p>
+                          <span [ngClass]="getStatusClass(inspection.status)"
+                                class="px-2 py-1 rounded-full text-xs font-medium">
+                            {{inspection.status | titlecase}}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <button mat-flat-button color="accent" 
+                          class="ml-4"
+                          (click)="viewInspection(getReportId(inspection))">
+                    <mat-icon class="mr-2">visibility</mat-icon>
+                    View Details
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- History Tab -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <div class="flex items-center space-x-2">
+              <mat-icon class="text-gray-600">history</mat-icon>
+              <span>History</span>
+            </div>
+          </ng-template>
+
+          <div class="p-6">
+            <!-- Loading State -->
+            <div *ngIf="loading.history" class="flex justify-center py-12">
+              <mat-spinner diameter="40"></mat-spinner>
+            </div>
+
+            <!-- Empty State -->
+            <div *ngIf="!loading.history && myHistory.length === 0" 
+                 class="text-center py-12 bg-gray-50 rounded-lg">
+              <mat-icon class="text-gray-400 text-5xl mb-4">history</mat-icon>
+              <p class="text-gray-600">No inspection history available</p>
+            </div>
+
+            <!-- Content -->
+            <div *ngIf="!loading.history && myHistory.length > 0" 
+                 class="grid grid-cols-1 gap-4">
+              <div *ngFor="let inspection of myHistory" 
+                   class="bg-white rounded-lg border border-gray-100 p-4 hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between">
+                  <div class="flex-1">
+                    <div class="flex items-center space-x-4">
+                      <div class="bg-purple-50 p-2 rounded-lg">
+                        <mat-icon class="text-purple-600">history</mat-icon>
+                      </div>
+                      <div>
+                        <h3 class="text-lg font-semibold text-gray-900">
+                          {{inspection.inspectorNotes}}
+                        </h3>
+                        <p class="text-sm text-gray-600">
+                          ID: {{getReportId(inspection)}}
+                        </p>
+                        <div class="flex items-center space-x-4 mt-1">
+                          <p class="text-sm text-gray-600">
+                            <mat-icon class="align-middle text-gray-400 text-base mr-1">update</mat-icon>
+                            {{inspection.updatedAt | date}}
+                          </p>
+                          <span [ngClass]="getStatusClass(inspection.status)"
+                                class="px-2 py-1 rounded-full text-xs font-medium">
+                            {{inspection.status | titlecase}}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <button mat-stroked-button
+                          class="ml-4"
+                          (click)="viewInspection(getReportId(inspection))">
+                    <mat-icon class="mr-2">visibility</mat-icon>
+                    View Details
+                  </button>
+                  <button mat-stroked-button
+                          class="ml-2 text-red-600 hover:text-red-700 border-red-200 hover:border-red-300 hover:bg-red-50"
+                          (click)="deleteInspection(getReportId(inspection))">
+                    <mat-icon class="mr-2">delete</mat-icon>
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </div>
+  </div>
+</div> 

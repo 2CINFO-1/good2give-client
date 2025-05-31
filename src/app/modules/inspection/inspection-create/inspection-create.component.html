@@ -24,7 +24,26 @@
     </div>
 
     <!-- Inspection Form -->
-    <form [formGroup]="form">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
+      <!-- Inspection Name -->
+      <div class="form-field">
+        <mat-form-field class="w-full">
+          <mat-label>Inspection Name</mat-label>
+          <input matInput formControlName="name" placeholder="Enter inspection name" required>
+          <mat-error *ngIf="form.get('name')?.invalid && form.get('name')?.touched">
+            Inspection name is required
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Inspection Note -->
+      <div class="form-field">
+        <mat-form-field class="w-full">
+          <mat-label>Note</mat-label>
+          <textarea matInput formControlName="note" placeholder="Enter any additional notes" rows="3"></textarea>
+        </mat-form-field>
+      </div>
+
       <!-- Type (Delivery or Depot) -->
       <div class="mb-4">
         <label for="type" class="block text-sm font-medium text-gray-700">Inspection Type *</label>

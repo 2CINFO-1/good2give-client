@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://api.good2give.org/api',
+  apiUrl: '/api',
   googleMapsApiKey: 'YOUR_PRODUCTION_GOOGLE_MAPS_API_KEY',
 };

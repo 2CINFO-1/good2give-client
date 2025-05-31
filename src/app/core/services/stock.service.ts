@@ -45,8 +45,7 @@ export class StockService {
    */
   getStocks(page: number = 1, limit: number = 10): Observable<Stock[]> {
     let params = new HttpParams()
-      .set('page', page.toString())
-      .set('limit', limit.toString());
+      
 
     return this.http.get<Stock[]>(this.apiUrl, { params }).pipe(
       catchError((error) => {
