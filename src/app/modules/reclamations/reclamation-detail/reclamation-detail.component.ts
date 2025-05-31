@@ -4,7 +4,7 @@ import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { ReclamationService } from '../../../core/services/reclamation.service';
 import {
   Reclamation,
-  ReclamationResolution,
+  ReclamationRES,
   ReclamationStatus,
 } from '../../../core/models/reclamation.model';
 import { Subscription } from 'rxjs';
@@ -19,7 +19,7 @@ import { Subscription } from 'rxjs';
 export class ReclamationDetailComponent implements OnInit, OnDestroy {
   reclamationId!: string;
   reclamation: Reclamation | null = null;
-  resolutions: ReclamationResolution[] = [];
+  resolutions: ReclamationRES[] = [];
   isLoading = true;
   error: string | null = null;
   ReclamationStatus = ReclamationStatus;
@@ -52,11 +52,11 @@ export class ReclamationDetailComponent implements OnInit, OnDestroy {
     const recSub = this.reclamationService
       .getReclamationById(this.reclamationId)
       .subscribe({
-        next: (data) => {
+        next: (data: Reclamation) => {
           this.reclamation = data;
           this.loadResolutions();
         },
-        error: (err) => {
+        error: (err: any) => {
           this.error = 'Failed to load reclamation details.';
           this.isLoading = false;
           console.error('Error loading reclamation:', err);
@@ -71,11 +71,11 @@ export class ReclamationDetailComponent implements OnInit, OnDestroy {
     const resSub = this.reclamationService
       .getResolutionsForReclamation(this.reclamationId)
       .subscribe({
-        next: (data) => {
+        next: (data: ReclamationRES[]) => {
           this.resolutions = data;
           this.isLoading = false;
         },
-        error: (err) => {
+        error: (err: any) => {
           console.error('Error loading resolutions:', err);
           this.isLoading = false;
         },
