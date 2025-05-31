@@ -6,6 +6,7 @@ import { StockService } from '../../../core/services/stock.service';
 import { Product } from '../../../core/models/product.model';
 import { Stock } from '../../../core/models/stock.model';
 import { AuthService } from '../../../core/services/auth.service';
+import { User, UserRole } from '../../../core/models/user.model';
 
 @Component({
   selector: 'app-product-details',
@@ -15,12 +16,13 @@ import { AuthService } from '../../../core/services/auth.service';
   imports: [CommonModule, RouterModule],
 })
 export class ProductDetailsComponent implements OnInit {
-  productId: string = '';
+  productId = '';
   product: Product | null = null;
   stockItems: Stock[] = [];
-  loading: boolean = true;
+  loading = true;
   error: string | null = null;
-  canEdit: boolean = false;
+  canEdit = false;
+  canDelete = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -38,8 +40,8 @@ export class ProductDetailsComponent implements OnInit {
       return;
     }
 
+    this.checkPermissions();
     this.loadProductDetails();
-    this.checkUserPermissions();
   }
 
   loadProductDetails(): void {
@@ -76,14 +78,20 @@ export class ProductDetailsComponent implements OnInit {
     });
   }
 
-  checkUserPermissions(): void {
+  checkPermissions(): void {
     const currentUser = this.authService.getCurrentUser();
-    // Check if user has admin role which allows product editing
-    this.canEdit = Boolean(currentUser && currentUser.role === 'admin');
+    this.canEdit = currentUser?.role === UserRole.ADMIN || currentUser?.role === UserRole.INSPECTOR;
+    this.canDelete = currentUser?.role === UserRole.ADMIN || currentUser?.role === UserRole.INSPECTOR;
   }
 
   goBack(): void {
     this.router.navigate(['/dashboard/products']);
+  }
+
+  goToProductDetail(): void {
+    if (this.productId) {
+      this.router.navigate(['/dashboard/products', this.productId]);
+    }
   }
 
   editProduct(): void {
@@ -92,11 +100,27 @@ export class ProductDetailsComponent implements OnInit {
     }
   }
 
-  getDonatorName(donatorId: any): string {
-    if (donatorId && typeof donatorId !== 'string' && donatorId.name) {
+  deleteProduct(): void {
+    if (this.product && confirm('Are you sure you want to delete this product?')) {
+      this.loading = true;
+      this.productService.deleteProduct(this.product._id).subscribe({
+        next: () => {
+          this.router.navigate(['/dashboard/products']);
+        },
+        error: (error) => {
+          this.error = 'Failed to delete product. Please try again.';
+          this.loading = false;
+          console.error('Error deleting product:', error);
+        }
+      });
+    }
+  }
+
+  getDonatorName(donatorId: string | User): string {
+    if (typeof donatorId === 'object' && donatorId !== null && 'name' in donatorId) {
       return donatorId.name;
     }
-    return 'Unknown';
+    return String(donatorId);
   }
 
   getStockStatus(stock: Stock): string {

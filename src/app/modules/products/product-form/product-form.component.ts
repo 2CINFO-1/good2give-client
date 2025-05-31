@@ -17,14 +17,13 @@ export class ProductFormComponent implements OnInit {
   loading = false;
   error: string | null = null;
   successMessage: string | null = null;
-  categories: string[] = ['Medicine', 'Equipment', 'Consumable', 'Other'];
+  categories: string[] = ['frais', 'sec', 'surgelé','conserve', 'Other'];
   productTypes: string[] = [
-    'Tablet',
-    'Liquid',
-    'Capsule',
-    'Injection',
-    'Cream',
-    'Equipment',
+    'fruit',
+    'légume',
+    'viande',
+    'produit laitier',
+    'pâtisserie',
     'Other',
   ];
   statusOptions: string[] = ['Active', 'Inactive'];
