@@ -96,17 +96,19 @@ export class DeliveryDetailComponent implements OnInit {
   }
 
   getDeliveryPersonName(): string {
-    if (!this.delivery || !this.delivery.transporter) return 'Not assigned';
-    return typeof this.delivery.transporter === 'object'
-      ? this.delivery.transporter.name || 'Unknown'
-      : 'Unknown';
+    if (!this.delivery?.transporter) return 'Not assigned';
+    if (typeof this.delivery.transporter === 'string') {
+      return 'Loading...';
+    }
+    return this.delivery.transporter.name || 'Unknown';
   }
 
   getDeliveryPersonId(): string {
-    if (!this.delivery || !this.delivery.transporter) return 'N/A';
-    return typeof this.delivery.transporter === 'string'
-      ? this.delivery.transporter
-      : this.delivery.transporter._id || 'N/A';
+    if (!this.delivery?.transporter) return 'N/A';
+    if (typeof this.delivery.transporter === 'string') {
+      return this.delivery.transporter;
+    }
+    return this.delivery.transporter._id || 'N/A';
   }
 
   getDonatorName(): string {
