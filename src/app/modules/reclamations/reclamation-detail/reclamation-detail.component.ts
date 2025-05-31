@@ -106,4 +106,8 @@ export class ReclamationDetailComponent implements OnInit, OnDestroy {
       'update',
     ]);
   }
+
+  goBack(): void {
+    this.router.navigate(['/dashboard/reclamations']);
+  }
 }
