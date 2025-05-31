@@ -20,7 +20,7 @@ export interface Stock {
   _id: string;
   productId: Product | string;
   releasedAt?: string;
-  donatorId: User | string;
+  donatorId: User ;
   createdAt?: string | Date;
   updatedAt?: string | Date;
 }
@@ -47,7 +47,7 @@ export interface StockResponse extends Stock {
   _id: string;
   productId: Product | string;
   releasedAt?: string;
-  donatorId: User | string;
+  donatorId: User ;
   createdAt: string | Date;
   updatedAt: string | Date;
 }

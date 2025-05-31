@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Product, ProductStatus } from '../../../core/models/product.model';
 import { ProductService } from '../../../core/services/product.service';
-import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
@@ -13,10 +12,12 @@ import { AuthService } from '../../../core/services/auth.service';
 export class ProductsListComponent implements OnInit {
   products: Product[] = [];
   filteredProducts: Product[] = [];
+  selectedProducts: Set<string> = new Set(); // Track selected product IDs
   loading = true;
   error: string | null = null;
   successMessage = '';
   productToDelete: Product | null = null;
+  productsToDelete: Product[] = []; // For bulk delete
   showDeleteModal = false;
   Math = Math;
   showArchived = false;
@@ -54,6 +55,36 @@ export class ProductsListComponent implements OnInit {
     this.canDelete = this.authService.hasRole(['admin']);
   }
 
+  // Toggle product selection
+  toggleSelection(productId: string): void {
+    if (this.selectedProducts.has(productId)) {
+      this.selectedProducts.delete(productId);
+    } else {
+      this.selectedProducts.add(productId);
+    }
+  }
+
+  // Select or deselect all products on the current page
+  toggleSelectAll(): void {
+    if (this.selectedProducts.size === this.filteredProducts.length) {
+      this.selectedProducts.clear();
+    } else {
+      this.filteredProducts.forEach((product) =>
+        this.selectedProducts.add(product._id)
+      );
+    }
+  }
+
+  // Check if all products on the current page are selected
+  isAllSelected(): boolean {
+    return (
+      this.filteredProducts.length > 0 &&
+      this.filteredProducts.every((product) =>
+        this.selectedProducts.has(product._id)
+      )
+    );
+  }
+
   loadProducts(): void {
     this.loading = true;
     this.error = null;
@@ -78,7 +109,6 @@ export class ProductsListComponent implements OnInit {
   }
 
   applyFilters(): void {
-    // Filter by search term and category
     this.filteredProducts = this.products.filter((product) => {
       const matchesSearch = this.filter.search
         ? product.name
@@ -102,11 +132,9 @@ export class ProductsListComponent implements OnInit {
       return matchesSearch && matchesCategory && matchesStockStatus;
     });
 
-    // Update total count for pagination
     this.totalItems = this.filteredProducts.length;
     this.calculateTotalPages();
 
-    // Apply pagination
     const startIndex = (this.currentPage - 1) * this.pageSize;
     this.filteredProducts = this.filteredProducts.slice(
       startIndex,
@@ -150,32 +178,66 @@ export class ProductsListComponent implements OnInit {
     this.router.navigate([`/dashboard/products/edit/${id}`]);
   }
 
-  confirmDelete(product: Product): void {
-    this.productToDelete = product;
+  confirmDelete(product: Product | null = null): void {
+    if (product) {
+      // Single product deletion
+      this.productToDelete = product;
+      this.productsToDelete = [];
+    } else {
+      // Bulk deletion
+      this.productToDelete = null;
+      this.productsToDelete = this.products.filter((p) =>
+        this.selectedProducts.has(p._id)
+      );
+    }
     this.showDeleteModal = true;
   }
 
   deleteProduct(): void {
-    if (!this.productToDelete) return;
-
-    this.loading = true;
-    this.productService.deleteProduct(this.productToDelete._id).subscribe({
-      next: () => {
-        this.successMessage = `Product "${this.productToDelete?.name}" was successfully deleted.`;
-        this.loadProducts();
-        this.cancelDelete();
-      },
-      error: (err: any) => {
-        this.error = err.message || 'Failed to delete product';
-        this.loading = false;
-        this.cancelDelete();
-      },
-    });
+    if (this.productToDelete) {
+      // Single product deletion
+      this.loading = true;
+      this.productService.deleteProduct(this.productToDelete._id).subscribe({
+        next: () => {
+          this.successMessage = `Product "${this.productToDelete?.name}" was successfully deleted.`;
+          this.loadProducts();
+          this.cancelDelete();
+        },
+        error: (err: any) => {
+          this.error = err.message || 'Failed to delete product';
+          this.loading = false;
+          this.cancelDelete();
+        },
+      });
+    } else if (this.productsToDelete.length > 0) {
+      // Bulk deletion
+      this.loading = true;
+      const deleteObservables = this.productsToDelete.map((product) =>
+        this.productService.deleteProduct(product._id)
+      );
+      // Use forkJoin to handle multiple deletions
+      import('rxjs').then((rxjs) => {
+        rxjs.forkJoin(deleteObservables).subscribe({
+          next: () => {
+            this.successMessage = `${this.productsToDelete.length} products were successfully deleted.`;
+            this.selectedProducts.clear();
+            this.loadProducts();
+            this.cancelDelete();
+          },
+          error: (err: any) => {
+            this.error = err.message || 'Failed to delete some products';
+            this.loading = false;
+            this.cancelDelete();
+          },
+        });
+      });
+    }
   }
 
   cancelDelete(): void {
     this.showDeleteModal = false;
     this.productToDelete = null;
+    this.productsToDelete = [];
   }
 
   goToPage(page: number): void {
@@ -185,8 +247,6 @@ export class ProductsListComponent implements OnInit {
   }
 
   getStockStatusText(product: Product): string {
-    // In a real application, this would check actual stock levels
-    // For now, we'll just return a placeholder based on product status
     if (product.status === 'inactive') return 'Out of Stock';
     return 'In Stock';
   }

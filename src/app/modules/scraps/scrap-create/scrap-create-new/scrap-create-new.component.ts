@@ -7,9 +7,9 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { ScrapService } from '../../../core/services/scrap.service';
-import { FoodScrapRequest } from '../../../core/models/scrap.model';
-import { UserStateService } from '../../../core/services/user-state.service';
+import { ScrapService } from '../../../../core/services/scrap.service';
+import { FoodScrapRequest } from '../../../../core/models/scrap.model';
+import { UserStateService } from '../../../../core/services/user-state.service';
 
 @Component({
   selector: 'app-scrap-create-new',

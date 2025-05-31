@@ -18,6 +18,11 @@ const routes: Routes = [
       import('./modules/home/home.module').then((m) => m.HomeModule),
   },
   {
+    path: 'landing',
+    loadChildren: () =>
+      import('./modules/landing/landing.module').then((m) => m.LandingModule),
+  },
+  {
     path: 'auth',
     children: [
       {
@@ -152,10 +157,8 @@ const routes: Routes = [
       },
       {
         path: 'stocks',
-        loadChildren: () =>
-          import('./modules/stocks/stocks.module').then((m) => m.StocksModule),
+        loadChildren: () => import('./modules/stocks/stocks.module').then((m) => m.StocksModule),
         canActivate: [AuthGuard],
-
         data: { roles: ['ADMIN', 'INSPECTOR', 'WAREHOUSE'] },
       },
       {
