@@ -20,6 +20,12 @@ export class UserListComponent implements OnInit, OnDestroy {
   updatingRole = false;
   private subscription: Subscription = new Subscription();
 
+  // Pagination properties
+  currentPage = 1;
+  pageSize = 5;
+  totalPages = 0;
+  paginatedUsers: User[] = [];
+
   // Available roles for dropdown
   availableRoles = [
     { value: UserRole.ADMIN, label: 'Administrator' },
@@ -50,6 +56,7 @@ export class UserListComponent implements OnInit, OnDestroy {
     const usersSub = this.userService.getUsers().subscribe({
       next: (users) => {
         this.users = users;
+        this.updatePagination();
         this.loading = false;
         this.toastr.success(`Successfully loaded ${users.length} users`);
       },
@@ -185,5 +192,54 @@ export class UserListComponent implements OnInit, OnDestroy {
   onDeleteUser(user: User): void {
     // TODO: Implement user deletion functionality
     this.toastr.warning(`Delete user feature coming soon for ${user.name}`);
+  }
+
+  // Pagination methods
+  updatePagination(): void {
+    this.totalPages = Math.ceil(this.users.length / this.pageSize);
+    this.currentPage = Math.min(this.currentPage, this.totalPages || 1);
+    this.updatePaginatedUsers();
+  }
+
+  updatePaginatedUsers(): void {
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    this.paginatedUsers = this.users.slice(startIndex, endIndex);
+  }
+
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.updatePaginatedUsers();
+      this.editingUserId = null; // Cancel any editing when changing pages
+    }
+  }
+
+  goToPreviousPage(): void {
+    this.goToPage(this.currentPage - 1);
+  }
+
+  goToNextPage(): void {
+    this.goToPage(this.currentPage + 1);
+  }
+
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    for (let i = 1; i <= this.totalPages; i++) {
+      pages.push(i);
+    }
+    return pages;
+  }
+
+  getCurrentPageInfo(): string {
+    if (this.users.length === 0) {
+      return 'No users';
+    }
+    const startIndex = (this.currentPage - 1) * this.pageSize + 1;
+    const endIndex = Math.min(
+      this.currentPage * this.pageSize,
+      this.users.length
+    );
+    return `${startIndex}-${endIndex} of ${this.users.length}`;
   }
 }
