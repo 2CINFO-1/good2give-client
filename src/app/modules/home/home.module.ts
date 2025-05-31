@@ -4,6 +4,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 
 import { HomeComponent } from './home.component';
+import { LandingModule } from '../landing/landing.module';
 
 const routes: Routes = [
   {
@@ -13,13 +14,16 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  declarations: [HomeComponent],
+  declarations: [
+    HomeComponent
+  ],
   imports: [
     CommonModule,
     RouterModule.forChild(routes),
     ReactiveFormsModule,
     FormsModule,
+    LandingModule
   ],
   exports: [CommonModule, ReactiveFormsModule, FormsModule],
 })
-export class HomeModule {}
+export class HomeModule { }
