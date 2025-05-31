@@ -2,11 +2,13 @@ export type IssueSeverity = 'low' | 'medium' | 'high';
 export type IssueStatus = 'failed' | 'reviewing' | 'rejected';
 
 export interface Issue {
+  _id?: string;
   type: string;
   description: string;
-  severity: IssueSeverity;
-  status: IssueStatus;
-  _id?: string;
+  severity: 'low' | 'medium' | 'high';
+  status: 'reviewing' | 'failed' | 'rejected';
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
 }
 
 export interface Inspector {
@@ -17,18 +19,19 @@ export interface Inspector {
   isEmailVerified: boolean;
   avatar: string;
   createdAt: string;
-  updatedAt: string;
 }
 
 export interface InspectionReport {
-  _id?: string;
-  inspectorId: Inspector; // Changed from string to Inspector object
+  _id: string;
+  name: string;
+  note?: string;
+  inspectorId: Inspector;
   deliveryId?: string | null;
   depotId?: string | null;
-  checklistId?: string; // Optional, auto-generated
-  inspectionDate: string; // ISO 8601 string
-  scheduledDate?: string | null;
-  issues: Issue[];
+  checklistId?: string;
+  inspectionDate: Date;
+  scheduledDate?: Date | null;
+  issue?: Issue | null;
   status: 'pending' | 'approved' | 'rejected';
   inspectorNotes?: string;
   createdAt?: string;
@@ -36,6 +39,7 @@ export interface InspectionReport {
 }
 
 export interface ChecklistItem {
+  _id?: string;
   item: string;
   description: string;
   required: boolean;
@@ -44,10 +48,10 @@ export interface ChecklistItem {
 }
 
 export interface Checklist {
-  _id?: string;
-  inspectorId: string;
-  type: 'delivery' | 'depot';
+  _id: string;
+  inspectorId: Inspector | string;
+  type: 'delivery' | 'depot' | 'product';
   items: ChecklistItem[];
-  createdAt?: string;
-  updatedAt?: string;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
 }

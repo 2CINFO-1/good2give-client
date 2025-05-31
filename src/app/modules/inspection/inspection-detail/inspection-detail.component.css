@@ -1,1 +1,284 @@
 /* All styling is handled by Tailwind CSS */
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.my-8 {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+.mb-4 {
+  margin-bottom: 1rem;
+}
+
+.mb-6 {
+  margin-bottom: 1.5rem;
+}
+
+.space-x-2 > * + * {
+  margin-left: 0.5rem;
+}
+
+.text-2xl {
+  font-size: 1.5rem;
+}
+
+.text-xl {
+  font-size: 1.25rem;
+}
+
+.font-bold {
+  font-weight: bold;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.text-gray-600 {
+  color: #4B5563;
+}
+
+.flex {
+  display: flex;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.items-start {
+  align-items: flex-start;
+}
+.red-button {
+  background-color: #dc2626; /* Tailwind's red-600 */
+  color: white;
+}
+
+.red-button:hover {
+  background-color: #b91c1c; /* Tailwind's red-700 */
+}
+
+.green-button {
+  background-color: #16a34a; /* Tailwind's green-600 */
+  color: white;
+}
+
+.green-button:hover {
+  background-color: #15803d; /* Tailwind's green-700 */
+}
+
+.mr-2 {
+  margin-right: 0.5rem; /* 8px */
+}
+
+.grid {
+  display: grid;
+}
+
+.grid-cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.gap-4 {
+  gap: 1rem;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.py-4 {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.pb-4 {
+  padding-bottom: 1rem;
+}
+
+.border-b {
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.last\:border-b-0:last-child {
+  border-bottom: none;
+}
+
+.text-red-500 {
+  color: #EF4444;
+}
+
+.text-yellow-500 {
+  color: #F59E0B;
+}
+
+.text-green-500 {
+  color: #10B981;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+}
+
+.w-full {
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .md\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Card Hover Effects */
+.bg-white {
+  transition: all 0.3s ease;
+}
+
+.bg-white:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Button Transitions */
+button {
+  transition: all 0.2s ease;
+}
+
+/* Form Field Animations */
+::ng-deep .mat-form-field-outline {
+  transition: all 0.2s ease;
+}
+
+::ng-deep .mat-form-field-outline-thick {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+::ng-deep .mat-form-field.mat-focused .mat-form-field-outline-thick {
+  opacity: 1;
+}
+
+/* Status Badge Styles */
+.status-badge {
+  transition: all 0.3s ease;
+}
+
+.status-badge.pending {
+  @apply bg-yellow-100 text-yellow-800;
+}
+
+.status-badge.approved {
+  @apply bg-green-100 text-green-800;
+}
+
+.status-badge.rejected {
+  @apply bg-red-100 text-red-800;
+}
+
+/* Progress Circle Animation */
+.progress-circle {
+  transition: all 0.5s ease-out;
+}
+
+/* Loading Spinner */
+::ng-deep .mat-progress-spinner circle {
+  transition: stroke-dashoffset 0.3s ease;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #666;
+}
+
+/* Material Form Field Customization */
+::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline {
+  color: rgba(156, 163, 175, 0.5);
+}
+
+::ng-deep .mat-form-field-appearance-outline.mat-focused .mat-form-field-outline-thick {
+  color: #3B82F6;
+}
+
+::ng-deep .mat-form-field-appearance-outline.mat-form-field-invalid.mat-form-field-invalid .mat-form-field-outline-thick {
+  color: #EF4444;
+}
+
+/* Card Header Styles */
+.card-header {
+  border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+  backdrop-filter: blur(8px);
+}
+
+/* Smooth Fade Animations */
+.fade-enter {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.fade-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Material Button Customization */
+::ng-deep .mat-flat-button {
+  border-radius: 8px !important;
+  transition: all 0.2s ease !important;
+}
+
+::ng-deep .mat-flat-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Loading Overlay Animation */
+.loading-overlay {
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

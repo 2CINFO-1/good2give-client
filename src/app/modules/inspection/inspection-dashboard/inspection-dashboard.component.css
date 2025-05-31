@@ -1,0 +1,160 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.mb-4 {
+  margin-bottom: 1rem;
+}
+
+.mb-6 {
+  margin-bottom: 1.5rem;
+}
+
+.mt-4 {
+  margin-top: 1rem;
+}
+
+.text-2xl {
+  font-size: 1.5rem;
+}
+
+.font-bold {
+  font-weight: bold;
+}
+
+.text-gray-600 {
+  color: #4B5563;
+}
+
+.flex {
+  display: flex;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.py-4 {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.text-lg {
+  font-size: 1.125rem;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+/* Custom styles for the inspection dashboard */
+
+/* Tab styles */
+::ng-deep .inspection-tabs {
+  @apply rounded-xl overflow-hidden;
+}
+
+::ng-deep .inspection-tabs .mat-tab-header {
+  @apply border-b border-gray-100 bg-gray-50;
+}
+
+::ng-deep .inspection-tabs .mat-tab-label {
+  @apply h-16 opacity-100 transition-all duration-200;
+}
+
+::ng-deep .inspection-tabs .mat-tab-label-active {
+  @apply bg-white;
+}
+
+::ng-deep .inspection-tabs .mat-tab-label-content {
+  @apply text-gray-600;
+}
+
+::ng-deep .inspection-tabs .mat-tab-body-content {
+  @apply overflow-hidden;
+}
+
+/* Card hover effects */
+.inspection-card {
+  @apply transition-all duration-200;
+}
+
+.inspection-card:hover {
+  @apply transform translate-y-[-2px] shadow-md;
+}
+
+/* Status badges */
+.status-badge {
+  @apply px-2 py-1 rounded-full text-xs font-medium;
+}
+
+.status-badge.pending {
+  @apply bg-yellow-100 text-yellow-800;
+}
+
+.status-badge.approved {
+  @apply bg-green-100 text-green-800;
+}
+
+.status-badge.rejected {
+  @apply bg-red-100 text-red-800;
+}
+
+/* Stats cards */
+.stats-card {
+  @apply transition-all duration-200 hover:shadow-md hover:border-gray-200;
+}
+
+/* Loading spinner */
+::ng-deep .mat-progress-spinner circle {
+  @apply stroke-current text-blue-600;
+}
+
+/* Empty state icons */
+.empty-state-icon {
+  @apply text-gray-400 text-5xl mb-4;
+}
+
+/* Button styles */
+::ng-deep .mat-flat-button.mat-primary {
+  @apply bg-blue-600 hover:bg-blue-700;
+}
+
+::ng-deep .mat-flat-button.mat-accent {
+  @apply bg-purple-600 hover:bg-purple-700;
+}
+
+::ng-deep .mat-stroked-button {
+  @apply border-gray-300 text-gray-700 hover:bg-gray-50;
+}
+
+/* Icon containers */
+.icon-container {
+  @apply p-2 rounded-lg flex items-center justify-center;
+}
+
+.icon-container.blue {
+  @apply bg-blue-50 text-blue-600;
+}
+
+.icon-container.green {
+  @apply bg-green-50 text-green-600;
+}
+
+.icon-container.purple {
+  @apply bg-purple-50 text-purple-600;
+} 

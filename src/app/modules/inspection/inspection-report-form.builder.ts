@@ -3,6 +3,8 @@ import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 export class InspectionReportFormBuilder {
   static buildForm(fb: FormBuilder): FormGroup {
     return fb.group({
+      name: ['', Validators.required],
+      note: [''],
       type: ['delivery', Validators.required],
       deliveryId: [''],
       depotId: [''],

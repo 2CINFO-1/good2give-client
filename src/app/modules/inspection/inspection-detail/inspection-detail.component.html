@@ -1,0 +1,403 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Loading States -->
+  <div *ngIf="loading.inspection || loading.checklist" 
+       class="fixed inset-0 bg-white bg-opacity-75 flex items-center justify-center z-50">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!loading.inspection && !loading.checklist && inspection" class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
+      <div class="flex items-center space-x-4">
+        <button mat-icon-button (click)="goBack()" class="text-gray-600 hover:text-gray-900">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <div class="flex-1">
+          <h1 class="text-2xl font-bold text-gray-900">{{inspection.inspectorNotes}}</h1>
+          <div class="flex items-center space-x-4 mt-2">
+            <span [ngClass]="getStatusClass(inspection.status)"
+                  class="px-3 py-1 rounded-full text-sm font-medium inline-flex items-center">
+              <span class="w-2 h-2 rounded-full mr-2" 
+                    [ngClass]="{
+                      'bg-yellow-400': inspection.status === 'pending',
+                      'bg-green-400': inspection.status === 'approved',
+                      'bg-red-400': inspection.status === 'rejected'
+                    }"></span>
+              {{inspection.status | titlecase}}
+            </span>
+            <span class="text-sm text-gray-500">
+              <mat-icon class="align-middle text-gray-400 text-base mr-1">event</mat-icon>
+              {{inspection.inspectionDate | date:'medium'}}
+            </span>
+          </div>
+        </div>
+        <!-- Action Buttons -->
+        <div *ngIf="inspection?.status === 'pending'" class="flex gap-3">
+          <button
+            *ngIf="canReject()"
+            mat-flat-button
+            class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg shadow-sm transition-all duration-200 hover:shadow-md group"
+            (click)="updateStatus('rejected')"
+            [disabled]="loading.saving"
+          >
+            <span class="flex items-center space-x-2">
+              <mat-icon class="transform group-hover:rotate-12 transition-transform">cancel</mat-icon>
+              <span>Reject</span>
+            </span>
+          </button>
+          <button
+            *ngIf="canApprove()"
+            mat-flat-button
+            class="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white px-8 py-2.5 rounded-lg shadow-sm transition-all duration-300 hover:shadow-lg hover:scale-105 flex items-center space-x-3 group relative overflow-hidden"
+            (click)="updateStatus('approved')"
+            [disabled]="loading.saving"
+          >
+            <div class="flex items-center space-x-2 relative z-10">
+              <mat-icon class="transform group-hover:rotate-12 transition-transform">verified</mat-icon>
+              <mat-icon class="text-white/80">check_circle</mat-icon>
+              <span class="font-medium tracking-wide">Approve Inspection</span>
+              <div *ngIf="loading.saving" class="ml-2">
+                <mat-spinner diameter="20" class="text-white"></mat-spinner>
+              </div>
+            </div>
+            <div class="absolute inset-0 bg-white/10 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Left Column - Main Info -->
+      <div class="lg:col-span-2 space-y-8">
+        <!-- Inspection Details -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <div class="px-6 py-4 border-b border-gray-100">
+            <h2 class="text-lg font-semibold text-gray-900">Inspection Details</h2>
+          </div>
+          <div class="p-6">
+            <div class="grid grid-cols-2 gap-6">
+              <div class="space-y-1">
+                <p class="text-sm text-gray-500">Inspector</p>
+                <div class="flex items-center space-x-3">
+                  <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                    <mat-icon class="text-gray-500">person</mat-icon>
+                  </div>
+                  <p class="text-gray-900">{{inspection.inspectorId.name}}</p>
+                </div>
+              </div>
+              <div class="space-y-1">
+                <p class="text-sm text-gray-500">Scheduled Date</p>
+                <p class="text-gray-900">{{inspection.scheduledDate | date:'medium'}}</p>
+              </div>
+              <div *ngIf="inspection.depotId" class="space-y-1">
+                <p class="text-sm text-gray-500">Depot ID</p>
+                <p class="text-gray-900">{{inspection.depotId}}</p>
+              </div>
+              <div *ngIf="inspection.deliveryId" class="space-y-1">
+                <p class="text-sm text-gray-500">Delivery ID</p>
+                <p class="text-gray-900">{{inspection.deliveryId}}</p>
+              </div>
+            </div>
+            <div *ngIf="inspection.inspectorNotes" class="mt-6">
+              <p class="text-sm text-gray-500 mb-2">Notes</p>
+              <p class="text-gray-900 bg-gray-50 p-4 rounded-lg">{{inspection.inspectorNotes}}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Issues Section -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+              <h2 class="text-lg font-semibold text-gray-900">Issues</h2>
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                {{currentIssue ? '1' : '0'}} Issue
+              </span>
+            </div>
+            <button *ngIf="!currentIssue && inspection.status === 'pending' && !showIssueForm"
+                    mat-flat-button
+                    (click)="showIssueForm = true"
+                    class="bg-green-600 hover:bg-green-700 text-white">
+              <mat-icon class="mr-2">add_circle</mat-icon>
+              Add Issue
+            </button>
+          </div>
+
+          <div class="p-6 space-y-6">
+            <!-- Form for Adding New Issue -->
+            <div *ngIf="inspection.status === 'pending' && !currentIssue && showIssueForm" 
+                 class="bg-gradient-to-br from-gray-50 to-white rounded-xl p-8 border border-gray-200 animate-fade-in">
+              <form [formGroup]="issueForm" (ngSubmit)="addIssue()" class="space-y-6">
+                <div class="flex items-center justify-between mb-4">
+                  <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-red-50 rounded-full flex items-center justify-center">
+                      <mat-icon class="text-red-500">report_problem</mat-icon>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800">Report New Issue</h3>
+                  </div>
+                  <button type="button" 
+                          mat-icon-button 
+                          (click)="showIssueForm = false"
+                          class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </div>
+
+                <div class="space-y-6">
+                  <!-- Issue Type -->
+                  <div class="relative group">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Issue Type</label>
+                    <div class="relative">
+                      <mat-icon class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors">category</mat-icon>
+                      <input matInput 
+                             formControlName="type" 
+                             class="w-full pl-10 pr-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                             placeholder="e.g., Quality Control, Safety Issue, Compliance Violation">
+                    </div>
+                    <div *ngIf="issueForm.get('type')?.touched && issueForm.get('type')?.hasError('required')" 
+                         class="mt-1 text-sm text-red-500">
+                      Please specify the issue type
+                    </div>
+                  </div>
+
+                  <!-- Description -->
+                  <div class="relative group">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                    <div class="relative">
+                      <textarea matInput 
+                                formControlName="description" 
+                                rows="4"
+                                class="w-full p-4 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"
+                                placeholder="Please provide a detailed description of the issue, including any relevant observations or concerns..."></textarea>
+                      <mat-icon class="absolute right-3 top-3 text-gray-400 group-focus-within:text-blue-500 transition-colors">description</mat-icon>
+                    </div>
+                    <div *ngIf="issueForm.get('description')?.touched && issueForm.get('description')?.hasError('required')" 
+                         class="mt-1 text-sm text-red-500">
+                      Description is required
+                    </div>
+                  </div>
+
+                  <!-- Severity Level -->
+                  <div class="relative group">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Severity Level</label>
+                    <div class="grid grid-cols-3 gap-4">
+                      <button type="button"
+                              *ngFor="let level of ['low', 'medium', 'high']"
+                              (click)="issueForm.get('severity')?.setValue(level)"
+                              [class]="'flex items-center justify-center p-4 rounded-lg border-2 transition-all ' + 
+                                      (issueForm.get('severity')?.value === level ? 
+                                        (level === 'low' ? 'border-yellow-500 bg-yellow-50' :
+                                         level === 'medium' ? 'border-orange-500 bg-orange-50' :
+                                         'border-red-500 bg-red-50') :
+                                        'border-gray-200 hover:border-gray-300')"
+                      >
+                        <div class="flex flex-col items-center space-y-2">
+                          <mat-icon [class]="level === 'low' ? 'text-yellow-500' :
+                                            level === 'medium' ? 'text-orange-500' :
+                                            'text-red-500'">
+                            {{level === 'low' ? 'info' : 
+                               level === 'medium' ? 'warning' : 
+                               'error'}}
+                          </mat-icon>
+                          <span class="text-sm font-medium capitalize" 
+                                [class]="issueForm.get('severity')?.value === level ?
+                                          (level === 'low' ? 'text-yellow-700' :
+                                           level === 'medium' ? 'text-orange-700' :
+                                           'text-red-700') :
+                                          'text-gray-600'">
+                            {{level}}
+                          </span>
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="flex justify-end space-x-3 pt-6 border-t border-gray-100">
+                  <button mat-stroked-button 
+                          type="button" 
+                          (click)="showIssueForm = false"
+                          class="px-6 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
+                    Cancel
+                  </button>
+                  <button mat-flat-button 
+                          type="submit" 
+                          class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-sm hover:shadow transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                          [disabled]="!issueForm.valid || loading.saving">
+                    <div class="flex items-center space-x-2">
+                      <mat-icon>save</mat-icon>
+                      <span>Save Issue</span>
+                    </div>
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Current Issue Card -->
+            <div *ngIf="currentIssue" 
+                 class="bg-white rounded-xl p-6 border-2 shadow-sm transition-all duration-200"
+                 [ngClass]="{
+                   'border-yellow-300 bg-yellow-50': currentIssue.severity === 'low',
+                   'border-orange-300 bg-orange-50': currentIssue.severity === 'medium',
+                   'border-red-300 bg-red-50': currentIssue.severity === 'high'
+                 }">
+              <div class="flex items-start justify-between">
+                <div class="flex-1">
+                  <!-- Issue Header -->
+                  <div class="flex items-center space-x-3">
+                    <mat-icon class="text-lg"
+                             [ngClass]="{
+                               'text-yellow-600': currentIssue.severity === 'low',
+                               'text-orange-600': currentIssue.severity === 'medium',
+                               'text-red-600': currentIssue.severity === 'high'
+                             }">
+                      report_problem
+                    </mat-icon>
+                    <h3 class="text-lg font-semibold text-gray-900">{{currentIssue.type}}</h3>
+                  </div>
+
+                  <!-- Issue Meta -->
+                  <div class="flex items-center mt-3 space-x-4">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+                          [ngClass]="{
+                            'bg-yellow-100 text-yellow-800': currentIssue.severity === 'low',
+                            'bg-orange-100 text-orange-800': currentIssue.severity === 'medium',
+                            'bg-red-100 text-red-800': currentIssue.severity === 'high'
+                          }">
+                      <span class="w-2 h-2 rounded-full mr-2"
+                            [ngClass]="{
+                              'bg-yellow-400': currentIssue.severity === 'low',
+                              'bg-orange-400': currentIssue.severity === 'medium',
+                              'bg-red-400': currentIssue.severity === 'high'
+                            }"></span>
+                      {{currentIssue.severity | titlecase}} Priority
+                    </span>
+                    <span class="text-sm text-gray-500 flex items-center">
+                      <mat-icon class="text-gray-400 text-base mr-1">schedule</mat-icon>
+                      {{currentIssue.createdAt ? (currentIssue.createdAt | date:'short') : 'Reported recently'}}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div *ngIf="inspection.status === 'pending'" class="flex space-x-2">
+                  <button mat-icon-button (click)="editIssue()" class="text-gray-500 hover:text-gray-700">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button mat-icon-button (click)="removeIssue()" class="text-gray-500 hover:text-red-600">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Issue Description -->
+              <div class="mt-4 pl-9">
+                <p class="text-gray-700 bg-white p-4 rounded-lg border border-gray-100 shadow-inner">
+                  {{currentIssue.description}}
+                </p>
+              </div>
+            </div>
+
+            <!-- No Issues Placeholder -->
+            <div *ngIf="!currentIssue && !showIssueForm" 
+                 class="bg-gradient-to-br from-gray-50 to-white rounded-xl border-2 border-dashed border-gray-200 p-8 text-center">
+              <div class="flex flex-col items-center space-y-4">
+                <div class="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center">
+                  <mat-icon class="text-green-500 transform scale-150">check_circle</mat-icon>
+                </div>
+                <div class="space-y-2">
+                  <h3 class="text-lg font-semibold text-gray-800">All Clear!</h3>
+                  <p class="text-gray-500 max-w-sm mx-auto">
+                    No issues have been reported for this inspection. Everything appears to be in order.
+                  </p>
+                </div>
+                <div *ngIf="inspection.status === 'pending'" 
+                     class="mt-6 flex flex-col items-center space-y-3">
+                  <div class="w-full h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
+                  <button mat-stroked-button
+                          (click)="showIssueForm = true"
+                          class="group relative px-6 py-2 border border-gray-300 hover:border-gray-400 rounded-lg text-gray-600 hover:text-gray-800 transition-all duration-200 hover:bg-gray-50">
+                    <div class="flex items-center space-x-2">
+                      <mat-icon class="text-gray-400 group-hover:text-gray-600 transition-colors">add_circle_outline</mat-icon>
+                      <span>Report an Issue</span>
+                    </div>
+                  </button>
+                  <p class="text-xs text-gray-400">
+                    Click here if you need to report any concerns
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column - Checklist & Stats -->
+      <div class="space-y-8">
+        <!-- Checklist Progress Card -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <div class="px-6 py-4 border-b border-gray-100">
+            <h2 class="text-lg font-semibold text-gray-900">Checklist Progress</h2>
+          </div>
+          <div class="p-6">
+            <div *ngIf="checklist" class="space-y-6">
+              <div class="text-center">
+                <div class="inline-flex items-center justify-center w-24 h-24 rounded-full border-8"
+                     [ngClass]="{
+                       'border-yellow-200': getChecklistProgress() < 50,
+                       'border-blue-200': getChecklistProgress() >= 50 && getChecklistProgress() < 100,
+                       'border-green-200': getChecklistProgress() === 100
+                     }">
+                  <span class="text-2xl font-bold"
+                        [ngClass]="{
+                          'text-yellow-600': getChecklistProgress() < 50,
+                          'text-blue-600': getChecklistProgress() >= 50 && getChecklistProgress() < 100,
+                          'text-green-600': getChecklistProgress() === 100
+                        }">
+                    {{getChecklistProgress()}}%
+                  </span>
+                </div>
+                <p class="mt-4 text-sm text-gray-500">
+                  {{isChecklistComplete() ? 'Checklist Complete' : 'In Progress'}}
+                </p>
+              </div>
+              
+              <div class="flex justify-center">
+                <button mat-flat-button color="primary" (click)="navigateToChecklist()"
+                        class="shadow-sm w-full">
+                  <mat-icon class="mr-2">assignment</mat-icon>
+                  View Full Checklist
+                </button>
+              </div>
+            </div>
+            <div *ngIf="!checklist" class="text-center py-8">
+              <mat-icon class="text-gray-400 text-4xl mb-4">assignment_late</mat-icon>
+              <p class="text-gray-500">No checklist available</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <div class="px-6 py-4 border-b border-gray-100">
+            <h2 class="text-lg font-semibold text-gray-900">Quick Stats</h2>
+          </div>
+          <div class="p-6">
+            <div class="space-y-4">
+              <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <span class="text-sm text-gray-500">Created</span>
+                <span class="text-sm font-medium text-gray-900">{{inspection.createdAt | date}}</span>
+              </div>
+              <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <span class="text-sm text-gray-500">Last Updated</span>
+                <span class="text-sm font-medium text-gray-900">{{inspection.updatedAt | date}}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

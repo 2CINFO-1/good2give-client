@@ -1,0 +1,145 @@
+/* Checklist Item Styles */
+.mat-list-item {
+  height: auto !important;
+  margin-bottom: 1rem !important;
+  padding: 1rem 0 !important;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.mat-list-item:last-child {
+  border-bottom: none;
+}
+
+/* Button Toggle Group Styles */
+.mat-button-toggle-group {
+  border: none !important;
+  border-radius: 4px;
+}
+
+.mat-button-toggle {
+  background-color: transparent !important;
+  border: 1px solid #e5e7eb !important;
+}
+
+.mat-button-toggle-checked.text-green-500 {
+  background-color: #ecfdf5 !important;
+  border-color: #34d399 !important;
+}
+
+.mat-button-toggle-checked.text-red-500 {
+  background-color: #fef2f2 !important;
+  border-color: #ef4444 !important;
+}
+
+/* Progress Bar Styles */
+.mat-progress-bar {
+  height: 8px !important;
+  border-radius: 4px;
+}
+
+/* Card Styles */
+.mat-card {
+  border-radius: 8px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Checkbox Styles */
+.mat-checkbox {
+  margin-top: 4px;
+}
+
+/* General Animations */
+.mat-list-item, .mat-card {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Checkbox Styles */
+::ng-deep .mat-checkbox-frame {
+  border-width: 2px !important;
+}
+
+::ng-deep .mat-checkbox-checked .mat-checkbox-background {
+  transform: scale(0.8);
+  transition: all 0.2s ease-in-out;
+}
+
+/* Radio Button Styles */
+::ng-deep .custom-radio.pass .mat-radio-label-content {
+  color: #059669 !important;
+}
+
+::ng-deep .custom-radio.fail .mat-radio-label-content {
+  color: #dc2626 !important;
+}
+
+::ng-deep .mat-radio-button.mat-radio-checked.custom-radio.pass .mat-radio-outer-circle {
+  border-color: #059669 !important;
+}
+
+::ng-deep .mat-radio-button.mat-radio-checked.custom-radio.fail .mat-radio-outer-circle {
+  border-color: #dc2626 !important;
+}
+
+::ng-deep .mat-radio-button.mat-radio-checked.custom-radio.pass .mat-radio-inner-circle {
+  background-color: #059669 !important;
+}
+
+::ng-deep .mat-radio-button.mat-radio-checked.custom-radio.fail .mat-radio-inner-circle {
+  background-color: #dc2626 !important;
+}
+
+/* Progress Circle Animation */
+.rounded-full {
+  transition: all 0.3s ease-in-out;
+}
+
+/* Card Hover Effects */
+.hover\:shadow-md:hover {
+  transform: translateY(-2px);
+}
+
+/* Loading Spinner */
+::ng-deep .mat-progress-spinner circle {
+  stroke: #4f46e5;
+}
+
+/* Button Styles */
+.mat-flat-button {
+  transition: all 0.2s ease-in-out !important;
+}
+
+.mat-flat-button:not([disabled]):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+/* Status Badge Animations */
+.rounded-full {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Disabled State Styles */
+.opacity-75 {
+  pointer-events: none;
+  user-select: none;
+} 
