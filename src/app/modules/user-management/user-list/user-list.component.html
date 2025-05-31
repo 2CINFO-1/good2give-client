@@ -1,0 +1,157 @@
+<div class="p-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">User Management</h1>
+            <p class="text-gray-600 mt-1">Manage all users in the system</p>
+        </div>
+        <button (click)="onRefresh()" [disabled]="loading"
+            class="bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-300 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
+            <span class="material-icons text-sm" [class.animate-spin]="loading">refresh</span>
+            <span>Refresh</span>
+        </button>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="flex justify-center items-center py-12">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
+        <span class="ml-3 text-gray-600">Loading users...</span>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="error && !loading" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+        <div class="flex">
+            <span class="material-icons text-red-400 mr-2">error</span>
+            <span>{{error}}</span>
+        </div>
+    </div>
+
+    <!-- Users Table -->
+    <div *ngIf="!loading && !error" class="bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden">
+        <!-- Table Header -->
+        <div class="bg-gray-50 px-6 py-3 border-b border-gray-200">
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg font-medium text-gray-900">Users ({{users.length}})</h3>
+                <!-- Future: Add search/filter controls here -->
+            </div>
+        </div>
+
+        <!-- Table Content -->
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            User
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Role
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Email Verified
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Created
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Actions
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <tr *ngFor="let user of users; trackBy: trackByUserId" [class.editing-row]="isEditing(user._id)"
+                        class="hover:bg-gray-50 transition-colors">
+                        <!-- User Info -->
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div
+                                    class="h-10 w-10 rounded-full bg-emerald-500 flex items-center justify-center text-white font-medium">
+                                    {{user.name?.charAt(0)?.toUpperCase() || 'U'}}
+                                </div>
+                                <div class="ml-4">
+                                    <div class="text-sm font-medium text-gray-900">{{user.name}}</div>
+                                    <div class="text-sm text-gray-500">{{user.email}}</div>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Role -->
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <!-- Normal role display -->
+                            <div *ngIf="!isEditing(user._id)">
+                                <span
+                                    class="role-badge inline-flex px-2 py-1 text-xs font-semibold rounded-full {{getRoleBadgeClass(user.role)}}">
+                                    {{getRoleDisplayName(user.role)}}
+                                </span>
+                            </div>
+
+                            <!-- Role dropdown when editing -->
+                            <div *ngIf="isEditing(user._id)" class="relative">
+                                <select [value]="user.role" (change)="onRoleChange(user, $event)"
+                                    [disabled]="updatingRole"
+                                    class="role-dropdown block w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500 disabled:bg-gray-100 disabled:cursor-not-allowed">
+                                    <option *ngFor="let role of availableRoles" [value]="role.value"
+                                        [selected]="role.value === user.role">
+                                        {{role.label}}
+                                    </option>
+                                </select>
+                                <div *ngIf="updatingRole"
+                                    class="role-loading-overlay absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 rounded-md">
+                                    <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-emerald-600"></div>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Email Verified -->
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <span *ngIf="user.isEmailVerified"
+                                    class="material-icons text-green-500 text-sm">verified</span>
+                                <span *ngIf="!user.isEmailVerified"
+                                    class="material-icons text-red-500 text-sm">error</span>
+                                <span class="ml-2 text-sm" [class.text-green-600]="user.isEmailVerified"
+                                    [class.text-red-600]="!user.isEmailVerified">
+                                    {{user.isEmailVerified ? 'Verified' : 'Not Verified'}}
+                                </span>
+                            </div>
+                        </td>
+
+                        <!-- Created Date -->
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {{user.createdAt | date:'MMM d, y'}}
+                        </td>
+
+                        <!-- Actions -->
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div class="flex space-x-2">
+                                <!-- Edit/Cancel Button -->
+                                <button (click)="onEditUser(user)" [disabled]="updatingRole"
+                                    [class.btn-disabled]="updatingRole"
+                                    class="text-emerald-600 hover:text-emerald-900 p-1 hover:bg-emerald-50 rounded transition-colors"
+                                    [title]="isEditing(user._id) ? 'Cancel Edit' : 'Edit User Role'">
+                                    <span class="material-icons text-sm" *ngIf="!isEditing(user._id)">edit</span>
+                                    <span class="material-icons text-sm" *ngIf="isEditing(user._id)">close</span>
+                                </button>
+
+                                <!-- Delete Button -->
+                                <button (click)="onDeleteUser(user)" [disabled]="isEditing(user._id) || updatingRole"
+                                    [class.btn-disabled]="isEditing(user._id) || updatingRole"
+                                    class="text-red-600 hover:text-red-900 p-1 hover:bg-red-50 rounded transition-colors"
+                                    title="Delete User">
+                                    <span class="material-icons text-sm">delete</span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Empty State -->
+            <div *ngIf="users.length === 0" class="text-center py-12">
+                <span class="material-icons text-gray-400 text-5xl mb-4">people</span>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No users found</h3>
+                <p class="text-gray-500">There are no users in the system yet.</p>
+            </div>
+        </div>
+    </div>
+</div>

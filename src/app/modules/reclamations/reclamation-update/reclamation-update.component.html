@@ -1,6 +1,6 @@
 <div class="container mx-auto p-4">
     <div class="mb-6">
-        <a [routerLink]="['/reclamations', reclamationId]"
+        <a [routerLink]="['/dashboard/reclamations', reclamationId]"
             class="text-emerald-600 hover:text-emerald-800 inline-flex items-center">
             <span class="material-icons mr-1 text-sm">arrow_back</span>
             Back to Reclamation
@@ -12,77 +12,58 @@
     </div>
 
     <div *ngIf="!isLoading" class="bg-white rounded-lg shadow-sm p-6">
-        <h1 class="text-2xl font-semibold text-gray-800 mb-6">Update Reclamation #{{ reclamationId }}</h1>
+        <h1 class="text-2xl font-semibold text-gray-800 mb-6">Update Reclamation #{{ reclamationId?.slice(-6) }}</h1>
 
         <form [formGroup]="reclamationForm" (ngSubmit)="onSubmit()" class="space-y-6">
             <div>
                 <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Title *</label>
                 <input type="text" id="title" formControlName="title"
-                    class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                <div *ngIf="reclamationForm.get('title')?.invalid && reclamationForm.get('title')?.touched"
-                    class="text-red-500 text-sm mt-1">
-                    Title is required
+                    class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    [class.border-red-500]="title?.invalid && title?.touched">
+                <div *ngIf="title?.invalid && title?.touched" class="text-red-500 text-sm mt-1">
+                    <div *ngIf="title?.errors?.['required']">Title is required</div>
+                    <div *ngIf="title?.errors?.['minlength']">Title must be at least 5 characters long</div>
                 </div>
             </div>
 
             <div>
-                <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description *</label>
-                <textarea id="description" formControlName="description" rows="4"
-                    class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
-                <div *ngIf="reclamationForm.get('description')?.invalid && reclamationForm.get('description')?.touched"
-                    class="text-red-500 text-sm mt-1">
-                    Description is required
+                <label for="subject" class="block text-sm font-medium text-gray-700 mb-1">Subject *</label>
+                <textarea id="subject" formControlName="subject" rows="4"
+                    class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    placeholder="Describe your reclamation in detail..."
+                    [class.border-red-500]="subject?.invalid && subject?.touched"></textarea>
+                <div *ngIf="subject?.invalid && subject?.touched" class="text-red-500 text-sm mt-1">
+                    <div *ngIf="subject?.errors?.['required']">Subject is required</div>
+                    <div *ngIf="subject?.errors?.['minlength']">Subject must be at least 10 characters long</div>
                 </div>
             </div>
 
             <div>
-                <label for="productId" class="block text-sm font-medium text-gray-700 mb-1">Product ID *</label>
-                <input type="text" id="productId" formControlName="productId"
-                    class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                <div *ngIf="reclamationForm.get('productId')?.invalid && reclamationForm.get('productId')?.touched"
-                    class="text-red-500 text-sm mt-1">
-                    Product ID is required
+                <label for="userid" class="block text-sm font-medium text-gray-700 mb-1">User ID *</label>
+                <input type="text" id="userid" formControlName="userid"
+                    class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    placeholder="User ID associated with this reclamation"
+                    [class.border-red-500]="userid?.invalid && userid?.touched">
+                <div *ngIf="userid?.invalid && userid?.touched" class="text-red-500 text-sm mt-1">
+                    <div *ngIf="userid?.errors?.['required']">User ID is required</div>
                 </div>
             </div>
 
             <div>
-                <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status *</label>
-                <select id="status" formControlName="status"
-                    class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                    <option value="">Select a status</option>
-                    <option value="new">New</option>
-                    <option value="in-progress">In Progress</option>
-                    <option value="resolved">Resolved</option>
-                    <option value="closed">Closed</option>
-                </select>
-                <div *ngIf="reclamationForm.get('status')?.invalid && reclamationForm.get('status')?.touched"
-                    class="text-red-500 text-sm mt-1">
-                    Status is required
+                <label for="date" class="block text-sm font-medium text-gray-700 mb-1">Date *</label>
+                <input type="date" id="date" formControlName="date"
+                    class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    [class.border-red-500]="date?.invalid && date?.touched">
+                <div *ngIf="date?.invalid && date?.touched" class="text-red-500 text-sm mt-1">
+                    <div *ngIf="date?.errors?.['required']">Date is required</div>
                 </div>
             </div>
 
-            <div>
-                <label for="priority" class="block text-sm font-medium text-gray-700 mb-1">Priority *</label>
-                <select id="priority" formControlName="priority"
-                    class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
-                    <option value="urgent">Urgent</option>
-                </select>
-                <div *ngIf="reclamationForm.get('priority')?.invalid && reclamationForm.get('priority')?.touched"
-                    class="text-red-500 text-sm mt-1">
-                    Priority is required
-                </div>
-            </div>
-
-            <div>
-                <label for="attachments" class="block text-sm font-medium text-gray-700 mb-1">Attachments</label>
-                <input type="file" id="attachments" class="w-full p-2">
-                <p class="text-xs text-gray-500 mt-1">Upload relevant documents or images (optional)</p>
-            </div>
-
-            <div class="flex justify-end pt-4">
+            <div class="flex justify-end space-x-3 pt-4">
+                <button type="button" (click)="onCancel()"
+                    class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition-colors">
+                    Cancel
+                </button>
                 <button type="submit" [disabled]="reclamationForm.invalid || isSubmitting"
                     class="px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700 transition-colors disabled:opacity-50">
                     <span *ngIf="isSubmitting" class="flex items-center">

@@ -31,6 +31,12 @@ export class DashboardLayoutComponent implements OnInit, OnDestroy {
       ],
     },
     {
+      name: 'User Management',
+      icon: 'people',
+      route: '/dashboard/users',
+      roles: [UserRole.ADMIN],
+    },
+    {
       name: 'Collections',
       icon: 'local_shipping',
       route: '/dashboard/collectes',
@@ -71,6 +77,12 @@ export class DashboardLayoutComponent implements OnInit, OnDestroy {
       icon: 'report_problem',
       route: '/dashboard/reclamations',
       roles: [UserRole.ADMIN, UserRole.BENEFICIARY],
+    },
+    {
+      name: 'Reclamation Resolutions',
+      icon: 'check_circle',
+      route: '/dashboard/reclamation-res',
+      roles: [UserRole.ADMIN],
     },
     {
       name: 'Inspection',

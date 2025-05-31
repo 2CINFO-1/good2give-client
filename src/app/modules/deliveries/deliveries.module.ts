@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Routes } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
+import { LeafletModule } from '@asymmetrik/ngx-leaflet';
 
 import { DeliveriesListComponent } from './deliveries-list/deliveries-list.component';
 import { DeliveryDetailComponent } from './delivery-detail/delivery-detail.component';
@@ -23,6 +24,7 @@ const routes: Routes = [
     CommonModule,
     RouterModule.forChild(routes),
     ReactiveFormsModule,
+    LeafletModule,
     DeliveriesListComponent
   ],
   providers: [DeliveryService],
