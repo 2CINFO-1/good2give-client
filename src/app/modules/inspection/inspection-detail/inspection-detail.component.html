@@ -155,10 +155,6 @@
                              class="w-full pl-10 pr-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                              placeholder="e.g., Quality Control, Safety Issue, Compliance Violation">
                     </div>
-                    <div *ngIf="issueForm.get('type')?.touched && issueForm.get('type')?.hasError('required')" 
-                         class="mt-1 text-sm text-red-500">
-                      Please specify the issue type
-                    </div>
                   </div>
 
                   <!-- Description -->
@@ -171,10 +167,6 @@
                                 class="w-full p-4 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"
                                 placeholder="Please provide a detailed description of the issue, including any relevant observations or concerns..."></textarea>
                       <mat-icon class="absolute right-3 top-3 text-gray-400 group-focus-within:text-blue-500 transition-colors">description</mat-icon>
-                    </div>
-                    <div *ngIf="issueForm.get('description')?.touched && issueForm.get('description')?.hasError('required')" 
-                         class="mt-1 text-sm text-red-500">
-                      Description is required
                     </div>
                   </div>
 

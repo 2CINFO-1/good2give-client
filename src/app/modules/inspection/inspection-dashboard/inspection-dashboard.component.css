@@ -157,4 +157,25 @@
 
 .icon-container.purple {
   @apply bg-purple-50 text-purple-600;
+}
+
+::ng-deep .confirm-dialog-container .mat-dialog-container {
+  border-radius: 8px;
+  padding: 0;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+::ng-deep .confirm-dialog-container {
+  animation: dialogFadeIn 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes dialogFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 } 

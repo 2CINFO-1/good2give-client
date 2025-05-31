@@ -37,6 +37,13 @@ export class InspectionDetailComponent implements OnInit {
       description: ['', Validators.required],
       severity: ['medium', Validators.required]
     });
+
+    // Subscribe to form changes to show real-time validation
+    this.issueForm.valueChanges.subscribe(() => {
+      if (this.issueForm.touched) {
+        this.validateForm();
+      }
+    });
   }
 
   ngOnInit(): void {
@@ -86,10 +93,43 @@ export class InspectionDetailComponent implements OnInit {
     });
   }
 
-  addIssue(): void {
-    if (!this.issueForm.valid) return;
+  // New method to handle form validation
+  private validateForm(): void {
+    const form = this.issueForm;
+    if (form.get('type')?.errors?.['required'] && form.get('type')?.touched) {
+      this.showErrorMessage('Please enter an issue type');
+    }
+    if (form.get('description')?.errors?.['required'] && form.get('description')?.touched) {
+      this.showErrorMessage('Please provide a description');
+    }
+  }
 
-    // Store the issue locally without sending to backend
+  // New method to show error messages
+  private showErrorMessage(message: string): void {
+    this.snackBar.open(message, 'Close', {
+      duration: 5000,
+      horizontalPosition: 'center',
+      verticalPosition: 'top',
+      panelClass: ['error-snackbar']
+    });
+  }
+
+  // New method to show success messages
+  private showSuccessMessage(message: string): void {
+    this.snackBar.open(message, 'Close', {
+      duration: 3000,
+      horizontalPosition: 'center',
+      verticalPosition: 'top',
+      panelClass: ['success-snackbar']
+    });
+  }
+
+  addIssue(): void {
+    if (!this.issueForm.valid) {
+      this.validateForm();
+      return;
+    }
+
     this.currentIssue = {
       ...this.issueForm.value,
       status: 'failed',
@@ -98,12 +138,12 @@ export class InspectionDetailComponent implements OnInit {
 
     this.issueForm.reset({ severity: 'medium' });
     this.showIssueForm = false;
-    this.snackBar.open('Issue added', 'Close', { duration: 2000 });
+    this.showSuccessMessage('Issue has been added successfully');
   }
 
   updateStatus(status: 'approved' | 'rejected'): void {
     if (!this.checklist?.items.every(item => item.checked)) {
-      this.snackBar.open('Please complete all checklist items before updating status', 'Close', { duration: 3000 });
+      this.showErrorMessage('Please complete all checklist items before updating status');
       return;
     }
 
@@ -117,9 +157,8 @@ export class InspectionDetailComponent implements OnInit {
         issue: null
       };
     } else {
-      // For rejection, ensure there is an issue
       if (!this.currentIssue) {
-        this.snackBar.open('Please add an issue before rejecting the inspection', 'Close', { duration: 3000 });
+        this.showErrorMessage('Please add an issue before rejecting the inspection');
         this.loading.saving = false;
         return;
       }
@@ -138,13 +177,13 @@ export class InspectionDetailComponent implements OnInit {
       next: (inspection) => {
         this.inspection = inspection;
         this.loading.saving = false;
-        this.snackBar.open(`Inspection ${status}`, 'Close', { duration: 2000 });
+        this.showSuccessMessage(`Inspection has been ${status} successfully`);
         this.router.navigate(['/dashboard/inspection']);
       },
       error: (error) => {
         console.error('Error updating status:', error);
         this.loading.saving = false;
-        this.snackBar.open(error.error?.message || 'Error updating status', 'Close', { duration: 3000 });
+        this.showErrorMessage(error.error?.message || 'Error updating status');
       }
     });
   }
@@ -210,5 +249,6 @@ export class InspectionDetailComponent implements OnInit {
     this.currentIssue = null;
     this.issueForm.reset({ severity: 'medium' });
     this.showIssueForm = false;
+    this.showSuccessMessage('Issue has been removed');
   }
 }

@@ -3,6 +3,8 @@ import { InspectionReportService } from '../inspection-report.service';
 import { InspectionReport } from 'src/app/core/models/inspection.model';
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDialogComponent } from '../components/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-inspection-dashboard',
@@ -22,7 +24,8 @@ export class InspectionDashboardComponent implements OnInit {
   constructor(
     private inspectionService: InspectionReportService,
     private router: Router,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -100,6 +103,60 @@ export class InspectionDashboardComponent implements OnInit {
       return;
     }
     this.router.navigate(['/dashboard/inspection', reportId]);
+  }
+
+  deleteInspection(reportId: string): void {
+    if (!reportId) {
+      this.snackBar.open('Invalid report ID', 'Close', { 
+        duration: 3000,
+        horizontalPosition: 'center',
+        verticalPosition: 'top',
+        panelClass: ['error-snackbar']
+      });
+      return;
+    }
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      data: { message: 'Are you sure you want to delete this inspection? This action cannot be undone.' },
+      panelClass: 'confirm-dialog-container',
+      disableClose: true,
+      maxWidth: '90vw',
+      width: '320px'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loading.history = true;
+        this.inspectionService.delete(reportId).subscribe({
+          next: () => {
+            this.myHistory = this.myHistory.filter(
+              (inspection) => this.getReportId(inspection) !== reportId
+            );
+            this.loading.history = false;
+            this.snackBar.open('Inspection deleted successfully', 'Close', {
+              duration: 3000,
+              horizontalPosition: 'center',
+              verticalPosition: 'top',
+              panelClass: ['success-snackbar']
+            });
+          },
+          error: (error) => {
+            console.error('Error deleting inspection:', error);
+            this.loading.history = false;
+            this.snackBar.open(
+              error.error?.message || 'Error deleting inspection',
+              'Close',
+              {
+                duration: 3000,
+                horizontalPosition: 'center',
+                verticalPosition: 'top',
+                panelClass: ['error-snackbar']
+              }
+            );
+          }
+        });
+      }
+    });
   }
 
   // Helper method to safely get ID

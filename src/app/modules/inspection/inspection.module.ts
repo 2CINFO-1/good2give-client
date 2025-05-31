@@ -5,6 +5,7 @@ import { InspectionRoutingModule } from './inspection-routing.module';
 import { InspectionDashboardComponent } from './inspection-dashboard/inspection-dashboard.component';
 import { InspectionDetailComponent } from './inspection-detail/inspection-detail.component';
 import { InspectionChecklistComponent } from './inspection-checklist/inspection-checklist.component';
+import { ConfirmDialogComponent } from './components/confirm-dialog/confirm-dialog.component';
 
 // Material Imports
 import { MatTabsModule } from '@angular/material/tabs';
@@ -24,12 +25,14 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatListModule } from '@angular/material/list';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatRadioModule } from '@angular/material/radio';
+import { MatDialogModule } from '@angular/material/dialog';
 
 @NgModule({
   declarations: [
     InspectionDashboardComponent,
     InspectionDetailComponent,
-    InspectionChecklistComponent
+    InspectionChecklistComponent,
+    ConfirmDialogComponent
   ],
   imports: [
     CommonModule,
@@ -52,7 +55,8 @@ import { MatRadioModule } from '@angular/material/radio';
     MatSnackBarModule,
     MatListModule,
     MatButtonToggleModule,
-    MatRadioModule
+    MatRadioModule,
+    MatDialogModule
   ]
 })
 export class InspectionModule {
