@@ -5,6 +5,7 @@ import { Delivery, DeliveryStatus } from 'src/app/core/models/delivery.model';
 import { CommonModule } from '@angular/common';
 import { User } from 'src/app/core/models/user.model';
 import { FormsModule } from '@angular/forms';
+import { NavigationEnd } from '@angular/router';
 
 @Component({
   selector: 'app-deliveries-list',
@@ -34,6 +35,13 @@ export class DeliveriesListComponent implements OnInit {
   ngOnInit(): void {
     console.log('DeliveriesListComponent initialized');
     this.loadDeliveries();
+
+    // Subscribe to route changes to refresh the list
+    this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) {
+        this.loadDeliveries();
+      }
+    });
   }
 
   loadDeliveries(): void {
@@ -101,10 +109,6 @@ export class DeliveriesListComponent implements OnInit {
 
   viewDeliveryDetails(id: string): void {
     this.router.navigate(['/dashboard/deliveries', id]);
-  }
-
-  assignDelivery(id: string): void {
-    this.router.navigate(['/dashboard/deliveries/assign', id]);
   }
 
   createDelivery(): void {

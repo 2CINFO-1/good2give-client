@@ -5,7 +5,7 @@ import {
   HttpErrorResponse,
 } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import {
   User,
@@ -202,10 +202,12 @@ export class UserService {
    * @param role User role
    */
   getUsersByRole(role: UserRole): Observable<User[]> {
+    console.log('Getting users by role:', role);
     const params = new HttpParams().set('role', role);
     return this.http.get<User[]>(this.apiUrl, { params }).pipe(
+      tap(response => console.log('Users by role response:', response)),
       catchError((error) => {
-        console.error(`Error fetching users with role ${role}`, error);
+        console.error(`Error fetching users with role ${role}:`, error);
         return throwError(() => error);
       })
     );
@@ -237,7 +239,10 @@ export class UserService {
   }
 
   getTransporters(): Observable<User[]> {
-    return this.getUsersByRole(UserRole.TRANSPORTER);
+    console.log('Getting transporters...');
+    return this.getUsersByRole(UserRole.TRANSPORTER).pipe(
+      tap(transporters => console.log('Transporters response:', transporters))
+    );
   }
 
   getInspectors(): Observable<User[]> {

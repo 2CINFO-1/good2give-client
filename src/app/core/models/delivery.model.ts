@@ -20,11 +20,11 @@ export interface Delivery {
 }
 
 export interface DeliveryRequest {
-  donorId: string;
+  donatorId: string;
   beneficiaryId: string;
   pickupDate: Date;
   expectedDeliveryDate?: Date;
-  transporterId?: string;
+  transporterId: string;
   pickupLocation: {
     lat: number;
     lng: number;
@@ -34,10 +34,10 @@ export interface DeliveryRequest {
     lng: number;
   };
   routeInfo?: {
-    distance?: number;
-    duration?: number; 
-    path?: {lat: number; lng: number}[];
-  }; // Stores the optimized route information
+    distance: number;
+    duration: number;
+    path?: { lat: number; lng: number; }[];
+  };
 }
 
 export interface DeliveryResponse {
