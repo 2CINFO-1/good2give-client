@@ -1,13 +1,13 @@
-<div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-    <div class="px-4 py-6 sm:px-0">
-        <div class="bg-white shadow overflow-hidden sm:rounded-lg p-6">
+<div class="min-h-screen bg-gray-50">
+    <div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
             <!-- Header -->
-            <div class="md:flex md:items-center md:justify-between mb-6">
-                <div class="flex-1 min-w-0">
-                    <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+            <div class="bg-gradient-to-r from-green-600 to-green-700 px-6 py-8">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold text-white">
                         {{ isEditMode ? 'Edit Product' : 'Add New Product' }}
                     </h2>
-                    <p class="mt-1 text-sm text-gray-500">
+                    <p class="mt-2 text-green-100">
                         {{ isEditMode ? 'Update product information' : 'Create a new product' }}
                     </p>
                 </div>
@@ -15,110 +15,106 @@
 
             <!-- Loading State -->
             <div *ngIf="loading" class="flex justify-center my-8">
-                <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
             </div>
 
             <!-- Error Message -->
-            <div *ngIf="error" class="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                            fill="currentColor">
-                            <path fill-rule="evenodd"
-                                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                                clip-rule="evenodd" />
-                        </svg>
-                    </div>
-                    <div class="ml-3">
-                        <p class="text-sm text-red-700">{{ error }}</p>
+            <div *ngIf="error" class="mx-6 mt-6">
+                <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-red-700">{{ error }}</p>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Success Message -->
-            <div *ngIf="successMessage" class="bg-green-50 border-l-4 border-green-500 p-4 mb-6">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        <svg class="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                            fill="currentColor">
-                            <path fill-rule="evenodd"
-                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                clip-rule="evenodd" />
-                        </svg>
-                    </div>
-                    <div class="ml-3">
-                        <p class="text-sm text-green-700">{{ successMessage }}</p>
+            <div *ngIf="successMessage" class="mx-6 mt-6">
+                <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-green-700">{{ successMessage }}</p>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Product Form -->
-            <form *ngIf="!loading" [formGroup]="productForm" (ngSubmit)="onSubmit()">
+            <form *ngIf="!loading" [formGroup]="productForm" (ngSubmit)="onSubmit()" class="px-6 py-8 space-y-6">
                 <!-- Product Name -->
-                <div class="mb-4">
+                <div class="space-y-2">
                     <label for="name" class="block text-sm font-medium text-gray-700">Product Name *</label>
                     <input type="text" id="name" formControlName="name"
-                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        class="block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-150 ease-in-out"
                         [ngClass]="{'border-red-500': productForm.controls['name'].invalid && productForm.controls['name'].touched}">
                     <div *ngIf="productForm.controls['name'].invalid && productForm.controls['name'].touched"
-                        class="text-red-500 text-sm mt-1">
+                        class="text-red-500 text-sm">
                         <span *ngIf="productForm.controls['name'].errors?.['required']">Product name is required</span>
                         <span *ngIf="productForm.controls['name'].errors?.['minlength']">Product name must be at least 3
                             characters</span>
                     </div>
                 </div>
 
-
-
                 <!-- Category -->
-                <div class="mb-4">
+                <div class="space-y-2">
                     <label for="category" class="block text-sm font-medium text-gray-700">Category *</label>
                     <select id="category" formControlName="category"
-                        class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        class="block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-150 ease-in-out"
                         [ngClass]="{'border-red-500': productForm.controls['category'].invalid && productForm.controls['category'].touched}">
                         <option value="" disabled>Select category</option>
                         <option *ngFor="let category of categories" [value]="category">{{ category }}</option>
                     </select>
                     <div *ngIf="productForm.controls['category'].invalid && productForm.controls['category'].touched"
-                        class="text-red-500 text-sm mt-1">
+                        class="text-red-500 text-sm">
                         <span *ngIf="productForm.controls['category'].errors?.['required']">Category is required</span>
                     </div>
                 </div>
 
                 <!-- Product Type -->
-                <div class="mb-4">
+                <div class="space-y-2">
                     <label for="productType" class="block text-sm font-medium text-gray-700">Product Type *</label>
                     <select id="productType" formControlName="productType"
-                        class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                        class="block w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-150 ease-in-out"
                         [ngClass]="{'border-red-500': productForm.controls['productType'].invalid && productForm.controls['productType'].touched}">
                         <option value="" disabled>Select product type</option>
                         <option *ngFor="let type of productTypes" [value]="type">{{ type }}</option>
                     </select>
                     <div *ngIf="productForm.controls['productType'].invalid && productForm.controls['productType'].touched"
-                        class="text-red-500 text-sm mt-1">
+                        class="text-red-500 text-sm">
                         <span *ngIf="productForm.controls['productType'].errors?.['required']">Product type is
                             required</span>
                     </div>
                 </div>
 
-
-
                 <!-- Form Buttons -->
-                <div class="pt-5 flex justify-end space-x-3">
+                <div class="flex justify-end space-x-4 pt-6">
                     <button type="button" (click)="cancel()"
-                        class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        class="px-6 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-150 ease-in-out">
                         Cancel
                     </button>
                     <button type="submit" [disabled]="loading || productForm.invalid"
-                        class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50">
-                        <span *ngIf="loading">
-                            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline-block"
-                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                    stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor"
-                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                </path>
+                        class="px-6 py-3 border border-transparent rounded-lg text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 transition duration-150 ease-in-out">
+                        <span *ngIf="loading" class="flex items-center">
+                            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
                             Saving...
                         </span>

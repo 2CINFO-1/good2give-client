@@ -1,0 +1,70 @@
+// Styles pour les cartes de statistiques
+.stat-card {
+  @apply bg-white rounded-lg shadow p-6;
+  transition: transform 0.2s ease-in-out;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+}
+
+// Styles pour les icônes
+.icon-container {
+  @apply p-3 rounded-full;
+
+  &.blue {
+    @apply bg-blue-100 text-blue-600;
+  }
+
+  &.green {
+    @apply bg-green-100 text-green-600;
+  }
+
+  &.purple {
+    @apply bg-purple-100 text-purple-600;
+  }
+
+  &.yellow {
+    @apply bg-yellow-100 text-yellow-600;
+  }
+}
+
+// Styles pour les barres de progression
+.progress-bar {
+  @apply w-full bg-gray-200 rounded-full h-2;
+
+  .progress {
+    @apply bg-blue-600 h-2 rounded-full;
+    transition: width 0.3s ease-in-out;
+  }
+}
+
+// Styles pour les liens rapides
+.quick-access-link {
+  @apply flex items-center p-3 rounded-lg transition-colors;
+
+  &:hover {
+    @apply bg-gray-50;
+  }
+
+  .icon {
+    @apply p-2 rounded-full mr-3;
+  }
+}
+
+// Animation de chargement
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}

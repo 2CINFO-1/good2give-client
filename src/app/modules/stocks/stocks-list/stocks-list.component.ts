@@ -13,7 +13,7 @@ import { Product } from '../../../core/models/product.model';
 export class StocksListComponent implements OnInit {
   stocks: Stock[] = [];
   filteredStocks: Stock[] = [];
-  products: { [key: string]: Product } = {};
+  products: Record<string, Product> = {};
   isLoading = true;
   errorMessage = '';
   searchTerm = '';
@@ -37,6 +37,7 @@ export class StocksListComponent implements OnInit {
         this.loadProducts();
       },
       error: (error) => {
+        console.error('Failed to load stocks', error);
         this.errorMessage = 'Failed to load stocks. Please try again.';
         this.isLoading = false;
       },
@@ -97,10 +98,8 @@ export class StocksListComponent implements OnInit {
       if (!this.searchTerm) return true;
 
       const productName = this.getProductName(stock.productId).toLowerCase();
-      const donatorId =
-        typeof stock.donatorId === 'string'
-          ? stock.donatorId.toLowerCase()
-          : stock.donatorId._id.toLowerCase();
+      const donatorId =stock.donatorId._id
+
 
       return (
         productName.includes(this.searchTerm.toLowerCase()) ||
