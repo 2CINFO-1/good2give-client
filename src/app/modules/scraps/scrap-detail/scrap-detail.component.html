@@ -7,9 +7,9 @@
                 <p class="mt-1 max-w-2xl text-sm text-gray-500">Detailed information about this food scrap record.</p>
             </div>
             <div>
-                <button (click)="goBack()" class="text-blue-600 hover:text-blue-800 flex items-center">
+                <button (click)="goBackToList()" class="text-blue-600 hover:text-blue-800 flex items-center">
                     <span class="material-icons text-sm mr-1">arrow_back</span>
-                    Back
+                    Back to Scraps
                 </button>
             </div>
         </div>
@@ -43,7 +43,7 @@
                 <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                     <dt class="text-sm font-medium text-gray-500">Date</dt>
                     <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                        <span class="font-medium">{{ scrap.dateOfScrapping | date }}</span>
+                        <span class="font-medium">{{ formatDate(scrap.dateOfScrapping) }}</span>
                     </dd>
                 </div>
                 <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
@@ -52,6 +52,9 @@
                         <span class="font-medium">{{ scrap.location }}</span>
                     </dd>
                 </div>
+
+
+                
             </dl>
 
             <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
@@ -79,15 +82,30 @@
                 </dd>
             </div>
 
+             <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt class="text-sm font-medium text-gray-500">Created At</dt>
+                <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                    <span class="font-medium">{{ formatDate(scrap.createdAt!) }}</span>
+                </dd>
+            </div>
+
+             <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                <dt class="text-sm font-medium text-gray-500">Last Updated At</dt>
+                <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                    <span class="font-medium">{{ formatDate(scrap.updatedAt!) }}</span>
+                </dd>
+            </div>
+
+
             <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                 <dt class="text-sm font-medium text-gray-500">Actions</dt>
                 <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                     <div class="flex justify-end space-x-4">
-                        <button
+                        <button (click)="goToEditScrap()"
                             class="px-4 py-2 border border-emerald-600 text-emerald-600 rounded hover:bg-emerald-50 transition-colors">
                             Edit
                         </button>
-                        <button class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors">
+                        <button (click)="deleteScrap()" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors">
                             Delete
                         </button>
                     </div>

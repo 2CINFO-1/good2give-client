@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Routes } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
+import { LeafletModule } from '@asymmetrik/ngx-leaflet';
 
 import { EventsListComponent } from './events-list/events-list.component';
 import { EventDetailComponent } from './event-detail/event-detail.component';
@@ -22,6 +23,11 @@ const routes: Routes = [
     EventCreateComponent,
     EventEditComponent,
   ],
-  imports: [CommonModule, ReactiveFormsModule, RouterModule.forChild(routes)],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterModule.forChild(routes),
+    LeafletModule
+  ],
 })
 export class EventsModule {}

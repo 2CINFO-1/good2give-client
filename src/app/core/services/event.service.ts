@@ -74,15 +74,8 @@ export class EventService {
    * @returns Array of food suggestions or null
    */
   suggestFood(
-    eventId: string,
-    numberOfAttendees: number,
-    eventTitle: string,
-    eventObjective: string
-  ): Observable<string[]> {
-    return this.http.post<string[]>(`${this.apiUrl}/${eventId}/suggest-food`, {
-      numberOfAttendees,
-      eventTitle,
-      eventObjective,
-    });
+    eventId: string
+  ): Observable<boolean> {
+      return this.http.get<boolean>(`${this.apiUrl}/${eventId}/suggest-food`);
   }
 }

@@ -18,6 +18,11 @@ const routes: Routes = [
       import('./modules/home/home.module').then((m) => m.HomeModule),
   },
   {
+    path: 'landing',
+    loadChildren: () =>
+      import('./modules/landing/landing.module').then((m) => m.LandingModule),
+  },
+  {
     path: 'auth',
     children: [
       {
