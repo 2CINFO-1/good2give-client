@@ -1,6 +1,7 @@
 import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EventService } from '../../../core/services/event.service';
+import { WeatherService } from '../../../core/services/weather.service';
 import { Event } from '../../../core/models/event.model';
 import { HttpClient } from '@angular/common/http';
 import { latLng, tileLayer, marker, Marker, Map, icon, divIcon } from 'leaflet';
@@ -34,7 +35,7 @@ export class EventDetailComponent implements OnInit, AfterViewInit {
     zoom: 15,
     center: latLng(36.798041449120824, 10.163262774962625) // Default to the event location
   };
-
+  
   markers: Marker[] = [];
   private map: Map | null = null;
 
@@ -42,6 +43,7 @@ export class EventDetailComponent implements OnInit, AfterViewInit {
     private route: ActivatedRoute,
     private router: Router,
     private eventService: EventService,
+    private weatherService: WeatherService,
     private http: HttpClient
   ) {
     // Fix marker icon issue
@@ -91,7 +93,7 @@ export class EventDetailComponent implements OnInit, AfterViewInit {
       next: (data: Event) => {
         this.event = data;
         console.log('Event data:', data); // Debug log
-
+      
         // Use the coordinates directly from the event data
         if (data.latitude && data.longitude) {
           this.centerMapOnLocation(data.latitude, data.longitude);
@@ -148,19 +150,40 @@ export class EventDetailComponent implements OnInit, AfterViewInit {
     this.map.setView([lat, lng], 15);
   }
 
+  loadWeather() {
+    if (!this.event || typeof this.event.latitude !== 'number' || typeof this.event.longitude !== 'number') {
+      this.weatherError = 'Location coordinates not available.';
+      return;
+    }
+    
+    this.weatherLoading = true;
+    this.weatherError = '';
+    this.weatherData = null;
 
-
-  private findClosestForecast(weatherData: any, targetDate: Date): any {
-    // Implementation of finding closest forecast
-    return weatherData;
+    const eventDate = new Date(this.event.date);
+    this.weatherService.getWeatherByLocation(
+      this.event.latitude,
+      this.event.longitude,
+      eventDate.toISOString()
+    ).subscribe({
+      next: (weatherData: any) => {
+        this.weatherData = weatherData;
+        this.weatherLoading = false;
+      },
+      error: (err: any) => {
+        console.error('Error loading weather:', err);
+        this.weatherError = 'Failed to load weather data.';
+        this.weatherLoading = false;
+      }
+    });
   }
 
   getFoodSuggestions(event: Event): void {
     if (!event._id) return;
-
+    
     this.foodSuggestionsLoading = true;
     this.foodSuggestionsError = '';
-
+    
     this.eventService.suggestFood(
       event._id
     ).pipe(
