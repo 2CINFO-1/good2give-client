@@ -27,6 +27,7 @@ export class ScrapService {
    * @returns Observable of food scrap array
    */
   getAllScraps(): Observable<FoodScrap[]> {
+    console.log('Fetching all scraps from:', this.apiUrl);
     return this.http.get<FoodScrap[]>(this.apiUrl).pipe(
       catchError((error) => {
         console.error('Error fetching scraps', error);
@@ -41,6 +42,7 @@ export class ScrapService {
    * @returns Observable of a single food scrap
    */
   getScrapById(id: string): Observable<FoodScrap> {
+    console.log('Fetching scrap by ID:', id);
     return this.http.get<FoodScrap>(`${this.apiUrl}/${id}`).pipe(
       catchError((error) => {
         console.error(`Error fetching scrap with ID ${id}`, error);
@@ -55,6 +57,7 @@ export class ScrapService {
    * @returns Observable of created food scrap
    */
   createScrap(scrapData: FoodScrapRequest): Observable<FoodScrapResponse> {
+    console.log('Creating new scrap:', scrapData);
     return this.http.post<FoodScrapResponse>(this.apiUrl, scrapData).pipe(
       catchError((error) => {
         console.error('Error creating scrap', error);
@@ -73,6 +76,7 @@ export class ScrapService {
     id: string,
     scrapData: Partial<FoodScrapRequest>
   ): Observable<FoodScrapResponse> {
+    console.log('Updating scrap:', { id, scrapData });
     return this.http
       .put<FoodScrapResponse>(`${this.apiUrl}/${id}`, scrapData)
       .pipe(
@@ -89,6 +93,7 @@ export class ScrapService {
    * @returns Observable of boolean indicating success
    */
   deleteScrap(id: string): Observable<boolean> {
+    console.log('Deleting scrap:', id);
     return this.http.delete<boolean>(`${this.apiUrl}/${id}`).pipe(
       catchError((error) => {
         console.error(`Error deleting scrap with ID ${id}`, error);

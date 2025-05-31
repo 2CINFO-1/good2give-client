@@ -28,6 +28,7 @@ export class EventEditComponent implements OnInit {
       objective: ['', [Validators.required, Validators.minLength(10)]],
       date: ['', Validators.required],
       numbre: [1, [Validators.required, Validators.min(1)]],
+      location: ['', [Validators.required, Validators.minLength(3)]],
     });
   }
 
@@ -67,6 +68,7 @@ export class EventEditComponent implements OnInit {
       objective: event.objective || '',
       date: event.date || '',
       numbre: event.numbre || 1,
+      location: event.location || '',
     };
 
     this.eventForm.patchValue(eventFormData);

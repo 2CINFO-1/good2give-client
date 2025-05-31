@@ -1,52 +1,83 @@
-<div class="container mx-auto p-4">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-semibold text-gray-800">Food Scrap Items</h1>
-        <a routerLink="create"
-            class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded inline-flex items-center">
-            <span class="material-icons mr-1 text-sm">add</span>
-            New Scrap Item
-        </a>
-    </div>
+<div class="min-h-screen bg-gray-50 pt-8">
+    <div class="container mx-auto px-4">
+        <!-- Header Section -->
+        <div class="text-center mb-12">
+            <h1 class="text-3xl font-bold mb-4">Food Scraps</h1>
+            <div class="h-1 w-24 bg-emerald-600 mx-auto mb-6"></div>
+            <button (click)="createScrap()"
+                class="bg-emerald-600 text-white px-6 py-3 rounded-md hover:bg-emerald-700 font-medium transition-all duration-300 hover:scale-105">
+                Create New Scrap
+            </button>
+        </div>
 
-    <div *ngIf="isLoading" class="flex justify-center py-8">
-        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-700"></div>
-    </div>
+        <!-- Error Message -->
+        <div *ngIf="error" class="max-w-2xl mx-auto mb-8">
+            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4" role="alert">
+                <p class="font-medium">Error</p>
+                <p>{{ error }}</p>
+            </div>
+        </div>
 
-    <div *ngIf="!isLoading && scraps.length === 0" class="bg-gray-50 p-8 text-center rounded-lg shadow-sm">
-        <p class="text-gray-600">No scrap items found. Click "New Scrap Item" to create one.</p>
-    </div>
+        <!-- Loading Spinner -->
+        <div *ngIf="loading" class="flex justify-center my-12">
+            <div class="p-4 rounded-full bg-emerald-100 text-emerald-600 w-16 h-16 flex items-center justify-center">
+                <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-emerald-600"></div>
+            </div>
+        </div>
 
-    <div *ngIf="!isLoading && scraps.length > 0" class="bg-white rounded-lg shadow-sm overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th scope="col"
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                    <th scope="col"
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title
-                    </th>
-                    <th scope="col"
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location
-                    </th>
-                    <th scope="col"
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                    <th scope="col"
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions
-                    </th>
-                </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-                <tr *ngFor="let scrap of scraps">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ scrap._id }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ scrap.title }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ scrap.location }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ scrap.dateOfScrapping | date }}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <a [routerLink]="[scrap._id]" class="text-emerald-600 hover:text-emerald-900 mr-3">View</a>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+        <!-- Empty State -->
+        <div *ngIf="!loading && scraps.length === 0" class="text-center my-16">
+            <div class="p-4 rounded-full bg-emerald-100 text-emerald-600 mx-auto mb-4 w-20 h-20 flex items-center justify-center">
+                <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+                    </path>
+                </svg>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-2">No scraps found</h3>
+            <p class="text-gray-600 mb-8">Get started by creating a new food scrap record.</p>
+            <button (click)="createScrap()"
+                class="bg-emerald-600 text-white px-6 py-3 rounded-md hover:bg-emerald-700 font-medium transition-all duration-300 hover:scale-105">
+                Create Your First Scrap
+            </button>
+        </div>
+
+        <!-- Scraps Grid -->
+        <div *ngIf="!loading && scraps.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div *ngFor="let scrap of scraps"
+                class="bg-white rounded-lg shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-[1.02]">
+                <div class="p-6">
+                    <div class="mb-4">
+                        <h2 class="text-xl font-bold text-gray-800 mb-2">{{ scrap.title }}</h2>
+                        <p class="text-gray-600 line-clamp-2">{{ scrap.objective }}</p>
+                    </div>
+                    
+                    <div class="flex items-center text-gray-500 mb-6">
+                        <div class="p-2 rounded-full bg-emerald-100 text-emerald-600 mr-3">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <span class="font-medium">{{ formatDate(scrap.dateOfScrapping) }}</span>
+                    </div>
+
+                    <div class="flex flex-wrap gap-3">
+                        <button (click)="goToScrapDetail(scrap._id)"
+                            class="flex-1 bg-emerald-600 text-white px-4 py-2 rounded-md hover:bg-emerald-700 transition-colors text-sm font-medium">
+                            View Details
+                        </button>
+                        <button (click)="editScrap(scrap._id)"
+                            class="px-3 py-2 bg-yellow-500 text-white text-sm rounded-md hover:bg-yellow-600 transition-colors font-medium">
+                            Edit
+                        </button>
+                        <button (click)="deleteScrap(scrap._id)"
+                            class="px-3 py-2 bg-red-500 text-white text-sm rounded-md hover:bg-red-600 transition-colors font-medium">
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
