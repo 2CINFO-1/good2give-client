@@ -16,11 +16,15 @@ const routes: Routes = [
 
 @NgModule({
   declarations: [
-    DeliveriesListComponent,
     DeliveryDetailComponent,
     DeliveryCreateComponent,
   ],
-  imports: [CommonModule, RouterModule.forChild(routes), ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    RouterModule.forChild(routes),
+    ReactiveFormsModule,
+    DeliveriesListComponent
+  ],
   providers: [DeliveryService],
 })
 export class DeliveriesModule {}

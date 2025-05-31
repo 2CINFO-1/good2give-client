@@ -13,6 +13,9 @@ import {
   providedIn: 'root',
 })
 export class CollecteService {
+  exportCollecte(_id: string) {
+    throw new Error('Method not implemented.');
+  }
   private apiUrl = `${environment.apiUrl}/collectes`;
 
   constructor(private http: HttpClient) {}
@@ -92,3 +95,4 @@ export class CollecteService {
     );
   }
 }
+

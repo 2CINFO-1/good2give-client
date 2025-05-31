@@ -30,7 +30,13 @@ export class CollecteCreateComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.collecteForm = this.fb.group({
+      title: ['', Validators.required],
+      description: ['', Validators.required],
+      location: ['', Validators.required],
+    });
+  }
 
   get formControls() {
     return this.collecteForm.controls;
@@ -72,6 +78,13 @@ export class CollecteCreateComponent implements OnInit {
   cancel(): void {
     this.router.navigate(['/dashboard/collectes']);
   }
+  getCompletedFields(): number {
+    let completed = 0;
+    if (this.collecteForm.get('title')?.value) completed++;
+    if (this.collecteForm.get('description')?.value) completed++;
+    if (this.collecteForm.get('location')?.value) completed++;
+    return completed;
+  }
 }
 import { Injectable } from '@angular/core';
 
@@ -82,3 +95,4 @@ export class FormatService {
     return new Date(date).toLocaleDateString();
   }
 }
+

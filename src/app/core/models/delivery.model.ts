@@ -22,10 +22,22 @@ export interface Delivery {
 export interface DeliveryRequest {
   donorId: string;
   beneficiaryId: string;
+  pickupDate: Date;
+  expectedDeliveryDate?: Date;
   transporterId?: string;
-  pickupDate?: Date | string;
-  expectedDeliveryDate?: Date | string;
-  status?: DeliveryStatus;
+  pickupLocation: {
+    lat: number;
+    lng: number;
+  };
+  deliveryLocation: {
+    lat: number;
+    lng: number;
+  };
+  routeInfo?: {
+    distance?: number;
+    duration?: number; 
+    path?: {lat: number; lng: number}[];
+  }; // Stores the optimized route information
 }
 
 export interface DeliveryResponse {

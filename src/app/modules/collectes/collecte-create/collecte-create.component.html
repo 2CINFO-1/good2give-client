@@ -1,142 +1,239 @@
-<div class="container mx-auto px-4 py-8">
-    <div class="max-w-lg mx-auto bg-white p-8 rounded-xl shadow-2xl">
-      <div class="flex justify-between items-center mb-8">
-        <h1 class="text-3xl font-bold text-gray-900">Create New Collection</h1>
-        <button
-          (click)="cancel()"
-          class="text-gray-500 hover:text-gray-700 transition-colors duration-200"
-          aria-label="Cancel and return to collections list"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-7 w-7"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-        </button>
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12">
+  <div class="container mx-auto px-4">
+    <!-- Background decorative elements -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+      <div class="absolute top-20 left-10 w-72 h-72 bg-gradient-to-br from-primary-200/20 to-primary-300/20 rounded-full blur-3xl"></div>
+      <div class="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-tl from-primary-100/30 to-primary-200/30 rounded-full blur-3xl"></div>
+    </div>
+
+    <div class="max-w-3xl mx-auto relative">
+      <!-- Main Form Container -->
+      <div class="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-primary-100/50 overflow-hidden">
+        <!-- Header Section -->
+        <div class="bg-gradient-to-r from-primary-50 via-white to-primary-50 p-8 border-b border-primary-100/50 relative">
+          <!-- Decorative elements -->
+          <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-primary-200/20 to-transparent rounded-full translate-x-16 -translate-y-16"></div>
+          
+          <div class="flex justify-between items-start relative z-10">
+            <div class="space-y-4">
+              <!-- Icon and Title -->
+              <div class="flex items-center gap-4">
+                <div class="p-4 bg-gradient-to-r from-primary-500 to-primary-600 rounded-2xl shadow-lg">
+                  <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                  </svg>
+                </div>
+                <div>
+                  <h1 class="text-4xl font-bold bg-gradient-to-r from-primary-700 to-primary-900 bg-clip-text text-transparent">
+                    Create New Collection
+                  </h1>
+                  <p class="text-gray-600 text-lg mt-2">Fill in the details below to create your collection</p>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Close Button -->
+            <button
+              (click)="cancel()"
+              class="text-gray-400 hover:text-gray-600 transition-all duration-300 p-3 hover:bg-red-50 rounded-2xl hover:scale-110 group"
+              aria-label="Cancel and return to collections list"
+            >
+              <svg class="h-7 w-7 group-hover:text-red-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Error Message -->
+        <div *ngIf="error" class="mx-8 mt-6">
+          <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-6 rounded-2xl shadow-lg animate-fade-in" role="alert">
+            <div class="flex items-center gap-3">
+              <div class="p-2 bg-red-100 rounded-full">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+              </div>
+              <div>
+                <p class="font-bold">Error</p>
+                <p>{{ error }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Content -->
+        <div class="p-8">
+          <form [formGroup]="collecteForm" (ngSubmit)="onSubmit()" class="space-y-8">
+            
+            <!-- Title Field -->
+            <div class="space-y-3 group">
+              <label for="title" class="flex items-center gap-3 text-sm font-bold text-gray-700 group-hover:text-primary-700 transition-colors duration-200">
+                <div class="w-2 h-2 bg-gradient-to-r from-primary-500 to-primary-600 rounded-full"></div>
+                <span>Collection Title <span class="text-red-500">*</span></span>
+              </label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <div class="p-2 bg-primary-100 rounded-xl group-hover:bg-primary-200 transition-colors">
+                    <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                    </svg>
+                  </div>
+                </div>
+                <input
+                  type="text"
+                  id="title"
+                  formControlName="title"
+                  placeholder="✨ Enter a compelling title for your collection"
+                  class="block w-full pl-16 pr-4 py-4 bg-white border-2 border-gray-200/70 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-300 transition-all hover:border-primary-300 hover:shadow-md text-gray-700 font-medium placeholder-gray-400 group-hover:shadow-lg"
+                  [ngClass]="{'border-red-400 focus:border-red-400 focus:ring-red-200': formControls['title'].touched && formControls['title'].errors?.['required']}"
+                  aria-describedby="title-error"
+                />
+              </div>
+              <div *ngIf="formControls['title'].touched && formControls['title'].errors?.['required']" 
+                   id="title-error" 
+                   class="flex items-center gap-2 text-red-600 text-sm mt-2 animate-fade-in">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01"/>
+                </svg>
+                <span class="font-medium">Title is required</span>
+              </div>
+            </div>
+
+            <!-- Description Field -->
+            <div class="space-y-3 group">
+              <label for="description" class="flex items-center gap-3 text-sm font-bold text-gray-700 group-hover:text-primary-700 transition-colors duration-200">
+                <div class="w-2 h-2 bg-gradient-to-r from-primary-500 to-primary-600 rounded-full"></div>
+                <span>Description <span class="text-red-500">*</span></span>
+              </label>
+              <div class="relative">
+                <div class="absolute top-4 left-0 pl-4 pointer-events-none">
+                  <div class="p-2 bg-primary-100 rounded-xl group-hover:bg-primary-200 transition-colors">
+                    <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/>
+                    </svg>
+                  </div>
+                </div>
+                <textarea
+                  id="description"
+                  formControlName="description"
+                  rows="5"
+                  placeholder="📝 Describe your collection in detail - what makes it special?"
+                  class="block w-full pl-16 pr-4 py-4 bg-white border-2 border-gray-200/70 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-300 transition-all resize-y hover:border-primary-300 hover:shadow-md text-gray-700 font-medium placeholder-gray-400 group-hover:shadow-lg"
+                  [ngClass]="{'border-red-400 focus:border-red-400 focus:ring-red-200': formControls['description'].touched && formControls['description'].errors?.['required']}"
+                  aria-describedby="description-error"
+                ></textarea>
+              </div>
+              <div *ngIf="formControls['description'].touched && formControls['description'].errors?.['required']" 
+                   id="description-error" 
+                   class="flex items-center gap-2 text-red-600 text-sm mt-2 animate-fade-in">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01"/>
+                </svg>
+                <span class="font-medium">Description is required</span>
+              </div>
+            </div>
+
+            <!-- Location Field -->
+            <div class="space-y-3 group">
+              <label for="location" class="flex items-center gap-3 text-sm font-bold text-gray-700 group-hover:text-primary-700 transition-colors duration-200">
+                <div class="w-2 h-2 bg-gradient-to-r from-primary-500 to-primary-600 rounded-full"></div>
+                <span>Location <span class="text-red-500">*</span></span>
+              </label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <div class="p-2 bg-primary-100 rounded-xl group-hover:bg-primary-200 transition-colors">
+                    <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                  </div>
+                </div>
+                <input
+                  type="text"
+                  id="location"
+                  formControlName="location"
+                  placeholder="📍 Where is this collection located?"
+                  class="block w-full pl-16 pr-4 py-4 bg-white border-2 border-gray-200/70 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-300 transition-all hover:border-primary-300 hover:shadow-md text-gray-700 font-medium placeholder-gray-400 group-hover:shadow-lg"
+                  [ngClass]="{'border-red-400 focus:border-red-400 focus:ring-red-200': formControls['location'].touched && formControls['location'].errors?.['required']}"
+                  aria-describedby="location-error"
+                />
+              </div>
+              <div *ngIf="formControls['location'].touched && formControls['location'].errors?.['required']" 
+                   id="location-error" 
+                   class="flex items-center gap-2 text-red-600 text-sm mt-2 animate-fade-in">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01"/>
+                </svg>
+                <span class="font-medium">Location is required</span>
+              </div>
+            </div>
+
+            <!-- Progress Indicator -->
+            <div class="bg-gradient-to-r from-primary-50 to-primary-100/50 rounded-2xl p-6 border border-primary-200/50">
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-sm font-bold text-primary-700">Form Completion</span>
+                <span class="text-sm font-semibold text-primary-600">
+                  {{ (collecteForm.valid ? 100 : (getCompletedFields() / 3 * 100)) | number:'1.0-0' }}%
+                </span>
+              </div>
+              <div class="w-full bg-primary-200/50 rounded-full h-3 overflow-hidden">
+                <div class="bg-gradient-to-r from-primary-500 to-primary-600 h-3 rounded-full transition-all duration-500 ease-out"
+                     [style.width.%]="collecteForm.valid ? 100 : (getCompletedFields() / 3 * 100)">
+                </div>
+              </div>
+              <p class="text-xs text-primary-600 mt-2 font-medium">
+                {{ collecteForm.valid ? '✅ Ready to create!' : 'Fill in all required fields to continue' }}
+              </p>
+            </div>
+
+          </form>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="bg-gradient-to-r from-gray-50 to-gray-100/50 p-8 border-t border-gray-200/50">
+          <div class="flex justify-end space-x-4">
+            <button
+              type="button"
+              (click)="cancel()"
+              class="px-8 py-4 bg-white text-gray-700 rounded-xl hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition-all duration-300 font-semibold hover:scale-105 shadow-md hover:shadow-lg border border-gray-200 hover:border-gray-300"
+            >
+              <div class="flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+                <span>Cancel</span>
+              </div>
+            </button>
+            
+            <button
+              type="submit"
+              (click)="onSubmit()"
+              [disabled]="collecteForm.invalid || submitting"
+              class="px-10 py-4 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-xl hover:from-primary-700 hover:to-primary-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 font-semibold shadow-lg hover:shadow-xl hover:scale-105 disabled:hover:scale-100 disabled:hover:shadow-lg"
+            >
+              <div class="flex items-center gap-3">
+                <div *ngIf="submitting" class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <svg *ngIf="!submitting" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
+                <span>{{ submitting ? 'Creating Collection...' : 'Create Collection' }}</span>
+              </div>
+            </button>
+          </div>
+        </div>
       </div>
-  
-      <div
-        *ngIf="error"
-        class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-lg mb-6 animate-fade-in"
-        role="alert"
-      >
-        {{ error }}
-      </div>
-  
-      <form [formGroup]="collecteForm" (ngSubmit)="onSubmit()" class="space-y-6">
-        <!-- Title -->
-        <div>
-          <label
-            for="title"
-            class="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Title <span class="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            id="title"
-            formControlName="title"
-            class="block w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-            [ngClass]="{
-              'border-red-500': formControls['title'].touched && formControls['title'].errors?.['required']
-            }"
-            aria-describedby="title-error"
-          />
-          <div
-            *ngIf="formControls['title'].touched && formControls['title'].errors?.['required']"
-            id="title-error"
-            class="text-red-500 text-sm mt-1 animate-fade-in"
-          >
-            Title is required
-          </div>
-        </div>
-  
-        <!-- Description -->
-        <div>
-          <label
-            for="description"
-            class="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Description <span class="text-red-500">*</span>
-          </label>
-          <textarea
-            id="description"
-            formControlName="description"
-            rows="4"
-            class="block w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 resize-y"
-            [ngClass]="{
-              'border-red-500': formControls['description'].touched && formControls['description'].errors?.['required']
-            }"
-            aria-describedby="description-error"
-          ></textarea>
-          <div
-            *ngIf="formControls['description'].touched && formControls['description'].errors?.['required']"
-            id="description-error"
-            class="text-red-500 text-sm mt-1 animate-fade-in"
-          >
-            Description is required
-          </div>
-        </div>
-  
-        <!-- Location -->
-        <div>
-          <label
-            for="location"
-            class="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Location <span class="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            id="location"
-            formControlName="location"
-            class="block w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-            [ngClass]="{
-              'border-red-500': formControls['location'].touched && formControls['location'].errors?.['required']
-            }"
-            aria-describedby="location-error"
-          />
-          <div
-            *ngIf="formControls['location'].touched && formControls['location'].errors?.['required']"
-            id="location-error"
-            class="text-red-500 text-sm mt-1 animate-fade-in"
-          >
-            Location is required
-          </div>
-        </div>
-  
-        <!-- Buttons -->
-        <div class="flex justify-end space-x-4">
-          <button
-            type="button"
-            (click)="cancel()"
-            class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors duration-200"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            [disabled]="collecteForm.invalid || submitting"
-            class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 transition-colors duration-200"
-          >
-            <span *ngIf="submitting" class="flex items-center">
-              <div
-                class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"
-              ></div>
-              Creating...
-            </span>
-            <span *ngIf="!submitting">Create Collection</span>
-          </button>
-        </div>
-      </form>
     </div>
   </div>
+</div>
+
+<style>
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>
