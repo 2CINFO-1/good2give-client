@@ -1,4 +1,11 @@
-import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  ViewChild,
+  ElementRef,
+  AfterViewInit,
+  OnDestroy,
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { AuthService } from '../../core/services/auth.service';
@@ -62,11 +69,14 @@ interface CollectionStats {
   }[];
 }
 
-type RoleSpecificStats = Record<string, {
-  title: string;
-  stats: Record<string, number>;
-  features: string[];
-}>;
+type RoleSpecificStats = Record<
+  string,
+  {
+    title: string;
+    stats: Record<string, number>;
+    features: string[];
+  }
+>;
 
 interface Feature {
   name: string;
@@ -81,7 +91,9 @@ type RoleSpecificFeatures = Record<UserRole, Feature[]>;
   templateUrl: './dashboard-home.component.html',
   styleUrls: ['./dashboard-home.component.scss'],
 })
-export class DashboardHomeComponent implements OnInit, AfterViewInit, OnDestroy {
+export class DashboardHomeComponent
+  implements OnInit, AfterViewInit, OnDestroy
+{
   @ViewChild('categoryChart') categoryChartRef!: ElementRef;
   @ViewChild('productBarChart') productBarChartRef!: ElementRef;
   @ViewChild('deliveryChart') deliveryChartRef!: ElementRef;
@@ -108,7 +120,7 @@ export class DashboardHomeComponent implements OnInit, AfterViewInit, OnDestroy 
     onTimeDelivery: 0,
     lateDeliveries: 0,
     topLocations: [],
-    recentDeliveries: []
+    recentDeliveries: [],
   };
 
   collectionStats: CollectionStats = {
@@ -118,7 +130,7 @@ export class DashboardHomeComponent implements OnInit, AfterViewInit, OnDestroy 
     pending: 0,
     averageItems: 0,
     topCategories: [],
-    recentCollections: []
+    recentCollections: [],
   };
 
   isLoading = true;
@@ -130,14 +142,14 @@ export class DashboardHomeComponent implements OnInit, AfterViewInit, OnDestroy 
         totalUsers: 0,
         activeDonations: 0,
         pendingApprovals: 0,
-        systemHealth: 0
+        systemHealth: 0,
       },
       features: [
         'User Management',
         'System Configuration',
         'Analytics Overview',
-        'Approval Management'
-      ]
+        'Approval Management',
+      ],
     },
     [UserRole.DONATOR]: {
       title: 'Donator Dashboard',
@@ -145,14 +157,14 @@ export class DashboardHomeComponent implements OnInit, AfterViewInit, OnDestroy 
         totalDonations: 0,
         activeDonations: 0,
         impactScore: 0,
-        upcomingEvents: 0
+        upcomingEvents: 0,
       },
       features: [
         'Donation History',
         'Impact Tracking',
         'Event Calendar',
-        'Tax Documents'
-      ]
+        'Tax Documents',
+      ],
     },
     [UserRole.BENEFICIARY]: {
       title: 'Beneficiary Dashboard',
@@ -160,14 +172,14 @@ export class DashboardHomeComponent implements OnInit, AfterViewInit, OnDestroy 
         receivedDonations: 0,
         pendingRequests: 0,
         availableItems: 0,
-        upcomingDeliveries: 0
+        upcomingDeliveries: 0,
       },
       features: [
         'Request Management',
         'Inventory Overview',
         'Delivery Tracking',
-        'Impact Reports'
-      ]
+        'Impact Reports',
+      ],
     },
     [UserRole.TRANSPORTER]: {
       title: 'Transporter Dashboard',
@@ -175,14 +187,14 @@ export class DashboardHomeComponent implements OnInit, AfterViewInit, OnDestroy 
         activeDeliveries: 0,
         completedDeliveries: 0,
         pendingPickups: 0,
-        routeEfficiency: 0
+        routeEfficiency: 0,
       },
       features: [
         'Delivery Management',
         'Route Planning',
         'Pickup Scheduling',
-        'Performance Metrics'
-      ]
+        'Performance Metrics',
+      ],
     },
     [UserRole.INSPECTOR]: {
       title: 'Inspector Dashboard',
@@ -190,15 +202,15 @@ export class DashboardHomeComponent implements OnInit, AfterViewInit, OnDestroy 
         pendingInspections: 0,
         completedInspections: 0,
         qualityScore: 0,
-        complianceRate: 0
+        complianceRate: 0,
       },
       features: [
         'Inspection Queue',
         'Quality Reports',
         'Compliance Tracking',
-        'Documentation'
-      ]
-    }
+        'Documentation',
+      ],
+    },
   };
 
   productStats: ProductStats = {
@@ -206,40 +218,76 @@ export class DashboardHomeComponent implements OnInit, AfterViewInit, OnDestroy 
     availableProducts: 0,
     categoriesCount: 0,
     lowStockProducts: 0,
-    categoryDistribution: []
+    categoryDistribution: [],
   };
 
   roleFeatures: RoleSpecificFeatures = {
     [UserRole.ADMIN]: [
       { name: 'User Management', route: '/dashboard/settings', icon: 'users' },
-      { name: 'System Configuration', route: '/dashboard/settings', icon: 'settings' },
+      {
+        name: 'System Configuration',
+        route: '/dashboard/settings',
+        icon: 'settings',
+      },
       { name: 'Analytics Overview', route: '/dashboard/home', icon: 'chart' },
-      { name: 'Approval Management', route: '/dashboard/products', icon: 'check' }
+      {
+        name: 'Approval Management',
+        route: '/dashboard/products',
+        icon: 'check',
+      },
     ],
     [UserRole.DONATOR]: [
-      { name: 'Donation History', route: '/dashboard/collectes', icon: 'history' },
+      {
+        name: 'Donation History',
+        route: '/dashboard/collectes',
+        icon: 'history',
+      },
       { name: 'Impact Tracking', route: '/dashboard/home', icon: 'chart' },
       { name: 'Event Calendar', route: '/dashboard/events', icon: 'calendar' },
-      { name: 'Tax Documents', route: '/dashboard/settings', icon: 'document' }
+      { name: 'Tax Documents', route: '/dashboard/settings', icon: 'document' },
     ],
     [UserRole.BENEFICIARY]: [
-      { name: 'Request Management', route: '/dashboard/reclamations', icon: 'request' },
+      {
+        name: 'Request Management',
+        route: '/dashboard/reclamations',
+        icon: 'request',
+      },
       { name: 'Inventory Overview', route: '/dashboard/products', icon: 'box' },
-      { name: 'Delivery Tracking', route: '/dashboard/deliveries', icon: 'truck' },
-      { name: 'Impact Reports', route: '/dashboard/home', icon: 'report' }
+      {
+        name: 'Delivery Tracking',
+        route: '/dashboard/deliveries',
+        icon: 'truck',
+      },
+      { name: 'Impact Reports', route: '/dashboard/home', icon: 'report' },
     ],
     [UserRole.TRANSPORTER]: [
-      { name: 'Delivery Management', route: '/dashboard/deliveries', icon: 'truck' },
+      {
+        name: 'Delivery Management',
+        route: '/dashboard/deliveries',
+        icon: 'truck',
+      },
       { name: 'Route Planning', route: '/dashboard/deliveries', icon: 'map' },
-      { name: 'Pickup Scheduling', route: '/dashboard/collectes', icon: 'calendar' },
-      { name: 'Performance Metrics', route: '/dashboard/home', icon: 'chart' }
+      {
+        name: 'Pickup Scheduling',
+        route: '/dashboard/collectes',
+        icon: 'calendar',
+      },
+      { name: 'Performance Metrics', route: '/dashboard/home', icon: 'chart' },
     ],
     [UserRole.INSPECTOR]: [
-      { name: 'Inspection Queue', route: '/dashboard/inspection', icon: 'list' },
+      {
+        name: 'Inspection Queue',
+        route: '/dashboard/inspection',
+        icon: 'list',
+      },
       { name: 'Quality Reports', route: '/dashboard/products', icon: 'report' },
-      { name: 'Compliance Tracking', route: '/dashboard/inspection', icon: 'check' },
-      { name: 'Documentation', route: '/dashboard/settings', icon: 'document' }
-    ]
+      {
+        name: 'Compliance Tracking',
+        route: '/dashboard/inspection',
+        icon: 'check',
+      },
+      { name: 'Documentation', route: '/dashboard/settings', icon: 'document' },
+    ],
   };
 
   // Make UserRole accessible in template
@@ -263,6 +311,19 @@ export class DashboardHomeComponent implements OnInit, AfterViewInit, OnDestroy 
 
   ngOnInit(): void {
     try {
+      // Since AuthGuard handles authentication, we can proceed directly
+      this.initializeDashboard();
+    } catch (error) {
+      console.error('DashboardHomeComponent - Error in ngOnInit:', error);
+      this.isLoading = false;
+      this.toastr.error(
+        'An unexpected error occurred while loading the dashboard'
+      );
+    }
+  }
+
+  private initializeDashboard(): void {
+    try {
       // Check email verification first
       if (
         !this.navigationService.checkEmailVerificationForRoute(
@@ -272,18 +333,32 @@ export class DashboardHomeComponent implements OnInit, AfterViewInit, OnDestroy 
         return; // Stop initialization if email verification failed
       }
 
-      // Get current user role
-      const user = this.userState.getCurrentUser();
+      // Get current user - try both state service and auth service
+      let user = this.userState.getCurrentUser();
       if (!user) {
-        this.handleAccessError('No user found. Please log in to access the dashboard.');
+        user = this.authService.getCurrentUser();
+        if (user) {
+          // Update the state service with the user found in auth service
+          this.userState.setCurrentUser(user);
+        }
+      }
+
+      if (!user) {
+        console.log('DashboardHomeComponent - No user found');
+        this.handleAccessError(
+          'No user found. Please log in to access the dashboard.'
+        );
         return;
       }
 
+      console.log('DashboardHomeComponent - User loaded:', user.email);
       this.currentUserRole = user.role;
 
       // Check if user has access to dashboard
       if (!this.hasDashboardAccess()) {
-        this.handleAccessError(`Access denied. Your role (${user.role}) does not have permission to access the dashboard.`);
+        this.handleAccessError(
+          `Access denied. Your role (${user.role}) does not have permission to access the dashboard.`
+        );
         return;
       }
 
@@ -295,16 +370,35 @@ export class DashboardHomeComponent implements OnInit, AfterViewInit, OnDestroy 
 
       // Load delivery and collection data
       this.loadDeliveryAndCollectionData();
+
+      // Also subscribe to future user changes
+      this.userState.currentUser$
+        .pipe(takeUntil(this.destroy$))
+        .subscribe((updatedUser) => {
+          if (updatedUser && updatedUser.email !== user?.email) {
+            console.log(
+              'DashboardHomeComponent - User updated:',
+              updatedUser.email
+            );
+            this.currentUserRole = updatedUser.role;
+            // Optionally reload data when user changes
+          }
+        });
     } catch (error) {
-      console.error('DashboardHomeComponent - Error in ngOnInit:', error);
+      console.error(
+        'DashboardHomeComponent - Error in initializeDashboard:',
+        error
+      );
       this.isLoading = false;
-      this.toastr.error('An unexpected error occurred while loading the dashboard');
+      this.toastr.error(
+        'An unexpected error occurred while loading the dashboard'
+      );
     }
   }
 
   private handleAccessError(message: string): void {
     this.toastr.error(message);
-    this.router.navigate(['/']);
+    this.router.navigate(['/auth/login']);
   }
 
   private hasDashboardAccess(): boolean {
@@ -323,7 +417,7 @@ export class DashboardHomeComponent implements OnInit, AfterViewInit, OnDestroy 
       const roleStats = this.roleSpecificStats[this.currentUserRole!];
       if (roleStats) {
         // Update stats based on role
-        Object.keys(roleStats.stats).forEach(key => {
+        Object.keys(roleStats.stats).forEach((key) => {
           roleStats.stats[key] = Math.floor(Math.random() * 100); // Simulated data
         });
       }
@@ -347,7 +441,8 @@ export class DashboardHomeComponent implements OnInit, AfterViewInit, OnDestroy 
 
   private loadDeliveryAndCollectionData(): void {
     // Load deliveries
-    this.deliveryService.getAllDeliveries()
+    this.deliveryService
+      .getAllDeliveries()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (deliveries: Delivery[]) => {
@@ -357,11 +452,12 @@ export class DashboardHomeComponent implements OnInit, AfterViewInit, OnDestroy 
         error: (error: Error) => {
           console.error('Error loading deliveries:', error);
           this.toastr.error('Failed to load delivery data');
-        }
+        },
       });
 
     // Load collections
-    this.collecteService.getAllCollectes()
+    this.collecteService
+      .getAllCollectes()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (collections: Collecte[]) => {
@@ -371,33 +467,50 @@ export class DashboardHomeComponent implements OnInit, AfterViewInit, OnDestroy 
         error: (error: Error) => {
           console.error('Error loading collections:', error);
           this.toastr.error('Failed to load collection data');
-        }
+        },
       });
   }
 
   private processDeliveryData(deliveries: Delivery[]): void {
     // Calculate delivery statistics
     const total = deliveries.length;
-    const completed = deliveries.filter(d => d.status === DeliveryStatus.DELIVERED).length;
-    const inProgress = deliveries.filter(d => d.status === DeliveryStatus.IN_PROGRESS).length;
-    const pending = deliveries.filter(d => d.status === DeliveryStatus.PENDING).length;
+    const completed = deliveries.filter(
+      (d) => d.status === DeliveryStatus.DELIVERED
+    ).length;
+    const inProgress = deliveries.filter(
+      (d) => d.status === DeliveryStatus.IN_PROGRESS
+    ).length;
+    const pending = deliveries.filter(
+      (d) => d.status === DeliveryStatus.PENDING
+    ).length;
 
     // Calculate average delivery time
-    const completedDeliveries = deliveries.filter(d => d.status === DeliveryStatus.DELIVERED);
+    const completedDeliveries = deliveries.filter(
+      (d) => d.status === DeliveryStatus.DELIVERED
+    );
     const totalTime = completedDeliveries.reduce((acc, delivery) => {
-      const pickupDate = delivery.pickupDate ? new Date(delivery.pickupDate) : null;
-      const expectedDate = delivery.expectedDeliveryDate ? new Date(delivery.expectedDeliveryDate) : null;
+      const pickupDate = delivery.pickupDate
+        ? new Date(delivery.pickupDate)
+        : null;
+      const expectedDate = delivery.expectedDeliveryDate
+        ? new Date(delivery.expectedDeliveryDate)
+        : null;
       if (pickupDate && expectedDate) {
         return acc + (expectedDate.getTime() - pickupDate.getTime());
       }
       return acc;
     }, 0);
-    const averageTime = completedDeliveries.length > 0 ? totalTime / completedDeliveries.length / (1000 * 60 * 60) : 0;
+    const averageTime =
+      completedDeliveries.length > 0
+        ? totalTime / completedDeliveries.length / (1000 * 60 * 60)
+        : 0;
 
     // Calculate on-time and late deliveries
-    const onTimeDeliveries = completedDeliveries.filter(d => {
+    const onTimeDeliveries = completedDeliveries.filter((d) => {
       const pickupDate = d.pickupDate ? new Date(d.pickupDate) : null;
-      const expectedDate = d.expectedDeliveryDate ? new Date(d.expectedDeliveryDate) : null;
+      const expectedDate = d.expectedDeliveryDate
+        ? new Date(d.expectedDeliveryDate)
+        : null;
       if (pickupDate && expectedDate) {
         return expectedDate >= pickupDate;
       }
@@ -406,7 +519,10 @@ export class DashboardHomeComponent implements OnInit, AfterViewInit, OnDestroy 
 
     // Get location distribution
     const locationCount = deliveries.reduce((acc, delivery) => {
-      const location = typeof delivery.beneficiary === 'string' ? delivery.beneficiary : 'Unknown';
+      const location =
+        typeof delivery.beneficiary === 'string'
+          ? delivery.beneficiary
+          : 'Unknown';
       acc[location] = (acc[location] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
@@ -424,12 +540,16 @@ export class DashboardHomeComponent implements OnInit, AfterViewInit, OnDestroy 
         return dateB - dateA;
       })
       .slice(0, 5)
-      .map(delivery => ({
+      .map((delivery) => ({
         id: delivery._id,
         status: delivery.status,
-        date: delivery.createdAt ? new Date(delivery.createdAt).toLocaleDateString() : 'N/A',
-        location: typeof delivery.beneficiary === 'string' ? delivery.beneficiary : 
-                 delivery.beneficiary?.name || 'Unknown Beneficiary'
+        date: delivery.createdAt
+          ? new Date(delivery.createdAt).toLocaleDateString()
+          : 'N/A',
+        location:
+          typeof delivery.beneficiary === 'string'
+            ? delivery.beneficiary
+            : delivery.beneficiary?.name || 'Unknown Beneficiary',
       }));
 
     this.deliveryStats = {
@@ -441,16 +561,22 @@ export class DashboardHomeComponent implements OnInit, AfterViewInit, OnDestroy 
       onTimeDelivery: onTimeDeliveries,
       lateDeliveries: completed - onTimeDeliveries,
       topLocations,
-      recentDeliveries
+      recentDeliveries,
     };
   }
 
   private processCollectionData(collections: Collecte[]): void {
     // Calculate collection statistics
     const total = collections.length;
-    const completed = collections.filter(c => c.status === CollecteStatus.COMPLETED).length;
-    const inProgress = collections.filter(c => c.status === CollecteStatus.IN_PROGRESS).length;
-    const pending = collections.filter(c => c.status === CollecteStatus.PENDING).length;
+    const completed = collections.filter(
+      (c) => c.status === CollecteStatus.COMPLETED
+    ).length;
+    const inProgress = collections.filter(
+      (c) => c.status === CollecteStatus.IN_PROGRESS
+    ).length;
+    const pending = collections.filter(
+      (c) => c.status === CollecteStatus.PENDING
+    ).length;
 
     // Get category distribution based on location
     const categoryCount = collections.reduce((acc, collection) => {
@@ -472,12 +598,14 @@ export class DashboardHomeComponent implements OnInit, AfterViewInit, OnDestroy 
         return dateB - dateA;
       })
       .slice(0, 5)
-      .map(collection => ({
+      .map((collection) => ({
         id: collection._id,
         status: collection.status,
-        date: collection.createdAt ? new Date(collection.createdAt).toLocaleDateString() : 'N/A',
+        date: collection.createdAt
+          ? new Date(collection.createdAt).toLocaleDateString()
+          : 'N/A',
         title: collection.title || 'Untitled Collection',
-        location: collection.location || 'No Location'
+        location: collection.location || 'No Location',
       }));
 
     this.collectionStats = {
@@ -487,7 +615,7 @@ export class DashboardHomeComponent implements OnInit, AfterViewInit, OnDestroy 
       pending,
       averageItems: 0, // Not available in the model
       topCategories,
-      recentCollections
+      recentCollections,
     };
   }
 
@@ -500,29 +628,31 @@ export class DashboardHomeComponent implements OnInit, AfterViewInit, OnDestroy 
       }
 
       // Get category distribution from deliveries
-      const categoryData = this.deliveryStats.topLocations.map(loc => ({
+      const categoryData = this.deliveryStats.topLocations.map((loc) => ({
         name: loc.location,
-        count: loc.count
+        count: loc.count,
       }));
 
       this.deliveryChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
-          labels: categoryData.map(cat => cat.name),
-          datasets: [{
-            label: 'Deliveries by Category',
-            data: categoryData.map(cat => cat.count),
-            backgroundColor: [
-              '#3B82F6', // blue-500
-              '#10B981', // green-500
-              '#8B5CF6', // purple-500
-              '#F59E0B', // yellow-500
-              '#EF4444', // red-500
-              '#EC4899', // pink-500
-            ],
-            borderWidth: 1,
-            borderColor: '#ffffff'
-          }]
+          labels: categoryData.map((cat) => cat.name),
+          datasets: [
+            {
+              label: 'Deliveries by Category',
+              data: categoryData.map((cat) => cat.count),
+              backgroundColor: [
+                '#3B82F6', // blue-500
+                '#10B981', // green-500
+                '#8B5CF6', // purple-500
+                '#F59E0B', // yellow-500
+                '#EF4444', // red-500
+                '#EC4899', // pink-500
+              ],
+              borderWidth: 1,
+              borderColor: '#ffffff',
+            },
+          ],
         },
         options: {
           responsive: true,
@@ -533,24 +663,24 @@ export class DashboardHomeComponent implements OnInit, AfterViewInit, OnDestroy 
               labels: {
                 padding: 20,
                 font: {
-                  size: 12
-                }
-              }
+                  size: 12,
+                },
+              },
             },
             title: {
               display: true,
               text: 'Delivery Categories Distribution',
               font: {
                 size: 16,
-                weight: 'bold'
+                weight: 'bold',
               },
               padding: {
                 top: 10,
-                bottom: 20
-              }
-            }
-          }
-        }
+                bottom: 20,
+              },
+            },
+          },
+        },
       });
     }
   }
@@ -564,29 +694,31 @@ export class DashboardHomeComponent implements OnInit, AfterViewInit, OnDestroy 
       }
 
       // Get category distribution from collections
-      const categoryData = this.collectionStats.topCategories.map(cat => ({
+      const categoryData = this.collectionStats.topCategories.map((cat) => ({
         name: cat.category,
-        count: cat.count
+        count: cat.count,
       }));
 
       this.collectionChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
-          labels: categoryData.map(cat => cat.name),
-          datasets: [{
-            label: 'Collections by Category',
-            data: categoryData.map(cat => cat.count),
-            backgroundColor: [
-              '#3B82F6', // blue-500
-              '#10B981', // green-500
-              '#8B5CF6', // purple-500
-              '#F59E0B', // yellow-500
-              '#EF4444', // red-500
-              '#EC4899', // pink-500
-            ],
-            borderWidth: 1,
-            borderColor: '#ffffff'
-          }]
+          labels: categoryData.map((cat) => cat.name),
+          datasets: [
+            {
+              label: 'Collections by Category',
+              data: categoryData.map((cat) => cat.count),
+              backgroundColor: [
+                '#3B82F6', // blue-500
+                '#10B981', // green-500
+                '#8B5CF6', // purple-500
+                '#F59E0B', // yellow-500
+                '#EF4444', // red-500
+                '#EC4899', // pink-500
+              ],
+              borderWidth: 1,
+              borderColor: '#ffffff',
+            },
+          ],
         },
         options: {
           responsive: true,
@@ -597,24 +729,24 @@ export class DashboardHomeComponent implements OnInit, AfterViewInit, OnDestroy 
               labels: {
                 padding: 20,
                 font: {
-                  size: 12
-                }
-              }
+                  size: 12,
+                },
+              },
             },
             title: {
               display: true,
               text: 'Collection Categories Distribution',
               font: {
                 size: 16,
-                weight: 'bold'
+                weight: 'bold',
               },
               padding: {
                 top: 10,
-                bottom: 20
-              }
-            }
-          }
-        }
+                bottom: 20,
+              },
+            },
+          },
+        },
       });
     }
   }
@@ -629,7 +761,10 @@ export class DashboardHomeComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   private initializeCategoryChart() {
-    if (this.categoryChartRef && this.productStats.categoryDistribution.length > 0) {
+    if (
+      this.categoryChartRef &&
+      this.productStats.categoryDistribution.length > 0
+    ) {
       const ctx = this.categoryChartRef.nativeElement.getContext('2d');
 
       if (this.categoryChart) {
@@ -639,19 +774,23 @@ export class DashboardHomeComponent implements OnInit, AfterViewInit, OnDestroy 
       this.categoryChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
-          labels: this.productStats.categoryDistribution.map(cat => cat.name),
-          datasets: [{
-            data: this.productStats.categoryDistribution.map(cat => cat.count),
-            backgroundColor: [
-              '#3B82F6', // blue-500
-              '#10B981', // green-500
-              '#8B5CF6', // purple-500
-              '#F59E0B', // yellow-500
-              '#EF4444', // red-500
-              '#EC4899', // pink-500
-            ],
-            borderWidth: 1
-          }]
+          labels: this.productStats.categoryDistribution.map((cat) => cat.name),
+          datasets: [
+            {
+              data: this.productStats.categoryDistribution.map(
+                (cat) => cat.count
+              ),
+              backgroundColor: [
+                '#3B82F6', // blue-500
+                '#10B981', // green-500
+                '#8B5CF6', // purple-500
+                '#F59E0B', // yellow-500
+                '#EF4444', // red-500
+                '#EC4899', // pink-500
+              ],
+              borderWidth: 1,
+            },
+          ],
         },
         options: {
           responsive: true,
@@ -662,30 +801,33 @@ export class DashboardHomeComponent implements OnInit, AfterViewInit, OnDestroy 
               labels: {
                 padding: 20,
                 font: {
-                  size: 12
-                }
-              }
+                  size: 12,
+                },
+              },
             },
             title: {
               display: true,
               text: 'Product Categories Distribution',
               font: {
                 size: 16,
-                weight: 'bold'
+                weight: 'bold',
               },
               padding: {
                 top: 10,
-                bottom: 20
-              }
-            }
-          }
-        }
+                bottom: 20,
+              },
+            },
+          },
+        },
       });
     }
   }
 
   private initializeProductBarChart() {
-    if (this.productBarChartRef && this.productStats.categoryDistribution.length > 0) {
+    if (
+      this.productBarChartRef &&
+      this.productStats.categoryDistribution.length > 0
+    ) {
       const ctx = this.productBarChartRef.nativeElement.getContext('2d');
 
       if (this.productBarChart) {
@@ -695,14 +837,18 @@ export class DashboardHomeComponent implements OnInit, AfterViewInit, OnDestroy 
       this.productBarChart = new Chart(ctx, {
         type: 'bar',
         data: {
-          labels: this.productStats.categoryDistribution.map(cat => cat.name),
-          datasets: [{
-            label: 'Nombre de Produits',
-            data: this.productStats.categoryDistribution.map(cat => cat.count),
-            backgroundColor: '#3B82F6',
-            borderColor: '#2563EB',
-            borderWidth: 1
-          }]
+          labels: this.productStats.categoryDistribution.map((cat) => cat.name),
+          datasets: [
+            {
+              label: 'Nombre de Produits',
+              data: this.productStats.categoryDistribution.map(
+                (cat) => cat.count
+              ),
+              backgroundColor: '#3B82F6',
+              borderColor: '#2563EB',
+              borderWidth: 1,
+            },
+          ],
         },
         options: {
           responsive: true,
@@ -716,23 +862,23 @@ export class DashboardHomeComponent implements OnInit, AfterViewInit, OnDestroy 
               text: 'Produits par Catégorie',
               font: {
                 size: 16,
-                weight: 'bold'
+                weight: 'bold',
               },
               padding: {
                 top: 10,
-                bottom: 20
-              }
-            }
+                bottom: 20,
+              },
+            },
           },
           scales: {
             y: {
               beginAtZero: true,
               ticks: {
-                stepSize: 1
-              }
-            }
-          }
-        }
+                stepSize: 1,
+              },
+            },
+          },
+        },
       });
     }
   }
@@ -743,28 +889,33 @@ export class DashboardHomeComponent implements OnInit, AfterViewInit, OnDestroy 
       next: (products: Product[]) => {
         this.productStats = {
           totalProducts: products.length,
-          availableProducts: products.filter((p: Product) => p.status === 'available').length,
-          categoriesCount: new Set(products.map((p: Product) => p.category)).size,
+          availableProducts: products.filter(
+            (p: Product) => p.status === 'available'
+          ).length,
+          categoriesCount: new Set(products.map((p: Product) => p.category))
+            .size,
           lowStockProducts: 0,
-          categoryDistribution: this.getCategoryDistribution(products)
+          categoryDistribution: this.getCategoryDistribution(products),
         };
 
         // Load stock information for each product
-        const stockPromises = products.map(product =>
+        const stockPromises = products.map((product) =>
           this.stockService.getStocksByProduct(product._id).toPromise()
         );
 
         Promise.all(stockPromises)
-          .then(stockArrays => {
+          .then((stockArrays) => {
             const lowStockProducts = products.filter((product, index) => {
               const stocks = stockArrays[index] || [];
-              const availableStocks = stocks.filter(stock => !stock.releasedAt).length;
+              const availableStocks = stocks.filter(
+                (stock) => !stock.releasedAt
+              ).length;
               return availableStocks < 10;
             }).length;
 
             this.productStats = {
               ...this.productStats,
-              lowStockProducts
+              lowStockProducts,
             };
             this.isLoading = false;
             this.initializeCharts();
@@ -777,20 +928,24 @@ export class DashboardHomeComponent implements OnInit, AfterViewInit, OnDestroy 
       error: (error: Error) => {
         console.error('Error loading product stats:', error);
         this.isLoading = false;
-      }
+      },
     });
   }
 
-  private getCategoryDistribution(products: Product[]): { name: string; count: number }[] {
+  private getCategoryDistribution(
+    products: Product[]
+  ): { name: string; count: number }[] {
     const categoryCount = products.reduce((acc, product) => {
       acc[product.category] = (acc[product.category] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
 
-    return Object.entries(categoryCount).map(([name, count]) => ({
-      name,
-      count
-    })).sort((a, b) => b.count - a.count);
+    return Object.entries(categoryCount)
+      .map(([name, count]) => ({
+        name,
+        count,
+      }))
+      .sort((a, b) => b.count - a.count);
   }
 
   navigateToFeature(route: string): void {

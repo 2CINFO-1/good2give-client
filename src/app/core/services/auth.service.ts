@@ -4,7 +4,14 @@ import {
   HttpBackend,
   HttpErrorResponse,
 } from '@angular/common/http';
-import { Observable, throwError, BehaviorSubject, of, map } from 'rxjs';
+import {
+  Observable,
+  throwError,
+  BehaviorSubject,
+  of,
+  map,
+  timeout,
+} from 'rxjs';
 import { tap, catchError, switchMap } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
@@ -85,6 +92,7 @@ export class AuthService {
             },
           })
           .pipe(
+            timeout(10000), // 10 second timeout to prevent hanging
             catchError((error) => {
               console.error('Error fetching user profile:', error);
 

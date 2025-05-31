@@ -29,16 +29,30 @@ export class NavigationService {
 
     // If no user is logged in, return true and let auth guard handle it
     if (!currentUser) {
+      console.log(
+        'NavigationService - No user found, letting auth guard handle it'
+      );
       return true;
     }
 
+    console.log('NavigationService - Checking email verification for user:', {
+      email: currentUser.email,
+      isEmailVerified: currentUser.isEmailVerified,
+    });
+
     // If isEmailVerified is not explicitly true (either false or undefined), redirect to verify
     if (currentUser.isEmailVerified !== true) {
+      console.log(
+        'NavigationService - Email not verified, redirecting to verification page'
+      );
       this.toastr.warning('Please verify your email address to continue');
-      this.router.navigate(['/auth/verify-email']);
+      this.router.navigate(['/auth/verify-email'], {
+        queryParams: { email: currentUser.email },
+      });
       return false;
     }
 
+    console.log('NavigationService - Email verified, allowing access');
     return true;
   }
 }

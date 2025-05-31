@@ -13,7 +13,7 @@ export class LoginComponent implements OnInit {
   loginForm: FormGroup;
   isSubmitting = false;
   errorMessage = '';
-  returnUrl: string = '/dashboard';
+  returnUrl: string = '/dashboard/home';
 
   constructor(
     private formBuilder: FormBuilder,
@@ -31,9 +31,9 @@ export class LoginComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Get return url from route parameters or default to '/dashboard'
+    // Get return url from route parameters or default to '/dashboard/home'
     this.returnUrl =
-      this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
+      this.route.snapshot.queryParams['returnUrl'] || '/dashboard/home';
 
     // Check if there's an error from the callback
     const error = this.route.snapshot.queryParams['error'];
@@ -47,6 +47,8 @@ export class LoginComponent implements OnInit {
     if (message) {
       this.toastr.info(message);
     }
+
+    console.log('LoginComponent - Initialized with returnUrl:', this.returnUrl);
   }
 
   // Getter methods for form validation
@@ -122,10 +124,15 @@ export class LoginComponent implements OnInit {
           });
         } else {
           console.log(
-            'LoginComponent onSubmit - Navigating to:',
+            'LoginComponent onSubmit - Email verified, navigating to:',
             this.returnUrl
           );
-          this.router.navigateByUrl(this.returnUrl);
+          // Use navigateByUrl for absolute paths, navigate for relative paths
+          if (this.returnUrl.startsWith('/')) {
+            this.router.navigateByUrl(this.returnUrl);
+          } else {
+            this.router.navigate([this.returnUrl]);
+          }
         }
       },
       error: (error) => {

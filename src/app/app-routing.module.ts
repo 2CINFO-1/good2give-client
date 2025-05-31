@@ -81,17 +81,16 @@ const routes: Routes = [
     redirectTo: 'auth/reset-password',
     pathMatch: 'full',
   },
-  // Redirect from /dashboard to /dashboard/home
-  {
-    path: 'dashboard',
-    redirectTo: 'dashboard/home',
-    pathMatch: 'full',
-  },
   {
     path: 'dashboard',
     component: DashboardLayoutComponent,
     canActivate: [AuthGuard],
     children: [
+      {
+        path: '',
+        redirectTo: 'home',
+        pathMatch: 'full',
+      },
       {
         path: 'home',
         loadChildren: () =>
@@ -99,11 +98,6 @@ const routes: Routes = [
             (m) => m.DashboardHomeModule
           ),
         canActivate: [AuthGuard],
-      },
-      {
-        path: '',
-        redirectTo: 'home',
-        pathMatch: 'full',
       },
       {
         path: 'users',
