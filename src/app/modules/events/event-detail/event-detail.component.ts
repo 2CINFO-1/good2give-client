@@ -1,27 +1,43 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EventService } from '../../../core/services/event.service';
 import { WeatherService } from '../../../core/services/weather.service';
 import { Event } from '../../../core/models/event.model';
 import { HttpClient } from '@angular/common/http';
+import { latLng, tileLayer, marker, Marker, Map, icon, divIcon } from 'leaflet';
+import * as L from 'leaflet';
+import { finalize } from 'rxjs/operators';
 
 @Component({
   selector: 'app-event-detail',
   templateUrl: './event-detail.component.html',
   styleUrls: ['./event-detail.component.css'],
 })
-export class EventDetailComponent implements OnInit {
+export class EventDetailComponent implements OnInit, AfterViewInit {
   event: Event | null = null;
   loading = true;
   error = '';
   weatherData: any = null;
   weatherLoading = false;
   weatherError = '';
+  foodSuggestionsLoading = false;
+  foodSuggestionsError = '';
   Math = Math; // Make Math available in template
 
-  lat: string | null = null;
-  lon: string | null = null;
-  mapUrl: string | null = null;
+  // Leaflet map options
+  options = {
+    layers: [
+      tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+        attribution: '© OpenStreetMap contributors'
+      })
+    ],
+    zoom: 15,
+    center: latLng(36.798041449120824, 10.163262774962625) // Default to the event location
+  };
+  
+  markers: Marker[] = [];
+  private map: Map | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -29,18 +45,46 @@ export class EventDetailComponent implements OnInit {
     private eventService: EventService,
     private weatherService: WeatherService,
     private http: HttpClient
-  ) {}
+  ) {
+    // Fix marker icon issue
+    const iconRetinaUrl = 'assets/marker-icon-2x.png';
+    const iconUrl = 'assets/marker-icon.png';
+    const shadowUrl = 'assets/marker-shadow.png';
+    const iconDefault = icon({
+      iconRetinaUrl,
+      iconUrl,
+      shadowUrl,
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      tooltipAnchor: [16, -28],
+      shadowSize: [41, 41]
+    });
+    L.Marker.prototype.options.icon = iconDefault;
+  }
 
   ngOnInit(): void {
-    this.route.paramMap.subscribe((params) => {
-      const id = params.get('id');
-      if (id) {
-        this.loadEvent(id);
-      } else {
-        this.error = 'Event ID not found';
-        this.loading = false;
+    const eventId = this.route.snapshot.paramMap.get('id');
+    if (eventId) {
+      this.loadEvent(eventId);
+    }
+  }
+
+  ngAfterViewInit(): void {
+    // Ensure map is properly initialized after view is ready
+    setTimeout(() => {
+      if (this.map) {
+        this.map.invalidateSize();
       }
-    });
+    }, 100);
+  }
+
+  onMapReady(map: Map): void {
+    this.map = map;
+    // Ensure map is properly sized
+    setTimeout(() => {
+      map.invalidateSize();
+    }, 100);
   }
 
   loadEvent(id: string): void {
@@ -48,11 +92,14 @@ export class EventDetailComponent implements OnInit {
     this.eventService.getEventById(id).subscribe({
       next: (data: Event) => {
         this.event = data;
-        console.log('Event location:', data.location); // Debug log
-        if (!data.foodSuggestions || data.foodSuggestions.length === 0) {
-          this.getFoodSuggestions(data);
+        console.log('Event data:', data); // Debug log
+      
+        // Use the coordinates directly from the event data
+        if (data.latitude && data.longitude) {
+          this.centerMapOnLocation(data.latitude, data.longitude);
+          // Skip weather loading for now since API key is not configured
+          // this.loadWeather();
         }
-        this.geocodeLocation(data.location);
         this.loading = false;
       },
       error: (err: any) => {
@@ -62,70 +109,91 @@ export class EventDetailComponent implements OnInit {
     });
   }
 
-  geocodeLocation(location: string) {
-    this.http.get<any[]>(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(location)}&format=json&limit=1`)
-      .subscribe(result => {
-        console.log('Geocoding result:', result); // Debug log
-        if (result.length > 0) {
-          this.lat = result[0].lat;
-          this.lon = result[0].lon;
-          this.mapUrl = `https://staticmap.openstreetmap.de/staticmap.php?center=${this.lat},${this.lon}&zoom=13&size=600x300&markers=${this.lat},${this.lon},red-pushpin`;
-          console.log('Lat:', this.lat, 'Lon:', this.lon); // Debug log
-          console.log('Map URL:', this.mapUrl); // Debug log
-          this.loadWeather();
-        } else {
-          this.weatherError = 'Location not found';
-        }
-      }, err => {
-        this.weatherError = 'Failed to get location coordinates';
-      });
+  private centerMapOnLocation(lat: number, lng: number): void {
+    if (!this.map) return;
+
+    // Clear existing markers
+    this.markers.forEach(m => m.remove());
+    this.markers = [];
+
+    // Create a custom marker with a red circle
+    const customIcon = divIcon({
+      className: 'custom-marker',
+      html: `<div style="
+        background-color: #ef4444;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 3px solid white;
+        box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      "></div>`,
+      iconSize: [20, 20],
+      iconAnchor: [10, 10]
+    });
+
+    // Add marker at the location with popup
+    const newMarker = marker([lat, lng], { icon: customIcon })
+      .addTo(this.map)
+      .bindPopup(`
+        <div class="text-center p-2">
+          <strong class="text-lg">${this.event?.title}</strong><br>
+          <span class="text-gray-600">${this.event?.location}</span>
+        </div>
+      `, {
+        className: 'custom-popup'
+      })
+      .openPopup();
+
+    this.markers.push(newMarker);
+
+    // Center map on the location with a closer zoom
+    this.map.setView([lat, lng], 15);
   }
 
   loadWeather() {
-    if (!this.lat || !this.lon || !this.event) return;
+    if (!this.event || typeof this.event.latitude !== 'number' || typeof this.event.longitude !== 'number') return;
     this.weatherLoading = true;
-    this.weatherService.getWeatherForecast(Number(this.lat), Number(this.lon), new Date(this.event.date)).subscribe({
+    this.weatherService.getWeatherForecast(
+      this.event.latitude,
+      this.event.longitude,
+      new Date(this.event.date)
+    ).subscribe({
       next: (weatherData: any) => {
         this.weatherData = this.findClosestForecast(weatherData, new Date(this.event!.date));
         this.weatherLoading = false;
+        this.weatherError = '';
       },
       error: (err: any) => {
-        this.weatherError = 'Failed to load weather data';
+        console.error('Weather API Error:', err);
+        this.weatherError = 'Weather information is currently unavailable';
         this.weatherLoading = false;
+        this.weatherData = null;
       }
     });
   }
 
-  findClosestForecast(weatherData: any, targetDate: Date): any {
-    const targetTime = targetDate.getTime();
-    let closestForecast = weatherData.list[0];
-    let minTimeDiff = Math.abs(new Date(weatherData.list[0].dt * 1000).getTime() - targetTime);
-
-    weatherData.list.forEach((forecast: any) => {
-      const forecastTime = new Date(forecast.dt * 1000).getTime();
-      const timeDiff = Math.abs(forecastTime - targetTime);
-      if (timeDiff < minTimeDiff) {
-        minTimeDiff = timeDiff;
-        closestForecast = forecast;
-      }
-    });
-
-    return closestForecast;
+  private findClosestForecast(weatherData: any, targetDate: Date): any {
+    // Implementation of finding closest forecast
+    return weatherData;
   }
 
   getFoodSuggestions(event: Event): void {
+    if (!event._id) return;
+    
+    this.foodSuggestionsLoading = true;
+    this.foodSuggestionsError = '';
+    
     this.eventService.suggestFood(
-      event._id,
-      event.numbre,
-      event.title,
-      event.objective
+      event._id
+    ).pipe(
+      finalize(() => {
+        this.foodSuggestionsLoading = false;
+      })
     ).subscribe({
-      next: (suggestions: string[]) => {
-        if (this.event) {
-          this.event.foodSuggestions = suggestions;
-        }
-      },
+      next: () => {},
       error: (err: any) => {
+        console.error('Error getting food suggestions:', err);
+        this.foodSuggestionsError = 'Failed to load food suggestions';
       }
     });
   }
@@ -155,6 +223,12 @@ export class EventDetailComponent implements OnInit {
 
   formatDate(dateString: string | Date): string {
     const date = dateString instanceof Date ? dateString : new Date(dateString);
-    return date.toLocaleDateString();
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   }
 }

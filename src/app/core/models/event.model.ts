@@ -8,6 +8,8 @@ export interface Event {
   numbre: number;
   date: Date;
   location: string;
+  latitude?: number;
+  longitude?: number;
   foodSuggestions?: string[];
   createdAt: Date;
   updatedAt: Date;
@@ -20,6 +22,8 @@ export interface CreateEventDto {
   numbre: number;
   date: string;
   location: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 export interface UpdateEventDto {
@@ -28,6 +32,8 @@ export interface UpdateEventDto {
   numbre?: number;
   date?: string;
   location?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 export interface EventSerializer {
@@ -38,6 +44,8 @@ export interface EventSerializer {
   numbre: number;
   date: Date;
   location: string;
+  latitude: number;
+  longitude: number;
   foodSuggestions?: string[];
   createdAt: Date;
   updatedAt: Date;

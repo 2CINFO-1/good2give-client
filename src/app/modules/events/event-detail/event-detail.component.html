@@ -70,8 +70,6 @@
                                     </div>
                                 </div>
 
-
-
                                 <div class="flex items-center">
                                     <div class="p-3 rounded-full bg-primary-100 text-primary-600 mr-4">
                                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -97,12 +95,35 @@
                                     <div>
                                         <p class="text-gray-600 text-sm">Food suggested</p>
                                         <div class="text-gray-900 font-medium">
-                                            <ul class="list-disc list-inside">
+                                            <!-- Loading state -->
+                                            <div *ngIf="foodSuggestionsLoading" class="flex items-center">
+                                                <div class="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-primary-600 mr-2"></div>
+                                                <span>Loading suggestions...</span>
+                                            </div>
+                                            
+                                            <!-- Error state -->
+                                            <div *ngIf="foodSuggestionsError" class="text-red-600">
+                                                {{ foodSuggestionsError }}
+                                            </div>
+                                            
+                                            <!-- Food suggestions list -->
+                                            <ul *ngIf="!foodSuggestionsLoading && !foodSuggestionsError" class="list-disc list-inside">
                                                 <li *ngFor="let suggestion of event?.foodSuggestions">{{ suggestion }}</li>
+                                                <li *ngIf="!event?.foodSuggestions?.length" class="text-gray-500">No food suggestions available</li>
                                             </ul>
                                         </div>
                                     </div>
                                 </div>
+
+                                <!-- Map -->
+                                <div class="mt-6 h-64 w-full rounded-lg overflow-hidden border border-gray-300">
+                                    <div leaflet
+                                         [leafletOptions]="options"
+                                         (leafletMapReady)="onMapReady($event)">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
                         <div class="bg-gray-50 rounded-lg p-6">
                             <h2 class="text-xl font-bold text-gray-800 mb-6">Manage Event</h2>
