@@ -32,6 +32,7 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class AuthService {
   private apiUrl = `${environment.apiUrl}/auth`;
+  private mailApiUrl = `${environment.apiUrl}/mail`;
   private usersApiUrl = `${environment.apiUrl}/users`;
 
   // This HttpClient instance bypasses all interceptors
@@ -597,18 +598,18 @@ export class AuthService {
 
   forgotPassword(email: string): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(
-      `${this.apiUrl}/forgot-password`,
+      `${this.mailApiUrl}/request-password-reset`,
       { email }
     );
   }
 
   resetPassword(
     token: string,
-    password: string
+    newPassword: string
   ): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(
-      `${this.apiUrl}/reset-password`,
-      { token, password }
+      `${this.mailApiUrl}/reset-password`,
+      { token, newPassword }
     );
   }
 
