@@ -6,7 +6,7 @@ pipeline {
     stages {
         stage('GIT') {
             steps {
-                git branch: 'master',
+                git branch: 'main',
                     url: 'https://github.com/2CINFO-1/good2give-client.git'
             }
         }
