@@ -17,7 +17,7 @@ pipeline {
         }
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t yahia/alpine:1.0.0 .'
+                sh 'docker build -t yahiahannachi/alpine:1.0.0 .'
             }
         }
         stage('Push Docker Image') {
@@ -28,7 +28,7 @@ pipeline {
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
                     sh 'docker login -u $DOCKER_USER -p $DOCKER_PASS'
-                    sh 'docker push yahia/alpine:1.0.0'
+                    sh 'docker push yahiahannachi/alpine:1.0.0'
                 }
             }
         }
@@ -36,7 +36,7 @@ pipeline {
             steps {
                 sh 'docker stop myapp || true'
                 sh 'docker rm myapp || true'
-                sh 'docker run -d --name myapp -p 8080:8080 yahia/alpine:1.0.0'
+                sh 'docker run -d --name myapp -p 8080:8080 yahiahannachi/alpine:1.0.0'
             }
         }
     }
